@@ -1,5 +1,0 @@
-Flask
-openpyxl
-cryptography
-pywebview
-waitress

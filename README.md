@@ -12,7 +12,6 @@ autogmail/
     web/                  app.py (fabrique Flask) + routes/*.py (4 blueprints)
   static/  templates/     Assets Flask (servis via RESS_DIR)
   scripts/                admin_comptes, build_exe
-  tests/                  test_smoke.py
   deploy/                 Caddy / Nginx / systemd (serveur web classique)
   uploads/  app.db        Donnees locales (jamais versionnees)
   .webview/               Logs + profil WebView2
@@ -68,12 +67,6 @@ Env : `CANDIMAIL_PORT=9000`, `CANDIMAIL_DEBUG=1`.
 - `GET /api/health` : sonde (port, version, taille DB)
 - `GET /api/debug/info` : etat interne SANS secrets + queue des logs
 - Logs : `.webview/candimail.log`, `.webview/desktop.log`
-
-## Tests
-
-```powershell
-python -m pytest tests -q
-```
 
 ## Build .exe
 
