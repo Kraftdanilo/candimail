@@ -58,3 +58,8 @@ Desktop.ini
 .vscode/*.log
 .idea/
 *.swp
+
+# Fichiers temporaires de debug
+_i.js
+_*.js
+!static/*.js
