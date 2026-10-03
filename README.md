@@ -28,6 +28,20 @@ autogmail/
 > Ils ont été **supprimés** : plus aucun module ne les importe.
 > Importez toujours directement `candimail.*`.
 
+## Pages
+
+| URL | Rôle |
+| --- | --- |
+| `/` | Redirige vers `/app` |
+| `/app` | Application principale (footer : vitrine, CV, suivi, CGU, RGPD) |
+| `/vitrine` | Vitrine publique (déplacée depuis `/`) |
+| `/cv` `/suivi` `/cgu` `/rgpd` | Pages secondaire |
+
+> **Pas d'authentification** : usage local mono-utilisateur. L'utilisateur 1
+> est considéré comme connecté sur chaque requête. Les routes `/login` et
+> `/api/auth/*` ont été supprimées. **Ne pas exposer cette app sur Internet**
+> (elle stocke des mots de passe Gmail) sans rétablir une protection d'accès.
+
 ## Lancement
 
 ```powershell

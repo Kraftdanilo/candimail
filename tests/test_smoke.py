@@ -13,8 +13,17 @@ def test_port_defaut():
 
 def test_pages():
     c = app.test_client()
-    assert c.get("/").status_code == 200
+    # "/" redirige vers l'app (la vitrine a été déplacée sur /vitrine)
+    assert c.get("/").status_code == 302
     assert c.get("/app").status_code == 200
+    assert c.get("/vitrine").status_code == 200
+
+
+def test_auth_supprimee():
+    """L'authentification a été retirée : plus aucune route /api/auth ni /login."""
+    c = app.test_client()
+    assert c.get("/login").status_code == 404
+    assert c.get("/api/auth/status").status_code == 404
 
 
 def test_sondes():

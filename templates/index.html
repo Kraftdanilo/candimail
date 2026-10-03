@@ -327,6 +327,18 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
   .sidebar{display:none}
   .breadcrumb{padding:14px 16px 0}
 }
+/* ===== PIED DE PAGE (pleine largeur, sous le contenu) ===== */
+.app-footer{ width:100%; margin-top:auto; padding:16px 24px;
+  border-top:2px solid var(--border,#1a1a1a);
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px;
+  font-size:12px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.03em; }
+.app-footer .sp{ flex:1 }
+.app-footer a{ color:inherit; text-decoration:none;
+  border-bottom:2px solid transparent; padding-bottom:1px; }
+.app-footer a:hover{ border-bottom-color:currentColor; }
+.app-footer .info{ opacity:.65; text-transform:none; letter-spacing:0; font-weight:600 }
+@media(max-width:900px){ .app-footer .sp{ display:none } }
 </style>
 <link rel="stylesheet" href="/static/brutalist.css">
 </head>
@@ -715,6 +727,17 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
 </main>
 </div><!-- /content -->
 </div><!-- /layout -->
+
+<!-- ===== PIED DE PAGE ===== -->
+<footer class="app-footer">
+  <a href="/vitrine">Vitrine</a>
+  <a href="/cv">Mon CV</a>
+  <a href="/suivi">Suivi des envois</a>
+  <span class="sp"></span>
+  <a href="/cgu">CGU</a>
+  <a href="/rgpd">RGPD</a>
+  <span class="info">Candimail v7 — usage local</span>
+</footer>
 
 <!-- MODAL APERÇU -->
 <div class="modal-overlay" id="modal">
