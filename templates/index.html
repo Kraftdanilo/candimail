@@ -369,7 +369,6 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     <div class="nav-label">Autres</div>
     <a class="nav-item" data-nav="params"><span class="ico">⚙️</span> Paramètres</a>
     <a class="nav-item" data-nav="hist"><span class="ico">🕓</span> Historique</a>
-    <a class="nav-item" id="side-securite"><span class="ico">🔒</span> Sécurité</a>
     <a class="nav-item" href="/cgu" target="_blank"><span class="ico">❓</span> Aide</a>
   </nav>
   <div class="spacer"></div>
@@ -391,10 +390,8 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     <div class="badge-cv" id="comptes-badge" title="Comptes Gmail actifs">📧 0</div>
     <div class="badge-cv" id="rate-badge" title="Rate limit horaire">⏱️ 0/30</div>
     <div class="top-actions">
-      <button class="btn small" id="btn-logout">🚪 Déconnexion</button>
       <a class="btn small" href="/api/export-excel">⬇️ Excel</a>
       <a class="btn small" href="/api/export-csv">⬇️ CSV</a>
-      <button class="btn small" id="btn-securite">🔒 Sécurité</button>
     </div>
   </div>
 </header>
@@ -762,32 +759,6 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
   </div>
 </div>
 
-<!-- MODAL SÉCURITÉ -->
-<div class="modal-overlay" id="sec-modal">
-  <div class="modal" style="max-width:460px">
-    <div class="modal-head">
-      <h3>🔒 Sécurité</h3>
-      <button class="modal-close" id="sec-close">✕</button>
-    </div>
-    <div class="modal-body">
-      <div id="sec-crypto-info" style="font-size:13px;font-weight:700;margin-bottom:14px"></div>
-      <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;margin-bottom:6px">
-        Mot de passe actuel</label>
-      <input type="password" id="sec-ancien" autocomplete="current-password"
-             style="width:100%;box-sizing:border-box;padding:10px 12px;border:2px solid #43161C;font-size:14px">
-      <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;margin:14px 0 6px">
-        Nouveau mot de passe</label>
-      <input type="password" id="sec-nouveau" autocomplete="new-password"
-             style="width:100%;box-sizing:border-box;padding:10px 12px;border:2px solid #43161C;font-size:14px">
-      <div id="sec-msg" style="margin-top:12px;font-size:13px;font-weight:700;min-height:18px"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" id="sec-logout">🚪 Déconnexion</button>
-      <button class="btn primary" id="sec-save">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL AIDE GMAIL -->
 <div class="modal-overlay" id="help-modal">
   <div class="modal" style="max-width:680px">
@@ -1128,7 +1099,7 @@ let groupesCache = [];
 async function refreshStatus() {
   try {
     const r = await fetch('/api/status');
-    if (r.status === 401) { window.location.href = '/login'; return; }
+    if (r.status === 401) { toast('❌ Session expirée', 'err'); return; }
     const data = await r.json();
     serverLog = data.log || {};
     piecesActives = data.pieces_count || 0;
@@ -1954,7 +1925,7 @@ function renderFiltres() {
       if (d.ok) { filtresCache = d.filtres; renderFiltres(); }
     }));
   box.querySelectorAll('[data-action="edit-regle"]').forEach(b =>
-    b.addEventListener('click', () => editerRegle(+b.dataset.idx))));
+    b.addEventListener('click', () => editerRegle(+b.dataset.idx)));
   box.querySelectorAll('[data-action="del-regle"]').forEach(b =>
     b.addEventListener('click', async () => {
       if (!confirm('Supprimer cette règle ?')) return;
@@ -2638,7 +2609,7 @@ function bindEvents() {
           headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ company: name, repondu: !current })
         });
-        if (r.status === 401) { window.location.href = '/login'; return; }
+        if (r.status === 401) { toast('❌ Session expirée', 'err'); return; }
         const data = await r.json();
         if (data.ok) { toast('OK', 'ok'); refreshStatus(); }
         else toast(data.error || 'Erreur', 'err');
@@ -2784,86 +2755,8 @@ function toast(msg, type='') {
   t._timer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-/* SÉCURITÉ : modale mot de passe + déconnexion */
-function initSecurite() {
-  const ov  = document.getElementById('sec-modal');
-  const msg = document.getElementById('sec-msg');
-  const open = async () => {
-    msg.textContent = '';
-    try {
-      const s = await (await fetch('/api/auth/status')).json();
-      document.getElementById('sec-crypto-info').innerHTML =
-        (s.crypto_actif === false)
-          ? '⚠️ <span style="color:#8A6410">cryptography absent — secrets non chiffrés</span>'
-          : '🔒 Mots de passe Gmail chiffrés · accès protégé par mot de passe';
-    } catch (e) {}
-    ov.classList.add('visible');
-  };
-  document.getElementById('btn-securite').addEventListener('click', open);
-  document.getElementById('sec-close').addEventListener('click', () => ov.classList.remove('visible'));
-  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('visible'); });
-  document.getElementById('sec-save').addEventListener('click', async () => {
-    const ancien  = document.getElementById('sec-ancien').value;
-    const nouveau = document.getElementById('sec-nouveau').value;
-    if (!ancien || !nouveau) { msg.textContent = '❌ Remplis les deux champs'; return; }
-    try {
-      const r = await fetch('/api/auth/change', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ ancien, nouveau })
-      });
-      if (r.status === 401) { window.location.href = '/login'; return; }
-      const d = await r.json();
-      if (d.ok) {
-        msg.textContent = '';
-        document.getElementById('sec-ancien').value = '';
-        document.getElementById('sec-nouveau').value = '';
-        ov.classList.remove('visible');
-        toast('🔒 Mot de passe modifié', 'ok');
-      } else msg.textContent = '❌ ' + (d.error || 'Erreur');
-    } catch (e) { msg.textContent = 'Erreur réseau'; }
-  });
-  document.getElementById('sec-logout').addEventListener('click', () => {
-    confirmerDeconnexion();
-  });
-  // Déconnexion rapide depuis la barre du haut
-  const btnLogout = document.getElementById('btn-logout');
-  if (btnLogout) btnLogout.addEventListener('click', () => {
-    confirmerDeconnexion();
-  });
-}
-
-/* MODALE CONFIRMATION DÉCONNEXION */
-function confirmerDeconnexion() {
-  if (document.getElementById('modal-deconnexion')) return;
-  const ov = document.createElement('div');
-  ov.id = 'modal-deconnexion';
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(67,22,28,.55);'
-    + 'display:flex;align-items:center;justify-content:center;z-index:10000;';
-  ov.innerHTML = `
-    <div style="background:#fff;border:3px solid #43161C;box-shadow:8px 8px 0 #43161C;
-                padding:26px 30px;width:min(380px,90vw);text-align:center;">
-      <h3 style="margin:0 0 8px;font-size:18px;">🚪 Déconnexion</h3>
-      <p style="margin:0 0 20px;font-size:14px;font-weight:600;color:#43161C;">
-        Voulez-vous vraiment vous déconnecter ?
-      </p>
-      <div style="display:flex;gap:12px;justify-content:center;">
-        <button id="dc-oui" class="btn primary" style="min-width:100px;">✅ Oui</button>
-        <button id="dc-non" class="btn" style="min-width:100px;">❌ Non</button>
-      </div>
-    </div>`;
-  document.body.appendChild(ov);
-  ov.querySelector('#dc-oui').addEventListener('click', async () => {
-    try { await fetch('/api/auth/logout', {method:'POST'}); } catch (e) {}
-    window.location.href = '/login';
-  });
-  const fermer = () => ov.remove();
-  ov.querySelector('#dc-non').addEventListener('click', fermer);
-  ov.addEventListener('click', e => { if (e.target === ov) fermer(); });
-}
-
 /* INIT */
 document.addEventListener('DOMContentLoaded', async () => {
-  initSecurite();
   await loadConfig();
   await loadTemplates();
   await loadPieces();
@@ -3000,11 +2893,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
       e.preventDefault(); sSide.focus();
     }
-  });
-
-  // Sécurité depuis la sidebar
-  document.getElementById('side-securite').addEventListener('click', () => {
-    document.getElementById('btn-securite').click();
   });
 
   // Règles de classement

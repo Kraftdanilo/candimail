@@ -248,7 +248,7 @@ function cleanCv(){
 function saveLocal(){ readIdentity(); storeSet(cleanCv()); }
 async function loadServer(){
   try { const r=await fetch('/api/cv');
-        if(r.status===401){ window.location.href='/login'; return false; }
+        if(r.status===401){ return false; }
         const d=await r.json();
         if(d.ok&&d.cv){ cv=Object.assign(cv,d.cv); return true; } } catch(e){}
   return false;
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     readIdentity(); saveLocal();
     try{
       const r=await fetch('/api/cv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cv:cleanCv()})});
-      if(r.status===401){ window.location.href='/login'; return; }
+      if(r.status===401){ return; }
       const d=await r.json();
       toast(d.ok?'CV enregistré ✅':(d.error||'Erreur'), d.ok?'ok':'err');
     }catch(e){ toast('Erreur réseau','err'); }

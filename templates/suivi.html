@@ -490,7 +490,7 @@ async function toggleReply(company, repondu) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ company, repondu })
     });
-    if (r.status === 401) { window.location.href = '/login'; return; }
+    if (r.status === 401) { return; }
     const data = await r.json();
     if (data.ok) {
       toast(repondu ? '✨ Marqué comme réponse' : '↩️ Réponse retirée', 'ok');
