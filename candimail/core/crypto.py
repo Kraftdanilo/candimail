@@ -7,8 +7,7 @@ Chiffrement des secrets + mot de passe d'accès à l'interface.
 - Mots de passe d'application Gmail chiffrés dans la base (marqueur enc$).
 - Mot de passe d'accès : hash scrypt (salt + hash hex), jamais stocké en clair.
 """
-import base64, hashlib, hmac, os, sys
-from pathlib import Path
+import base64, hashlib, hmac, os
 
 from candimail.core.config import BASE_DIR
 

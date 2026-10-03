@@ -11,9 +11,7 @@ from pathlib import Path
 from flask import session
 
 from candimail.core import db
-from candimail.core import crypto
-from candimail.core.config import (BASE_DIR, UPLOADS_DIR, CONFIG_FILE, LOG_FILE,
-                                   DEFAULT_CONFIG, DEFAULT_CV, TEMPLATES)
+from candimail.core.config import UPLOADS_DIR, DEFAULT_CONFIG, TEMPLATES
 
 
 # ============================================================

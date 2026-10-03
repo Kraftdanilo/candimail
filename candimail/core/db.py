@@ -7,9 +7,7 @@ Au premier lancement, migre automatiquement les anciens fichiers JSON.
 """
 import json
 import sqlite3
-import sys
 import threading
-from pathlib import Path
 
 from candimail.core.config import BASE_DIR
 

@@ -16,15 +16,12 @@ Structure (après refactor) :
 """
 import os, socket, time, threading, logging, traceback
 from datetime import datetime
-from pathlib import Path
 
 from flask import Flask, request, jsonify
 
 from candimail.core import crypto, db
 from candimail.core.config import RESS_DIR, RACINE
-from candimail.core.noyau import (charger_config, sauver_config, _config_globale,
-                   get_comptes_actifs, get_pieces_actives, get_delai,
-                   recharger_pieces, _auth_attempts)  # (compat. scripts QA)
+from candimail.core.noyau import charger_config, sauver_config, _config_globale, get_comptes_actifs, get_pieces_actives, get_delai, recharger_pieces
 from candimail.services.imap import verifier_toutes_boites, appliquer_filtres_compte
 
 
@@ -113,13 +110,11 @@ def _force_utf8(resp):
 # ENREGISTREMENT DES BLUEPRINTS
 # ============================================================
 from candimail.web.routes.pages import bp as bp_pages
-from candimail.web.routes.auth import bp as bp_auth
 from candimail.web.routes.donnees import bp as bp_donnees
 from candimail.web.routes.envoi import bp as bp_envoi
 from candimail.web.routes.divers import bp as bp_divers
 
 app.register_blueprint(bp_pages)
-app.register_blueprint(bp_auth)
 app.register_blueprint(bp_donnees)
 app.register_blueprint(bp_envoi)
 app.register_blueprint(bp_divers)

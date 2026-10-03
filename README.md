@@ -9,7 +9,7 @@ autogmail/
   candimail/              Package applicatif (v7.1.0)
     core/                 config.py, crypto.py, db.py, noyau.py
     services/             smtp.py (envoi), imap.py (reponses/bounces)
-    web/                  app.py (fabrique Flask) + routes/*.py (5 blueprints)
+    web/                  app.py (fabrique Flask) + routes/*.py (4 blueprints)
   static/  templates/     Assets Flask (servis via RESS_DIR)
   scripts/                admin_comptes, build_exe
   tests/                  test_smoke.py
@@ -17,6 +17,15 @@ autogmail/
   uploads/  app.db        Donnees locales (jamais versionnees)
   .webview/               Logs + profil WebView2
 ```
+
+Blueprints de `candimail/web/routes/` :
+
+| Fichier | Responsabilite |
+| --- | --- |
+| `pages.py` | Pages HTML (racine, vitrine, app, suivi, CV, SEO, 404) |
+| `donnees.py` | CV, entreprises, config, comptes, pieces jointes |
+| `envoi.py` | Envoi unitaire, envoi de masse, groupes |
+| `divers.py` | Templates, IMAP/filtres, exports/imports |
 
 > **Donnees non versionnees** : `app.db`, `config.json`, `envois.json`,
 > `uploads/`, `secret.key`, `admin.key`, `.webview/` et les logs sont
@@ -59,6 +68,12 @@ Env : `CANDIMAIL_PORT=9000`, `CANDIMAIL_DEBUG=1`.
 - `GET /api/health` : sonde (port, version, taille DB)
 - `GET /api/debug/info` : etat interne SANS secrets + queue des logs
 - Logs : `.webview/candimail.log`, `.webview/desktop.log`
+
+## Tests
+
+```powershell
+python -m pytest tests -q
+```
 
 ## Build .exe
 

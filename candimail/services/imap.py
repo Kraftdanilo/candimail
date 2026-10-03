@@ -9,8 +9,7 @@ from email.header import decode_header
 from email.utils import parseaddr
 
 from candimail.core import crypto
-from candimail.core.noyau import (charger_config, sauver_config, charger_log,
-                                  sauver_log, current_uid, get_comptes_actifs)
+from candimail.core.noyau import charger_config, sauver_config, charger_log, sauver_log, get_comptes_actifs
 
 
 # ============================================================
