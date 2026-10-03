@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Candimail — Automatisation Gmail multi-usages</title>
+<meta name="description" content="Candimail automatise tous tes envois Gmail : campagnes personnalisées, groupes de destinataires, pièces jointes, plusieurs comptes en rotation, détection des réponses et export Excel.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Candimail — Automatisation Gmail">
+<meta property="og:description" content="Envoie tout type de message à la bonne cadence, gère plusieurs comptes Gmail, détecte les réponses. Zéro oubli.">
+<meta property="og:image" content="/static/og-image.svg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Candimail — Automatisation Gmail">
+<meta name="twitter:description" content="Envoie tous tes messages à la bonne cadence, gère plusieurs comptes Gmail, détecte les réponses.">
+<meta name="twitter:image" content="/static/og-image.svg">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="stylesheet" href="/static/brutalist.css">
+<style>
+  *{ box-sizing:border-box; border-radius:0 !important; }
+  body{ margin:0; background:#F7F1E4; color:#43161C;
+        font-family:Arial, Helvetica, sans-serif; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 24px; }
+
+  header{ background:#fff; border-bottom:3px solid #43161C;
+          border-top:8px solid #1E5AA8; }
+  .h-inner{ display:flex; align-items:center; justify-content:space-between;
+            padding:18px 0; }
+  .logo{ font-size:22px; font-weight:900; text-transform:uppercase; }
+  .logo span{ background:#1E5AA8; color:#fff; padding:2px 8px;
+              border:2px solid #43161C; box-shadow:3px 3px 0 #43161C; }
+
+  .b{ display:inline-block; padding:12px 22px; font-size:14px; font-weight:800;
+      text-transform:uppercase; letter-spacing:.05em; cursor:pointer;
+      text-decoration:none; color:#43161C; background:#fff;
+      border:2px solid #43161C; box-shadow:4px 4px 0 #43161C;
+      transition:transform .1s; }
+  .b:hover{ transform:translate(2px,2px); box-shadow:2px 2px 0 #43161C; }
+  .b.orange{ background:#143E77; color:#fff; }
+  .b.big{ font-size:17px; padding:16px 34px; }
+
+  .hero{ padding:72px 0 64px; display:grid;
+         grid-template-columns:1.2fr .8fr; gap:48px; align-items:center; }
+  .kicker{ display:inline-block; background:#F2E7CE; border:2px solid #43161C;
+           font-size:12px; font-weight:800; text-transform:uppercase;
+           padding:4px 10px; margin-bottom:18px; }
+  .hero h1{ font-size:46px; line-height:1.08; font-weight:900;
+            text-transform:uppercase; margin:0 0 20px; }
+  .hero h1 em{ font-style:normal; background:#143E77; color:#fff;
+               padding:0 8px; box-shadow:4px 4px 0 #43161C; }
+  .hero p{ font-size:17px; line-height:1.6; margin:0 0 30px; max-width:520px; }
+  .hero-actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  .term{ background:#fff; border:3px solid #43161C; box-shadow:8px 8px 0 #43161C;
+         font-family:'Courier New', monospace; font-size:13px; }
+  .term-bar{ background:#43161C; color:#F7F1E4; padding:8px 12px;
+             font-weight:700; font-size:11px; text-transform:uppercase; }
+  .term-body{ padding:16px; line-height:1.9; }
+  .term-body .ok{ color:#1E5AA8; font-weight:700; }
+  .term-body .acc{ color:#1E5AA8; font-weight:800; }
+
+  .stats{ background:#143E77; color:#fff;
+          border-top:3px solid #43161C; border-bottom:3px solid #43161C; }
+  .stats .wrap{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px;
+                padding:34px 24px; }
+  .stat{ border-left:3px solid #43161C; padding-left:16px; }
+  .stat b{ display:block; font-size:34px; font-weight:900; color:#fff; }
+  .stat span{ font-size:12px; font-weight:700; text-transform:uppercase;
+              letter-spacing:.06em; color:#43161C; }
+
+  section{ padding:64px 0; }
+  h2.title{ font-size:30px; font-weight:900; text-transform:uppercase;
+            margin:0 0 8px; }
+  .sub{ color:#7A6E5B; font-weight:600; margin:0 0 36px; }
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .card{ background:#fff; border:2px solid #43161C; padding:22px;
+         box-shadow:5px 5px 0 #43161C; transition:transform .1s; }
+  .card:hover{ transform:translate(2px,2px); box-shadow:3px 3px 0 #43161C; }
+  .card .ico{ font-size:26px; }
+  .card h3{ font-size:15px; font-weight:900; text-transform:uppercase;
+            margin:10px 0 6px; }
+  .card p{ font-size:13.5px; line-height:1.55; margin:0; color:#544A3C; }
+
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+          counter-reset:step; }
+  .step{ background:#fff; border:2px solid #43161C; padding:22px;
+         position:relative; box-shadow:5px 5px 0 #F2E7CE; }
+  .step::before{ counter-increment:step; content:"0" counter(step);
+                 position:absolute; top:-16px; left:14px; background:#1E5AA8;
+                 color:#fff; border:2px solid #43161C; font-weight:900;
+                 font-size:15px; padding:4px 10px; }
+  .step h3{ font-size:15px; font-weight:900; text-transform:uppercase;
+            margin:14px 0 6px; }
+  .step p{ font-size:13.5px; line-height:1.55; margin:0; color:#544A3C; }
+
+  .cta{ background:#143E77; border-top:3px solid #43161C;
+        border-bottom:3px solid #43161C; color:#fff; text-align:center;
+        padding:56px 0; }
+  .cta h2{ font-size:30px; font-weight:900; text-transform:uppercase;
+           margin:0 0 10px; }
+  .cta p{ margin:0 0 26px; font-weight:600; }
+  .cta .b{ background:#fff; color:#43161C; }
+
+  footer{ background:#43161C; color:#C9BCA4; padding:30px 0; font-size:13px; }
+  footer .wrap{ display:flex; justify-content:space-between;
+                flex-wrap:wrap; gap:10px; }
+  footer a{ color:#F7F1E4; text-decoration:none; font-weight:700; }
+
+  @media (max-width:880px){
+    .hero{ grid-template-columns:1fr; padding:48px 0; }
+    .grid,.steps{ grid-template-columns:1fr; }
+    .stats .wrap{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap h-inner">
+     <div class="logo">📧 Candimail <span>v7</span></div>
+     <a class="b" href="/login">Connexion →</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <div>
+    <span class="kicker">Campagnes · Groupes · Messages personnalisés</span>
+    <h1>Automatise Gmail. <em>Tout ce que tu veux.</em> Réponses suivies.</h1>
+    <p>
+      L'outil qui envoie tous tes messages à la bonne cadence : candidatures,
+      relances, informations, annonces ou messages sur mesure. Il fait tourner
+      plusieurs comptes Gmail, gère les groupes de destinataires, détecte les
+      réponses et exporte tout en Excel. Fini le suivi à la main dans une boîte mail.
+    </p>
+    <div class="hero-actions">
+      <a class="b orange big" href="/login">Commencer maintenant →</a>
+    </div>
+  </div>
+  <div class="term">
+    <div class="term-bar">— journal d'envoi</div>
+    <div class="term-body">
+      <div><span class="acc">➤</span> Client Nord — dossier envoyé <span class="ok">✓</span></div>
+      <div><span class="acc">➤</span> Groupe fournisseurs — info diffusée <span class="ok">✓</span></div>
+      <div><span class="acc">➤</span> Partenaire Sud — <span class="ok">✓ réponse détectée</span></div>
+      <div><span class="acc">➤</span> quota : 12/100 cette heure</div>
+      <div><span class="acc">➤</span> rotation : 2 comptes actifs</div>
+    </div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="wrap">
+    <div class="stat"><b>100</b><span>messages / heure</span></div>
+    <div class="stat"><b>∞</b><span>comptes Gmail en rotation</span></div>
+    <div class="stat"><b>Tout</b><span>type de message</span></div>
+    <div class="stat"><b>🔒</b><span>secrets chiffrés</span></div>
+  </div>
+</div>
+
+<section id="fonctions">
+  <div class="wrap">
+    <h2 class="title">Ce qu'il fait</h2>
+    <p class="sub">Un automate d'envoi Gmail complet — quel que soit ton usage.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">📤</div>
+        <h3>Envoi personnalisé</h3>
+        <p>Chaque destinataire reçoit un mail rédigé pour lui : nom, objet et
+           corps sur mesure, variables remplacées automatiquement, pièces
+           jointes PDF de 0 à N.</p></div>
+      <div class="card"><div class="ico">🔁</div>
+        <h3>Multi-comptes</h3>
+        <p>Ajoute autant de comptes Gmail que tu veux : la rotation répartit la
+           charge et chaque compte peut avoir son propre message.</p></div>
+      <div class="card"><div class="ico">⏱️</div>
+        <h3>Cadence maîtrisée</h3>
+        <p>Délai aléatoire 35–55 s entre chaque envoi, quota horaire réglable
+           jusqu'à 100 — l'envoi attend la fenêtre si le quota sature.</p></div>
+      <div class="card"><div class="ico">👥</div>
+        <h3>Groupes &amp; Cci</h3>
+        <p>Crée tes listes de destinataires, puis envoie en individuel
+           personnalisé ou en un seul mail groupé en Cci (invisible).</p></div>
+      <div class="card"><div class="ico">🧩</div>
+        <h3>Templates perso</h3>
+        <p>Rédige, duplique et range tes modèles de message par catégorie, et
+           assigne un modèle propre à chaque compte Gmail.</p></div>
+      <div class="card"><div class="ico">📥</div>
+        <h3>Réponses &amp; bounces</h3>
+        <p>Relevé IMAP automatique : les réponses sont détectées et marquées,
+           les adresses invalides aussi.</p></div>
+      <div class="card"><div class="ico">📊</div>
+        <h3>Suivi &amp; exports</h3>
+        <p>Page de suivi complète : envoyés, réponses, bounces. Export Excel,
+           CSV ou JSON en un clic.</p></div>
+      <div class="card"><div class="ico">📇</div>
+        <h3>Contacts &amp; CV</h3>
+        <p>Gère tes fiches de contact (nom, email, catégorie, contexte de
+           rédaction) et ta page CV, réutilisées dans chaque message.</p></div>
+      <div class="card"><div class="ico">🔒</div>
+        <h3>Sécurité</h3>
+        <p>Accès protégé par mot de passe, mots de passe Gmail chiffrés dans
+           la base, multi-utilisateurs isolés. Rien ne part sans toi.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <h2 class="title">Comment ça marche</h2>
+    <p class="sub">Prêt à tourner en trois étapes.</p>
+    <div class="steps">
+      <div class="step"><h3>Connecte tes comptes</h3>
+        <p>Mots de passe d'application Gmail, un ou plusieurs. Test de
+           connexion intégré.</p></div>
+      <div class="step"><h3>Charge tes cibles</h3>
+        <p>Ajoute tes destinataires ou tes groupes, choisis le message, les
+           pièces jointes et le modèle à utiliser.</p></div>
+      <div class="step"><h3>Lance la campagne</h3>
+        <p>Envoi groupé progressif, progression en direct, arrêt possible à
+           tout moment, suivi automatique des réponses.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <h2>Prêt à envoyer ta prochaine vague de messages ?</h2>
+    <p>Accès protégé — connexion obligatoire pour ouvrir l'application.</p>
+    <a class="b big" href="/login">🔑 Connexion</a>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>📧 Candimail v7 — automatisation Gmail</div>
+    <div>
+      <a href="/rgpd">Confidentialité</a> ·
+      <a href="/cgu">CGU</a> ·
+      <a href="/login">Connexion</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

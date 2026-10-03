@@ -1,0 +1,60 @@
+# ==========================================================
+# Candimail — fichiers exclus du suivi de version
+# ==========================================================
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+*.spec
+
+# ---- Donnees locales (JAMAIS versionnees) ----
+app.db
+app.db-journal
+app.db-wal
+app.db-shm
+config.json
+envois.json
+*.backup.json
+uploads/
+*.sqlite
+*.sqlite3
+
+# ---- Secrets / cles de chiffrement ----
+secret.key
+admin.key
+*.pem
+*.key
+!requirements.txt
+
+# ---- WebView2 : profil, cookies, caches (13+ Mo) ----
+.webview/
+webview/
+
+# ---- Logs ----
+*.log
+*.err
+server.log
+server.err
+
+# ---- Fichiers de debug / QA temporaires ----
+_debug/
+*.spec.py
+qa_*.mjs
+
+# ---- Caches / OS / IDE ----
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/*.log
+.idea/
+*.swp

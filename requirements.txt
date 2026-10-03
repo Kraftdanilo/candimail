@@ -1,0 +1,6 @@
+# Candimail — dependances
+Flask==3.0.0
+openpyxl==3.1.2
+cryptography==46.0.7
+pywebview==6.2.1
+waitress==3.0.2

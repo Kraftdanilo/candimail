@@ -1,0 +1,353 @@
+/* ============================================================
+   NEO-BRUTALISTE — thème partagé
+   Palette : blanc sable / bleu / rouge vin / jaune soleil
+   Appliqué à : index.html · suivi.html · cv.html · vitrine ·
+                404 · CGU · RGPD · login
+   ============================================================ */
+
+/* --- Jetons de style --- */
+:root{
+  --bg:#F7F1E4;            /* blanc sable        */
+  --bg2:#EFE7D4;
+  --surface:#FFFFFF;
+  --surface2:#FFFDF6;
+  --border:#D9CDB4;        /* trait sable        */
+  --border-strong:#43161C; /* trait encre vin    */
+  --text:#2A141A;
+  --muted:#7A6E5B;
+  --accent:#1E5AA8;        /* bleu               */
+  --accent2:#143E77;       /* bleu nuit          */
+  --accent-soft:#FCEFC2;   /* jaune soleil doux  */
+  --wine:#722F37;          /* rouge vin          */
+  --sun:#C98F0D;           /* jaune soleil texte */
+  --sand:#F2E7CE;          /* sable              */
+  --sand-dark:#E0C979;
+  --ok:#1E5AA8;            /* succès = bleu      */
+  --danger:#722F37;        /* erreur = rouge vin */
+  --warn:#C98F0D;          /* attention = jaune  */
+  --purple:#143E77;        /* réponses = bleu nuit */
+  --radius:0;
+  --shadow:4px 4px 0 rgba(58,22,28,.18);
+  --shadow-sm:2px 2px 0 rgba(58,22,28,.16);
+  --shadow-h:5px 5px 0 rgba(58,22,28,.22);
+}
+
+/* --- Reset brutaliste : angles droits partout --- */
+*{ border-radius:0 !important; }
+
+html{ scroll-behavior:smooth; }
+
+body{
+  background:var(--bg); color:var(--text);
+  font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:14px; line-height:1.5;
+}
+
+/* --- Sélection de texte aux couleurs de la marque --- */
+::selection{ background:var(--accent-soft); color:var(--text); }
+
+/* --- Accessibilité clavier : focus toujours visible --- */
+:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+
+/* --- Barre de défilement discrète (WebKit) --- */
+::-webkit-scrollbar{ width:12px; height:12px; }
+::-webkit-scrollbar-track{ background:var(--bg2); }
+::-webkit-scrollbar-thumb{ background:var(--sand-dark); border:2px solid var(--bg2); }
+::-webkit-scrollbar-thumb:hover{ background:var(--warn); }
+
+h1,h2,h3{ font-weight:900; letter-spacing:.01em; }
+h1{ text-transform:uppercase; }
+
+/* --- Header --- */
+header{
+  background:var(--surface);
+  border-bottom:3px solid var(--border-strong);
+  box-shadow:var(--shadow-sm);
+  border-top:3px solid var(--accent);
+}
+h1 small{ color:var(--muted); font-weight:600; text-transform:none; letter-spacing:.03em; }
+
+/* --- Badges d'état (header) --- */
+.badge-cv{
+  background:var(--surface); border:2px solid var(--border-strong);
+  color:var(--text); font-weight:800; letter-spacing:.02em;
+  box-shadow:var(--shadow-sm);
+}
+.badge-cv.ok{ background:var(--sand); color:var(--text); }
+.badge-cv.warn{ background:var(--accent-soft); color:var(--accent2); border-color:var(--accent2); }
+.badge-cv.purple{ background:var(--accent); color:#fff; }
+
+/* --- Boutons --- */
+.btn{
+  background:var(--surface); color:var(--text);
+  border:2px solid var(--border-strong); box-shadow:var(--shadow-sm);
+  font-weight:800; text-transform:uppercase; letter-spacing:.03em;
+}
+.btn:hover:not(:disabled){
+  transform:translate(1px,1px);
+  box-shadow:2px 2px 0 rgba(58,22,28,.16);
+}
+.btn.primary{ background:var(--accent); color:#fff; border-color:var(--accent2); }
+.btn.primary:hover:not(:disabled){ background:var(--accent2); }
+.btn.ok{ background:var(--ok); color:#fff; border-color:var(--border-strong); }
+.btn.green{ background:var(--ok); color:#fff; border-color:var(--border-strong); }
+.btn.purple{ background:var(--purple); color:#fff; }
+.btn.danger{ color:var(--wine); border-color:var(--wine); background:var(--surface); }
+.btn.danger:hover:not(:disabled){ background:var(--wine); color:#fff; }
+.btn:active:not(:disabled){
+  transform:translate(3px,3px);
+  box-shadow:0 0 0 rgba(58,22,28,.16);
+}
+
+/* --- Panneaux --- */
+.panel{
+  background:var(--surface); border:2px solid var(--border);
+  box-shadow:var(--shadow);
+}
+.panel h2{
+  color:var(--text); font-size:13px; font-weight:900;
+  text-transform:uppercase; letter-spacing:.06em;
+  border-bottom:2px solid var(--accent); padding-bottom:6px;
+}
+.panel h2 .badge-count,.category-head .count{
+  background:var(--accent-soft); color:var(--accent2);
+  border:1px solid var(--accent2); font-weight:800;
+}
+
+/* --- Champs / lignes de config --- */
+.config-row label,.modal-body label,label{
+  color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+}
+.config-row input[type=text],
+.config-row input[type=email],
+.config-row input[type=password],
+.config-row input[type=number],
+.config-row select,
+.search-bar input,
+.search-mini,
+.modal-body input[type=text],
+.modal-body input[type=email],
+.modal-body textarea,
+input[type=text],input[type=email],input[type=number],input[type=password],textarea,select{
+  background:var(--surface); color:var(--text);
+  border:2px solid var(--border-strong);
+}
+input:focus,textarea:focus,select:focus,.search-bar input:focus,.search-mini:focus{
+  outline:none; border-color:var(--accent); background:#fff;
+  box-shadow:0 0 0 3px var(--accent-soft);
+}
+.config-row input:disabled{ background:var(--bg2); color:var(--muted); }
+
+/* --- Statistiques --- */
+.stat{
+  background:var(--surface); border:2px solid var(--border-strong);
+  box-shadow:var(--shadow-sm);
+}
+.stat .n{ font-size:27px; font-weight:900; }
+.stat .l{ color:var(--muted); font-weight:800; letter-spacing:.05em; }
+.stat.ok .n{ color:var(--ok); }
+.stat.warn .n{ color:var(--warn); }
+.stat.err .n{ color:var(--danger); }
+.stat.purple .n{ color:var(--purple); }
+
+/* --- Graphiques (suivi) --- */
+.chart-box{ background:var(--surface); border:2px solid var(--border-strong); box-shadow:var(--shadow); }
+.chart-box h3{ color:var(--text); font-weight:900; text-transform:uppercase; letter-spacing:.05em; border-bottom:2px solid var(--accent); padding-bottom:6px; }
+
+/* --- Puces de filtres --- */
+.chip{
+  background:var(--surface); border:2px solid var(--border-strong);
+  color:var(--text); font-weight:700;
+}
+.chip:hover{ transform:translate(1px,1px); box-shadow:2px 2px 0 rgba(58,22,28,.16); }
+.chip.active{ background:var(--accent); color:#fff; border-color:var(--accent2); }
+
+/* --- Banque entreprises : cartes --- */
+.category-head h3{ font-weight:900; letter-spacing:.06em; }
+.category-head hr{ border-top:2px solid var(--border-strong); }
+.card{
+  background:var(--surface); border:2px solid var(--border-strong);
+  box-shadow:var(--shadow-sm);
+}
+.card:hover{ border-color:var(--accent); box-shadow:var(--shadow-h); }
+.card.sent{ background:var(--bg2); border-color:var(--border); }
+.card.error{ background:var(--accent-soft); border-color:var(--danger); }
+.card.responded{ background:var(--sand); border-color:var(--sand-dark); }
+.card.bounce{ background:var(--accent-soft); border-color:var(--warn); }
+.card-head .name{ font-size:15px; font-weight:800; }
+.card-head .email{ font-family:ui-monospace,"SF Mono",Consolas,monospace; }
+.card-head .badge{
+  background:var(--bg2); color:var(--text); border:1px solid var(--border-strong);
+  font-weight:800;
+}
+.card-head .badge.grand{ background:var(--accent); color:#fff; }
+.card-head .badge.port{ background:var(--sand); color:var(--text); }
+.card-head .badge.response{ background:var(--ok); color:#fff; }
+.card-head .badge.bounce{ background:var(--warn); color:#fff; }
+.card-head .badge.nopj{ background:var(--danger); color:#fff; }
+.card-body{ border-top:2px solid var(--border-strong); }
+
+/* --- Tableaux (suivi) --- */
+.table-wrap{ background:var(--surface); border:2px solid var(--border-strong); box-shadow:var(--shadow); }
+table{ border-spacing:0; border-collapse:collapse; }
+th{
+  background:var(--bg2); color:var(--text); font-weight:900;
+  text-transform:uppercase; letter-spacing:.05em;
+  border-bottom:2px solid var(--border-strong); border-right:1px solid var(--border);
+}
+th:last-child{ border-right:none; }
+td{ border-bottom:1px solid var(--border); border-right:1px solid var(--border); }
+td:last-child{ border-right:none; }
+tr:last-child td{ border-bottom:none; }
+tbody tr:hover{ background:var(--surface2); }
+.status{
+  background:var(--surface); border:1px solid var(--border-strong);
+  color:var(--text); font-weight:800;
+}
+.status.ok{ background:var(--ok); color:#fff; }
+.status.err{ background:var(--danger); color:#fff; }
+.status.purple{ background:var(--purple); color:#fff; }
+.status.orange{ background:var(--accent); color:#fff; }
+.status.gray{ background:var(--bg2); color:var(--text); }
+.email-cell{ font-family:ui-monospace,Consolas,monospace; color:var(--muted); }
+.pj-badge{
+  background:var(--bg2); color:var(--text); border:1px solid var(--border-strong); font-weight:800;
+}
+.pj-badge.ok{ background:var(--ok); color:#fff; }
+.pj-badge.no{ background:var(--warn); color:#fff; }
+.icon-btn{
+  background:var(--surface); border:2px solid var(--border-strong); font-weight:800;
+}
+.icon-btn:hover{ transform:translate(1px,1px); box-shadow:2px 2px 0 rgba(58,22,28,.16); }
+.icon-btn.purple:hover{ background:var(--purple); color:#fff; }
+.icon-btn.red:hover{ background:var(--danger); color:#fff; }
+.detail-row{ background:var(--surface2); color:var(--muted); }
+
+/* --- Modales --- */
+.modal{
+  background:#fff; border:3px solid var(--border-strong);
+  box-shadow:0 18px 44px rgba(0,0,0,.4);
+}
+.modal-head{ background:var(--accent); color:#fff; border-bottom:3px solid var(--accent2); }
+.modal-head h3{ font-weight:900; letter-spacing:.03em; }
+.modal-close{ border:1px solid var(--accent2); color:#fff; }
+.modal-close:hover{ background:var(--accent2); }
+.modal-foot{ background:var(--bg2); border-top:2px solid var(--border-strong); }
+
+/* --- Listes dynamiques / pièces jointes --- */
+.piece-item{ background:var(--surface); border:2px solid var(--border-strong); }
+.piece-item.inactive{ background:var(--bg2); border-color:var(--border); }
+
+/* --- Toast --- */
+.toast{
+  background:var(--text); color:#fff; border:2px solid var(--border-strong);
+  box-shadow:var(--shadow-h); font-weight:700;
+}
+.toast.ok{ background:var(--ok); }
+.toast.err{ background:var(--danger); }
+.toast.warn{ background:var(--warn); }
+
+/* --- Bandes d'alerte --- */
+.pj-warning,.empty-box{
+  background:var(--accent-soft); border:2px solid var(--accent2);
+  color:var(--accent2); font-weight:700;
+}
+.bulk-panel{ background:var(--accent-soft); border:2px solid var(--accent2); }
+.bulk-panel.running{ background:var(--sand); border:2px solid var(--sand-dark); }
+.bulk-panel .progress{ border:1px solid var(--border-strong); }
+.bulk-panel .progress-bar{ background:var(--accent); }
+.bulk-panel.running .progress-bar{ background:var(--warn); }
+
+/* --- CV --- */
+.cv-sheet{
+  background:#fff; border:3px solid var(--border-strong);
+  box-shadow:var(--shadow-sm);
+}
+.cv-name{ font-family:Georgia,"Times New Roman",serif; font-size:27px; font-weight:900; letter-spacing:.02em; }
+.cv-title{ color:var(--accent); font-weight:800; text-transform:uppercase; letter-spacing:.03em; }
+.cv-sect h3{ border-bottom:3px solid var(--accent); color:var(--text); font-weight:900; }
+.cv-item .d{ color:var(--accent); font-weight:800; }
+.cv-list li::before{ color:var(--accent); }
+.cv-sheet p{ color:var(--text); }
+
+/* --- Lignes d'édition (CV) --- */
+.row{ background:var(--surface); border:2px solid var(--border-strong); }
+.row .del{ border:2px solid var(--danger); color:var(--danger); background:#fff; font-weight:900; }
+.row .del:hover{ background:var(--danger); color:#fff; }
+
+/* --- Sélection individuelle d'entreprises --- */
+.sel-bar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  width:100%; padding-top:12px; margin-top:4px;
+  border-top:2px solid var(--border-strong);
+}
+.sel-count{
+  background:var(--accent-soft); border:2px solid var(--accent2);
+  color:var(--accent2); font-weight:800; padding:4px 10px;
+  text-transform:uppercase; letter-spacing:.04em; font-size:12px;
+}
+input.sel-ck{
+  width:18px; height:18px; accent-color:var(--accent);
+  cursor:pointer; flex-shrink:0;
+}
+.card.selected{
+  background:var(--accent-soft); border-color:var(--accent);
+  box-shadow:var(--shadow-sm);
+}
+.card.selected .card-head .name{ color:var(--accent2); }
+.bulk-panel{ flex-wrap:wrap; }
+
+/* --- Comptes Gmail : lignes + template par compte --- */
+.compte-row{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:10px 14px; border:2px solid var(--border-strong);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.compte-row:hover{ transform:translate(-2px,-2px); box-shadow:4px 4px 0 var(--border-strong); }
+.compte-row.active{ background:var(--accent-soft); border-color:var(--accent); }
+.compte-row.inactive{ background:var(--bg2); opacity:.75; }
+.compte-row select{ border-radius:0!important; }
+.compte-row select:hover{ border-color:var(--accent)!important; }
+
+/* --- Traçabilité : compte émetteur --- */
+.via-compte{
+  margin-top:8px; display:inline-block;
+  background:var(--surface); border:1px solid var(--border-strong);
+  font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.04em; padding:3px 8px;
+}
+
+/* --- Interactivité globale --- */
+.card, .panel, .chip, .btn{ transition:transform .12s ease, box-shadow .12s ease, background .12s ease; }
+.card:hover{ transform:translate(-2px,-2px); box-shadow:var(--shadow-sm); }
+.card.sent:hover{ box-shadow:4px 4px 0 rgba(30,90,168,.35); }
+.card.error:hover{ box-shadow:4px 4px 0 rgba(114,47,55,.35); }
+.chip:hover, .btn:hover{ transform:translate(-1px,-1px); }
+.panel{ animation:panelIn .35s ease both; }
+@keyframes panelIn{
+  from{ opacity:0; transform:translateY(8px); }
+  to{ opacity:1; transform:none; }
+}
+.card{ animation:cardIn .25s ease both; }
+@keyframes cardIn{
+  from{ opacity:0; transform:translateY(6px); }
+  to{ opacity:1; transform:none; }
+}
+.stats > *:hover{ transform:translate(-2px,-2px); }
+@keyframes pulse{
+  0%,100%{ opacity:1; } 50%{ opacity:.55; }
+}
+.bulk-running #bulk-start{ animation:pulse 1.2s ease infinite; }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none!important; transition:none!important; }
+}
+
+@media print{
+  body{ background:#fff; }
+  .cv-sheet{ border:none; box-shadow:none; }
+}
+
+@media(max-width:640px){
+  header{ border-top-width:3px; }
+}

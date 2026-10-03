@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Suivi des envois — Candimail</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#F7F1E4; --surface:#FFF; --border:#DED2BC;
+  --text:#2A141A; --muted:#7A6E5B;
+  --accent:#1E5AA8; --accent2:#143E77;
+  --ok:#1E5AA8; --danger:#722F37;
+  --purple:#143E77; --warn:#C98F0D;
+  --radius:10px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;
+  padding-bottom:60px;
+}
+header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:20px 32px;box-shadow:var(--shadow);position:sticky;top:0;z-index:100;
+}
+.header-inner{
+  max-width:1200px;margin:0 auto;display:flex;align-items:center;
+  gap:16px;flex-wrap:wrap;
+}
+h1{font-size:19px;font-weight:700;flex:1;min-width:220px}
+h1 small{display:block;font-size:12px;color:var(--muted);margin-top:2px;font-weight:400}
+.btn{
+  padding:9px 16px;border:1px solid var(--border);background:var(--surface);
+  color:var(--text);border-radius:6px;font-size:13px;font-weight:600;
+  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;
+  gap:6px;transition:all .15s;
+}
+.btn:hover{background:#FBF6EA;border-color:#C8B896}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn.green{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btn.green:hover{background:#17559B;border-color:#17559B}
+.btn.purple{background:var(--purple);color:#fff;border-color:var(--purple)}
+.btn.purple:hover{background:#10325C;border-color:#10325C}
+.btn.small{padding:6px 12px;font-size:12px}
+main{max-width:1200px;margin:0 auto;padding:24px 32px}
+.stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;margin-bottom:20px;
+}
+.stat{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);
+}
+.stat .n{font-size:24px;font-weight:700}
+.stat .l{
+  font-size:11px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;margin-top:2px;
+}
+.stat.ok .n{color:var(--ok)}
+.stat.err .n{color:var(--danger)}
+.stat.purple .n{color:var(--purple)}
+.stat.warn .n{color:var(--warn)}
+.charts{
+  display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;
+}
+@media(max-width:800px){.charts{grid-template-columns:1fr}}
+.chart-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);
+}
+.chart-box h3{
+  font-size:13px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;
+}
+.chart-box canvas{max-height:260px}
+.filters-bar{
+  display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;
+  align-items:center;
+}
+.chip{
+  padding:8px 14px;border:1px solid var(--border);background:var(--surface);
+  border-radius:20px;font-size:12px;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:all .15s;
+}
+.chip:hover{border-color:#C8B896;color:var(--text)}
+.chip.active{background:var(--text);color:#fff;border-color:var(--text)}
+.search-mini{
+  margin-left:auto;
+  padding:8px 14px;border:1px solid var(--border);
+  border-radius:20px;font-size:13px;font-family:inherit;
+  background:var(--surface);min-width:200px;
+}
+.search-mini:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(30,90,168,.1);
+}
+.table-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);
+}
+table{
+  width:100%;border-collapse:separate;border-spacing:0;
+}
+th{
+  text-align:left;padding:12px 16px;background:#FBF6EA;
+  border-bottom:1px solid var(--border);font-size:11px;font-weight:700;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.05em;
+  position:sticky;top:0;z-index:1;
+}
+td{
+  padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;
+  vertical-align:middle;
+}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#FBF6EA}
+tbody tr.hidden{display:none}
+.status{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.03em;white-space:nowrap;
+}
+.status.ok{background:#DCEAFB;color:#143E77}
+.status.err{background:#F3E0E2;color:#722F37}
+.status.purple{background:#DCEAFB;color:#143E77}
+.status.orange{background:#FCEFC2;color:#8A6410}
+.status.gray{background:#EFE7D4;color:#5A5142}
+.email-cell{
+  font-family:ui-monospace,Consolas,monospace;font-size:12px;
+  color:var(--muted);max-width:220px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.pj-badge{
+  display:inline-block;padding:2px 8px;border-radius:12px;
+  font-size:11px;font-weight:700;
+}
+.pj-badge.ok{background:#DCEAFB;color:#143E77}
+.pj-badge.no{background:#FCEFC2;color:#8A6410}
+.actions-cell{
+  display:flex;gap:6px;justify-content:flex-end;
+}
+.icon-btn{
+  padding:4px 8px;border:1px solid var(--border);background:var(--surface);
+  border-radius:6px;cursor:pointer;font-size:14px;
+  transition:all .15s;line-height:1;
+}
+.icon-btn:hover{background:#FBF6EA;border-color:#C8B896}
+.icon-btn.purple:hover{background:#DCEAFB;border-color:var(--purple);color:var(--purple)}
+.icon-btn.red:hover{background:#F3E0E2;border-color:var(--danger);color:var(--danger)}
+.empty{
+  padding:60px 20px;text-align:center;color:var(--muted);
+  background:var(--surface);border:1px dashed var(--border);
+  border-radius:var(--radius);
+}
+.empty p:first-child{font-size:16px;margin-bottom:8px;color:var(--text)}
+.empty a{color:var(--accent);text-decoration:none;font-weight:600}
+.empty a:hover{text-decoration:underline}
+.detail-row{
+  background:#FBF6EA;font-size:12px;color:var(--muted);
+  padding:8px 16px;
+}
+.detail-row td{
+  padding:10px 16px;font-size:12px;
+}
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--text);color:#fff;padding:12px 22px;
+  border-radius:8px;font-size:13px;font-weight:500;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);opacity:0;
+  transition:all .25s;pointer-events:none;z-index:999;max-width:90%;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--ok)}
+.toast.err{background:var(--danger)}
+.toast.warn{background:var(--warn)}
+@media(max-width:640px){
+  header,main{padding:16px}
+  h1{font-size:16px}
+  th,td{padding:10px;font-size:12px}
+  .hide-mobile{display:none}
+  .search-mini{width:100%;margin-left:0}
+}
+</style>
+<link rel="stylesheet" href="/static/brutalist.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <h1>
+      📊 Suivi des envois
+      <small>Historique complet + statistiques</small>
+    </h1>
+    <a class="btn" href="/app">← Retour</a>
+    <a class="btn green" href="/api/export-excel">📊 Excel</a>
+    <a class="btn purple" href="/api/export-json">⬇️ JSON</a>
+    <a class="btn primary" href="/api/export-csv">⬇️ CSV</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="n">{{ total }}</div>
+      <div class="l">Total</div>
+    </div>
+    <div class="stat ok">
+      <div class="n">{{ envoyes }}</div>
+      <div class="l">Envoyés</div>
+    </div>
+    <div class="stat purple">
+      <div class="n">{{ repondus }}</div>
+      <div class="l">Réponses</div>
+    </div>
+    <div class="stat warn">
+      <div class="n">{{ bounces }}</div>
+      <div class="l">Bounces</div>
+    </div>
+    <div class="stat err">
+      <div class="n">{{ echecs }}</div>
+      <div class="l">Échecs</div>
+    </div>
+  </div>
+
+  <!-- GRAPHIQUES -->
+  <div class="charts">
+    <div class="chart-box">
+      <h3>Répartition des envois</h3>
+      <canvas id="chart-pie"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Activité (7 derniers jours)</h3>
+      <canvas id="chart-line"></canvas>
+    </div>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filters-bar">
+    <button class="chip active" data-f="all">Tout ({{ total }})</button>
+    <button class="chip" data-f="ok">✅ Envoyés ({{ envoyes }})</button>
+    <button class="chip" data-f="replied">✨ Réponses ({{ repondus }})</button>
+    <button class="chip" data-f="bounce">⚠️ Bounces ({{ bounces }})</button>
+    <button class="chip" data-f="err">❌ Échecs ({{ echecs }})</button>
+    <button class="chip" data-f="sans_pj">📎 Sans PJ</button>
+    <input type="search" id="search-mini" class="search-mini"
+           placeholder="Rechercher une entreprise, un email...">
+  </div>
+
+  <!-- TABLEAU -->
+  {% if items %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Entreprise</th>
+          <th class="hide-mobile">Email</th>
+          <th class="hide-mobile">PJ</th>
+          <th class="hide-mobile">Date</th>
+          <th>Statut</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        {% for company, info in items %}
+        {% set statut = 'replied' if info.repondu
+                        else ('bounce' if info.bounce
+                        else ('ok' if info.envoye else 'err')) %}
+        <tr data-statut="{{ statut }}"
+            data-sanspj="{{ '1' if info.sans_pj else '0' }}"
+            data-search="{{ (company ~ ' ' ~ (info.email or '')) | lower | e }}">
+          <td>
+            <strong>{{ company }}</strong>
+            {% if info.groupe_nom %}
+              <br><small style="color:var(--muted);font-size:11px">
+                👥 {{ info.groupe_nom }}
+              </small>
+            {% endif %}
+          </td>
+          <td class="email-cell hide-mobile">{{ info.email or '—' }}</td>
+          <td class="hide-mobile">
+            {% if info.sans_pj %}
+              <span class="pj-badge no" title="Envoyé sans pièce jointe">⚠️</span>
+            {% else %}
+              <span class="pj-badge ok" title="Avec pièces jointes">✅</span>
+            {% endif %}
+          </td>
+          <td class="hide-mobile" style="font-size:12px;color:var(--muted)">
+            {{ info.date or '—' }}
+          </td>
+          <td>
+            {% if info.repondu %}
+              <span class="status purple" title="{{ info.sujet_reponse or '' }}">
+                ✨ Réponse
+              </span>
+            {% elif info.bounce %}
+              <span class="status orange" title="{{ info.bounce_raison or '' }}">
+                ⚠️ Bounce
+              </span>
+            {% elif info.envoye %}
+              <span class="status ok">✅ Envoyé</span>
+            {% else %}
+              <span class="status err" title="{{ info.erreur or '' }}">
+                ❌ Échec
+              </span>
+            {% endif %}
+          </td>
+          <td style="text-align:right">
+            <div class="actions-cell">
+              {% if info.repondu %}
+                <button class="icon-btn purple" title="Retirer la réponse"
+                        data-action="unmark-reply" data-company="{{ company }}">
+                  ↩️
+                </button>
+              {% elif info.envoye %}
+                <button class="icon-btn purple" title="Marquer comme réponse reçue"
+                        data-action="mark-reply" data-company="{{ company }}">
+                  ✨
+                </button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <p>Aucun envoi pour l'instant</p>
+    <p style="font-size:13px">
+      Rends-toi sur la <a href="/">page principale</a> pour commencer.
+    </p>
+  </div>
+  {% endif %}
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DONNÉES CHART.JS
+   ============================================================ */
+const CHART_DATA = {{ chart_data | safe }};
+
+/* Pie chart */
+const ctxPie = document.getElementById('chart-pie');
+if (ctxPie) {
+  new Chart(ctxPie, {
+    type: 'doughnut',
+    data: {
+      labels: ['Envoyés', 'Échecs', 'Réponses', 'Bounces'],
+      datasets: [{
+        data: [
+          CHART_DATA.envoyes,
+          CHART_DATA.echecs,
+          CHART_DATA.repondus,
+          CHART_DATA.bounces
+        ],
+        backgroundColor: ['#1E5AA8', '#722F37', '#143E77', '#C98F0D'],
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 16, font: { size: 12 } }
+        }
+      }
+    }
+  });
+}
+
+/* Bar chart activité 7 jours */
+const ctxLine = document.getElementById('chart-line');
+if (ctxLine) {
+  const labels = CHART_DATA.jours.map(j => {
+    const d = new Date(j.date);
+    return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' });
+  });
+  const values = CHART_DATA.jours.map(j => j.total);
+
+  new Chart(ctxLine, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Emails envoyés',
+        data: values,
+        backgroundColor: '#1E5AA8',
+        borderRadius: 6,
+        barThickness: 32,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1, precision: 0 },
+          grid: { color: '#EFE7D4' }
+        },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+/* ============================================================
+   FILTRES + RECHERCHE
+   ============================================================ */
+let activeFilter = 'all';
+let searchQuery = '';
+
+function applyFilters() {
+  const q = searchQuery.trim().toLowerCase();
+  document.querySelectorAll('#tbody tr').forEach(tr => {
+    let match = true;
+
+    // Filtre statut
+    if (activeFilter !== 'all') {
+      if (activeFilter === 'sans_pj') {
+        match = tr.dataset.sanspj === '1';
+      } else {
+        match = tr.dataset.statut === activeFilter;
+      }
+    }
+
+    // Recherche
+    if (match && q) {
+      const s = tr.dataset.search || '';
+      match = s.includes(q);
+    }
+
+    tr.classList.toggle('hidden', !match);
+  });
+
+  // Compteur du filtre actif
+  const visible = document.querySelectorAll('#tbody tr:not(.hidden)').length;
+  const chipActive = document.querySelector('.chip.active');
+  if (chipActive && activeFilter !== 'all') {
+    const base = chipActive.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
+    chipActive.textContent = `${base} (${visible})`;
+  }
+}
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.dataset.f;
+    applyFilters();
+  });
+});
+
+const searchInput = document.getElementById('search-mini');
+if (searchInput) {
+  let timer;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      searchQuery = searchInput.value;
+      applyFilters();
+    }, 120);
+  });
+}
+
+/* ============================================================
+   MARQUER / DÉMARQUER RÉPONSE
+   ============================================================ */
+async function toggleReply(company, repondu) {
+  try {
+    const r = await fetch('/api/mark-response', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ company, repondu })
+    });
+    if (r.status === 401) { window.location.href = '/login'; return; }
+    const data = await r.json();
+    if (data.ok) {
+      toast(repondu ? '✨ Marqué comme réponse' : '↩️ Réponse retirée', 'ok');
+      setTimeout(() => location.reload(), 600);
+    } else {
+      toast(data.error || 'Erreur', 'err');
+    }
+  } catch (e) {
+    toast('Erreur réseau', 'err');
+  }
+}
+
+document.querySelectorAll('[data-action="mark-reply"]').forEach(b => {
+  b.addEventListener('click', () => toggleReply(b.dataset.company, true));
+});
+
+document.querySelectorAll('[data-action="unmark-reply"]').forEach(b => {
+  b.addEventListener('click', () => toggleReply(b.dataset.company, false));
+});
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ============================================================
+   RACCOURCIS CLAVIER
+   ============================================================ */
+document.addEventListener('keydown', e => {
+  // Focus sur la recherche avec "/"
+  if (e.key === '/' && e.target.tagName !== 'INPUT') {
+    e.preventDefault();
+    if (searchInput) searchInput.focus();
+  }
+  // Escape pour effacer la recherche
+  if (e.key === 'Escape' && document.activeElement === searchInput) {
+    searchInput.value = '';
+    searchQuery = '';
+    applyFilters();
+    searchInput.blur();
+  }
+});
+</script>
+
+</body>
+</html>

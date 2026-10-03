@@ -1,0 +1,30 @@
+[Unit]
+Description=Candimail — automatisation Gmail pour candidatures
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adapte le chemin et l'utilisateur à ton serveur
+WorkingDirectory=/opt/candimail
+User=candimail
+Group=candimail
+
+# Démarre Flask derrière le reverse proxy
+# (remplace par waitress-serve / gunicorn en production, voir README)
+Environment=CANDIMAIL_BEHIND_PROXY=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/candimail/venv/bin/python /opt/candimail/app.py
+
+Restart=on-failure
+RestartSec=5
+
+# Durcissement de base
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/candimail
+
+[Install]
+WantedBy=multi-user.target

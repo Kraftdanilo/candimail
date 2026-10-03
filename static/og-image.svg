@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+ <rect width="1200" height="630" fill="#F7F1E4"/>
+ <rect x="0" y="0" width="1200" height="16" fill="#143E77"/>
+ <rect x="0" y="614" width="1200" height="16" fill="#143E77"/>
+
+ <text x="80" y="230" font-family="Arial, sans-serif" font-size="46"
+       font-weight="900" fill="#43161C" letter-spacing="2">
+   📧 CANDIMAIL
+ </text>
+
+ <text x="80" y="330" font-family="Arial, sans-serif" font-size="76"
+       font-weight="900" fill="#43161C">
+   Prospection automatisée
+ </text>
+ <text x="80" y="420" font-family="Arial, sans-serif" font-size="76"
+       font-weight="900" fill="#143E77">
+   Gmail · Réponses suivies
+ </text>
+
+ <text x="80" y="510" font-family="Arial, sans-serif" font-size="30"
+       fill="#544A3C">
+   Envoi à la bonne cadence · Multi-comptes · Export Excel
+ </text>
+
+ <rect x="80" y="550" width="340" height="6" fill="#43161C"/>
+</svg>
