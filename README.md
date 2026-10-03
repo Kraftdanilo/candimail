@@ -23,11 +23,10 @@ autogmail/
 > exclus via `.gitignore` (ils contiennent des donnees personnelles
 > et/ou des secrets). Ne jamais les commiter.
 
-> Compat : les anciens `constantes.py`, `db.py`, `noyau.py`,
-> `smtp_service.py`, `imap_service.py`, `routes_*.py`, `admin_comptes.py`,
-> `build_exe.py` a la racine sont des **calques** qui re-exportent le
-> package. Tout l'existant (`import db`, `python app.py`, QA...) continue
-> de marcher sans modification.
+> **Compat** : historiquement, la racine contenait des calques
+> (`constantes.py`, `db.py`, `routes_*.py`…) qui ré-exportaient le package.
+> Ils ont été **supprimés** : plus aucun module ne les importe.
+> Importez toujours directement `candimail.*`.
 
 ## Lancement
 
