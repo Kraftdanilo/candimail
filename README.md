@@ -11,12 +11,17 @@ autogmail/
     services/             smtp.py (envoi), imap.py (reponses/bounces)
     web/                  app.py (fabrique Flask) + routes/*.py (5 blueprints)
   static/  templates/     Assets Flask (servis via RESS_DIR)
-  scripts/                admin_comptes, build_exe, QA, verifs
-  tests/                  test_smoke.py (+ QA historiques)
+  scripts/                admin_comptes, build_exe
+  tests/                  test_smoke.py
   deploy/                 Caddy / Nginx / systemd (serveur web classique)
   uploads/  app.db        Donnees locales (jamais versionnees)
   .webview/               Logs + profil WebView2
 ```
+
+> **Donnees non versionnees** : `app.db`, `config.json`, `envois.json`,
+> `uploads/`, `secret.key`, `admin.key`, `.webview/` et les logs sont
+> exclus via `.gitignore` (ils contiennent des donnees personnelles
+> et/ou des secrets). Ne jamais les commiter.
 
 > Compat : les anciens `constantes.py`, `db.py`, `noyau.py`,
 > `smtp_service.py`, `imap_service.py`, `routes_*.py`, `admin_comptes.py`,
