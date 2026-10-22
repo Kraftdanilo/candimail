@@ -189,7 +189,12 @@ def _config_globale():
 
 
 def charger_config(uid=None):
-    """Config de l'utilisateur courant (candidat, templates, groupes, PJ...)."""
+    """Config de l'utilisateur courant (candidat, templates, groupes, PJ...).
+
+    uid 0 (profil par défaut)  : config système (_config_globale).
+    uid >= 1 (vrais profils)   : config vide au premier lancement — AUCUNE
+    donnée de démo (pas de nom démo, pas de compte Gmail factice, pas de
+    template pré-rempli). L'utilisateur saisit tout lui-même."""
     if uid is None:
         uid = current_uid()
     if not uid:
@@ -197,8 +202,10 @@ def charger_config(uid=None):
     db_cfg = db.config_get(uid)
     cfg = json.loads(json.dumps(DEFAULT_CONFIG))
     if db_cfg is None:
-        # Nouvel utilisateur : profil candidat vide
+        # Nouveau profil : 100 % vide, aucune donnée de démonstration.
         cfg["candidat"] = {k: "" for k in cfg["candidat"]}
+        cfg["comptes"] = []
+        cfg["templates_perso"] = []
     else:
         for k, v in db_cfg.items():
             if isinstance(v, dict) and k in cfg:

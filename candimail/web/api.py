@@ -27,17 +27,22 @@ from candimail.core.noyau import (
     compte_suivant, build_letter, build_subject, check_rate_limit,
     maintenant_str, charger_log, sauver_log, modifier_log, _pieces,
     _NONCE_TTL, _NONCE, creer_nonce, _nonce_valide, app_secret_bytes,
-    _txt,
+    _txt, get_selected_compte_index, set_selected_compte_index,
 )
 from candimail.services.smtp import envoyer_email, _envoyer_un_email
-from candimail.services.imap import verifier_toutes_boites, appliquer_filtres_compte
+from candimail.services.imap import (
+    verifier_toutes_boites, appliquer_filtres_compte, _gimap_ouvre,
+)
 from candimail.core.regles import (
     REGLES_DEFAUT, seed_regles, normaliser_regle, reindexer_priorites,
     appliquer_apprentissage, calculer_suggestions, export_sans_secrets,
 )
 from candimail.web import hist_helpers as hh
 from candimail.core.purge import purger_orphelins
-from candimail.services.ia_agent import GROQ_MODELS, GOOGLE_MODELS, MISTRAL_MODELS, IA_TASKS
+from candimail.services.ia_agent import (
+    GROQ_MODELS, GOOGLE_MODELS, MISTRAL_MODELS, IA_TASKS,
+    openrouter_models as _openrouter_models, agent_par_defaut as _ia_agent,
+)
 
 # ============================================================
 # CONFIG GLOBALE (port, debug, chemins logs)
@@ -82,6 +87,24 @@ except Exception:
 
 
 @app.middleware("http")
+async def _set_uid_middleware(request: Request, call_next):
+    """Définit l'uid du profil actif dans le stockage thread-local
+    à partir du header X-UID, pour que current_uid() dans noyau fonctionne."""
+    try:
+        uid_header = request.headers.get("x-uid")
+        if uid_header:
+            session_set("uid", int(uid_header))
+        else:
+            # Pas de header : on garde 0 (profil par défaut) ou on ne touche rien
+            if session_get("uid") is None:
+                session_set("uid", 0)
+    except (TypeError, ValueError):
+        session_set("uid", 0)
+    response = await call_next(request)
+    return response
+
+
+@app.middleware("http")
 async def _force_utf8(request: Request, call_next):
     try:
         response = await call_next(request)
@@ -99,10 +122,26 @@ async def _force_utf8(request: Request, call_next):
 
 
 # ============================================================
-# SESSION UID (mono-utilisateur desktop : uid = 0 par défaut)
+# SESSION UID (multi-profils : uid lu depuis le header X-UID,
+# fallback sur le stockage thread-local, puis 0)
 # ============================================================
 def _get_uid(request: Request) -> int:
+    # 1. Priorité : header X-UID envoyé par le front (profil sélectionné)
+    try:
+        uid_header = request.headers.get("x-uid")
+        if uid_header:
+            return int(uid_header)
+    except (TypeError, ValueError):
+        pass
+    # 2. Fallback : stockage thread-local (defini par le middleware)
     return int(session_get("uid", 0) or 0)
+
+
+def _profil_verrouille(uid: int) -> bool:
+    """Le profil 0 est le profil SYSTÈME (données de démonstration) :
+    on ne peut pas y saisir d'informations personnelles. Pour utiliser
+    l'application pour de vrai, crée un profil (uid >= 1)."""
+    return int(uid or 0) == 0
 
 
 def _templates_context() -> dict:
@@ -156,6 +195,41 @@ async def cv_page(request: Request):
     base = json.loads(json.dumps(DEFAULT_CV))
     base.update(data)
     return _render("cv.html", cv=base)
+
+
+# ------------------------------------------------------------
+# CV (GET /api/cv, POST /api/cv)
+# ------------------------------------------------------------
+@app.get("/api/cv")
+async def api_cv_get():
+    """Renvoie le CV du profil actif (fusionné avec les valeurs par défaut)."""
+    data = db.cv_get(current_uid())
+    if not isinstance(data, dict):
+        data = json.loads(json.dumps(DEFAULT_CV))
+    base = json.loads(json.dumps(DEFAULT_CV))
+    base.update(data)
+    return {"ok": True, "cv": base}
+
+
+@app.post("/api/cv")
+async def api_cv_set(request: Request):
+    """Enregistre le CV du profil actif."""
+    uid = current_uid()
+    if _profil_verrouille(uid):
+        return JSONResponse({"ok": False, "error": "Le profil par défaut (#0) est un profil système — crée un vrai profil pour enregistrer ton CV."}, status_code=403)
+    try:
+        data = await request.json()
+    except Exception:
+        return JSONResponse({"ok": False, "error": "JSON invalide"}, status_code=400)
+    cv = data.get("cv")
+    if not isinstance(cv, dict):
+        return JSONResponse({"ok": False, "error": "CV invalide"}, status_code=400)
+    try:
+        db.cv_set(cv, current_uid())
+    except Exception as e:
+        log_erreur("api_cv_set", e, "sauvegarde CV")
+        return JSONResponse({"ok": False, "error": erreur_publique(type_erreur="db")[0]}, status_code=500)
+    return {"ok": True}
 
 
 @app.get("/api/health")
@@ -214,6 +288,40 @@ async def api_debug_info(request: Request):
         "pieces_actives": len(get_pieces_actives()),
         "log_tail": queue_log,
     }
+
+
+# ============================================================
+# PROFILS UTILISATEURS (multi-profils isolés)
+# ============================================================
+@app.get("/api/profils")
+async def api_profils_lister():
+    """Liste tous les profils existants avec leur uid et nom."""
+    return {"ok": True, "profils": db.profils_lister()}
+
+
+@app.post("/api/profils")
+async def api_profils_creer(request: Request):
+    """Crée un nouveau profil avec un uid unique."""
+    try:
+        data = await request.json()
+    except Exception:
+        return JSONResponse({"ok": False, "error": "JSON invalide"}, status_code=400)
+
+    nom = (data.get("nom") or "").strip()
+    if not nom:
+        return JSONResponse({"ok": False, "error": "Nom requis"}, status_code=400)
+
+    # Générer un uid unique : max(uid existants) + 1, ou 1 si vide
+    profils = db.profils_lister()
+    if profils:
+        nouvel_uid = max(p["uid"] for p in profils) + 1
+    else:
+        nouvel_uid = 1
+
+    if not db.profil_creer(nouvel_uid, nom):
+        return JSONResponse({"ok": False, "error": "Profil déjà existant"}, status_code=409)
+
+    return {"ok": True, "uid": nouvel_uid, "nom": nom}
 
 
 # ============================================================
@@ -499,6 +607,8 @@ async def api_companies_get():
 
 @app.post("/api/companies")
 async def api_companies_add(request: Request):
+    if _profil_verrouille(current_uid()):
+        return JSONResponse({"ok": False, "error": "Le profil par défaut (#0) est un profil système — crée un vrai profil pour ajouter des entreprises."}, status_code=403)
     data = await request.json()
     name = (data.get("name") or "").strip()
     email = (data.get("email") or "").strip()
@@ -621,7 +731,11 @@ async def api_config_get():
     safe["pieces_jointes"] = cfg.get("pieces_jointes", {})
     safe["filtres_gmail"] = cfg.get("filtres_gmail", [])
     safe["filtres_init"] = cfg.get("filtres_init", 0)
-    safe["comptes"] = [{"index": i, "email": c.get("email", ""), "actif": bool(c.get("actif", True)), "has_password": bool(c.get("password")), "devoiler": bool(c.get("devoiler", False)), "template": c.get("template", "") or ""} for i, c in enumerate(_config_globale().get("comptes", []))]
+    # Comptes sans mot de passe (démo) masqués dans les vrais profils
+    tous_comptes = [{"index": i, "email": c.get("email", ""), "actif": bool(c.get("actif", True)), "has_password": bool(c.get("password")), "devoiler": bool(c.get("devoiler", False)), "template": c.get("template", "") or ""} for i, c in enumerate(_config_globale().get("comptes", []))]
+    if not _profil_verrouille(current_uid()):
+        tous_comptes = [c for c in tous_comptes if c["has_password"]]
+    safe["comptes"] = tous_comptes
     tous = {k: {"nom": v["nom"], "predefini": True, "categorie": "predefini"} for k, v in TEMPLATES.items()}
     for t in cfg.get("templates_perso", []):
         tid = t.get("id")
@@ -635,6 +749,9 @@ async def api_config_get():
 @app.post("/api/config")
 async def api_config_update(request: Request):
     data = await request.json()
+    uid = current_uid()
+    if _profil_verrouille(uid):
+        return JSONResponse({"ok": False, "error": "Le profil par défaut (#0) est un profil système de démonstration — crée un vrai profil pour saisir tes informations."}, status_code=403)
     cfg = charger_config()
     profil_avant = None
     if isinstance(data.get("candidat"), dict):
@@ -678,12 +795,21 @@ async def api_comptes_nonce():
 @app.get("/api/comptes")
 async def api_comptes_list():
     cfg = _config_globale()
-    safe = [{"index": i, "email": c.get("email", ""), "actif": bool(c.get("actif", True)), "has_password": bool(c.get("password")), "template": c.get("template", "") or "", "devoiler": bool(c.get("devoiler", False))} for i, c in enumerate(cfg.get("comptes", []))]
+    # Les comptes SANS mot de passe (comme le compte de démo) ne sont pas
+    # utilisables : on ne les montre pas dans les vrais profils (uid >= 1).
+    masquer_demo = not _profil_verrouille(current_uid())
+    safe = [{"index": i, "email": c.get("email", ""), "actif": bool(c.get("actif", True)), "has_password": bool(c.get("password")), "template": c.get("template", "") or "", "devoiler": bool(c.get("devoiler", False))}
+            for i, c in enumerate(cfg.get("comptes", []))]
+    if masquer_demo:
+        safe = [c for c in safe if c["has_password"]]
     return {"comptes": safe}
 
 
 @app.post("/api/comptes")
 async def api_comptes_add(request: Request):
+    uid = current_uid()
+    if _profil_verrouille(uid):
+        return JSONResponse({"ok": False, "error": "Le profil par défaut (#0) est un profil système — crée un vrai profil pour ajouter ton compte Gmail."}, status_code=403)
     data = await request.json()
     email = (data.get("email") or "").strip()
     password = (data.get("password") or "").strip()
@@ -732,7 +858,6 @@ async def api_comptes_template(idx: int, request: Request):
 
 @app.get("/api/comptes/selected")
 async def api_comptes_selected():
-    from candimail.core.noyau import get_selected_compte_index
     return {"index": get_selected_compte_index()}
 
 
@@ -740,7 +865,6 @@ async def api_comptes_selected():
 async def api_comptes_selected_set(request: Request):
     data = await request.json()
     idx = data.get("index")
-    from candimail.core.noyau import set_selected_compte_index, get_comptes_actifs
     if idx is not None and (idx < 0 or idx >= len(get_comptes_actifs())):
         return JSONResponse({"ok": False, "error": "Index invalide"}, status_code=400)
     set_selected_compte_index(idx)
@@ -847,6 +971,8 @@ async def api_pieces_list():
 
 @app.post("/api/pieces")
 async def api_pieces_add(request: Request):
+    if _profil_verrouille(current_uid()):
+        return JSONResponse({"ok": False, "error": "Le profil par défaut (#0) est un profil système — crée un vrai profil pour ajouter des pièces jointes."}, status_code=403)
     form = await request.form()
     if "fichier" not in form:
         return JSONResponse({"ok": False, "error": "Aucun fichier"}, status_code=400)
@@ -1260,6 +1386,8 @@ async def api_preview(request: Request):
 
 @app.post("/api/send")
 async def api_send(request: Request):
+    if _profil_verrouille(current_uid()):
+        return JSONResponse({"ok": False, "error": "Le profil par défaut (#0) est un profil système — crée un vrai profil pour envoyer des emails."}, status_code=403)
     data = await request.json()
     dest = (data.get("email") or "").strip()
     company = (data.get("company") or "").strip()
@@ -1369,6 +1497,8 @@ def _bulk_worker(companies, template, owner_uid=0):
 
 @app.post("/api/send-bulk")
 async def api_send_bulk(request: Request):
+    if _profil_verrouille(current_uid()):
+        return JSONResponse({"ok": False, "error": "Le profil par défaut (#0) est un profil système — crée un vrai profil pour lancer des envois."}, status_code=403)
     with _bulk_lock:
         if _bulk_running[0]:
             return JSONResponse({"ok": False, "error": "Déjà en cours"}, status_code=409)
@@ -1536,9 +1666,11 @@ async def api_ia_catalogue():
         "ok": True,
         "tasks": IA_TASKS,
         "providers": {
-            "groq":    {"label": "Groq",      "models": list(GROQ_MODELS.keys())},
-            "google":  {"label": "Google AI", "models": list(GOOGLE_MODELS.keys())},
-            "mistral": {"label": "Mistral",   "models": list(MISTRAL_MODELS.keys())},
+            "groq":       {"label": "Groq (gratuit)",       "models": list(GROQ_MODELS.keys())},
+            "google":     {"label": "Google AI (gratuit)",  "models": list(GOOGLE_MODELS.keys())},
+            "mistral":    {"label": "Mistral (gratuit)",    "models": list(MISTRAL_MODELS.keys())},
+            "openrouter": {"label": "OpenRouter (tous les modèles gratuits)",
+                           "models": list(_openrouter_models().keys())},
         },
     }
 
@@ -1673,6 +1805,155 @@ async def api_export_excel():
     wb.save(output)
     output.seek(0)
     return Response(content=output.read(), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": 'attachment; filename="candimail_%s.xlsx"' % datetime.now().strftime('%Y%m%d_%H%M')})
+
+
+# ============================================================
+# AGENT IA — CHAT (conversation en langage naturel)
+# ============================================================
+def _lire_emails_recents(uid: int, limite: int = 15) -> list[dict]:
+    """Lit les emails récents des boîtes actives (sujets + expéditeurs).
+    Utilisé par l'agent IA pour résumer / classer le courrier."""
+    comptes = get_comptes_actifs()
+    if not comptes:
+        return []
+    import email as _email_mod
+    from email.header import decode_header as _dh
+    from email.utils import parseaddr as _parseaddr
+
+    def _dec(raw):
+        try:
+            parts = _dh(raw or "")
+            return " ".join(
+                c.decode(cs or "utf-8", errors="ignore") if isinstance(c, bytes) else c
+                for c, cs in parts)
+        except Exception:
+            return str(raw)
+
+    emails = []
+    for compte in comptes:
+        mail = None
+        try:
+            mail = _gimap_ouvre(compte)
+            mail.select("INBOX")
+            status, msgs = mail.search(None, "(ALL)")
+            if status != "OK" or not msgs[0]:
+                continue
+            nums = msgs[0].split()[-limite:]
+            for num in reversed(nums):
+                st, data = mail.fetch(num, "(BODY.PEEK[HEADER])")
+                if st != "OK" or not data or not data[0]:
+                    continue
+                msg = _email_mod.message_from_bytes(data[0][1])
+                emails.append({
+                    "compte": compte.get("email", ""),
+                    "de": _parseaddr(msg.get("From", ""))[1],
+                    "sujet": _dec(msg.get("Subject", ""))[:200],
+                    "date": msg.get("Date", "")[:40],
+                })
+        except Exception as e:
+            log_erreur("_lire_emails_recents", e, compte.get("email", ""))
+        finally:
+            if mail:
+                try: mail.logout()
+                except Exception: pass
+    return emails[:limite]
+
+
+async def _ia_chat_repondre(message: str, uid: int) -> str:
+    """Cerveau du chat : détecte l'intention, exécute l'action réelle
+    correspondante, puis formule la réponse avec le LLM."""
+    from candimail.services.ia_agent import IAAgentError
+    msg = (message or "").strip()
+    bas = msg.lower()
+
+    # ---- Actions réelles détectées par mots-clés -------------------------
+    contexte = ""
+    intention = "conversation"
+
+    if any(k in bas for k in ("résume", "resume", "résumé", "dernier", "recu", "reçus",
+                              "boîte", "inbox", "mails", "emails")) \
+            and any(k in bas for k in ("email", "mail", "courrier", "boîte", "reçu")):
+        intention = "resumer_emails"
+        emails = _lire_emails_recents(uid)
+        if not emails:
+            return "Aucun compte Gmail actif ou boîte vide — ajoute un compte dans la page Comptes & pièces."
+        liste = "\n".join(f"- [{e['date']}] {e['de']} : {e['sujet']}" for e in emails)
+        contexte = f"Voici les derniers emails reçus ({len(emails)}) :\n{liste}\n\n"
+        intention = "resumer_emails"
+
+    elif "classe" in bas or "ranger" in bas or "classer" in bas or "courrier" in bas:
+        intention = "classer"
+        cfg = charger_config(uid)
+        filtres = cfg.get("filtres_gmail", [])
+        comptes = get_comptes_actifs()
+        if not filtres:
+            return ("Il n'y a encore aucune règle de classement. Crée des règles dans la page "
+                    "« Réponses & filtres » puis je pourrai les appliquer sur ta boîte.")
+        if not comptes:
+            return "Aucun compte Gmail actif — ajoute un compte d'abord."
+        resultats = []
+        for c in comptes:
+            resultats.extend(appliquer_filtres_compte(c, filtres, uid=uid))
+        n = sum(r.get("trouves", 0) for r in resultats if r.get("ok"))
+        regles_ok = [r.get("regle") for r in resultats if r.get("ok") and r.get("trouves")]
+        return (f"Classement terminé : {n} email(s) traité(s).\n" +
+                ("Règles actives : " + ", ".join(regles_ok) if regles_ok
+                 else "Aucune règle n'a trouvé de mail à classer."))
+
+    elif bas.startswith("écris") or bas.startswith("ecris") or "rédige" in bas or "redige" in bas \
+            or ("mail" in bas and ("à " in bas or "a " in bas or "pour " in bas)):
+        intention = "rediger"
+        cfg = charger_config(uid)
+        cand = cfg.get("candidat", {})
+        contexte = (f"Profil du candidat : nom={cand.get('nom')}, email={cand.get('email')}, "
+                    f"ville={cand.get('ville')}, diplome={cand.get('diplome')}, spécialité={cand.get('spec')}.\n")
+
+    # ---- Appel du LLM avec le contexte collecté --------------------------
+    cfg_ia = _ia_agent.get_config("rediger")
+    if not cfg_ia.api_key:
+        # Pas de clé : l'agent ne peut pas répondre par IA.
+        # On donne quand même une réponse utile selon l'intention.
+        if intention == "resumer_emails":
+            return ("Clé API IA manquante (page Agent IA) — je ne peux pas rédiger un résumé "
+                    "intelligent, mais voici les derniers emails bruts :\n" + contexte)
+        return ("Pour me faire parler, configure une clé API dans la page 🤖 Agent IA "
+                "(Groq, Google, Mistral ou OpenRouter — gratuits).")
+
+    system = (
+        "Tu es l'assistant intégré de Candimail, une application de suivi de candidatures "
+        "par email. Tu réponds en français, de façon concise et actionnable. "
+        "Tu peux : résumer des emails, aider à classer le courrier, rédiger des mails "
+        "professionnels (candidatures, relances), conseiller sur la stratégie de candidature."
+    )
+    if contexte:
+        system += "\n\n" + contexte
+    try:
+        resp = await _ia_agent.chat("rediger", [
+            {"role": "system", "content": system},
+            {"role": "user", "content": msg},
+        ])
+        return resp.text
+    except IAAgentError as e:
+        return f"Erreur IA : {e}"
+
+
+@app.post("/api/ia/chat")
+async def api_ia_chat(request: Request):
+    """Panneau de conversation IA : l'utilisateur demande en langage naturel
+    (résumer les derniers mails, classer, rédiger à X…), le backend détecte
+    l'intention, exécute l'action réelle si nécessaire puis répond via le LLM."""
+    uid = current_uid()
+    if _profil_verrouille(uid):
+        return JSONResponse({"ok": False, "error": "Le profil système (#0) n'a pas d'agent IA — crée un vrai profil."}, status_code=403)
+    try:
+        data = await request.json()
+    except Exception:
+        return JSONResponse({"ok": False, "error": "JSON invalide"}, status_code=400)
+    message = (data.get("message") or "").strip()
+    if not message:
+        return JSONResponse({"ok": False, "error": "Message vide"}, status_code=400)
+    reponse = await _ia_chat_repondre(message, uid)
+    return {"ok": True, "reponse": reponse}
 
 
 def lancer_serveur(app_instance, port, host=None):

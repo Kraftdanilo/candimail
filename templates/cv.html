@@ -3,294 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>Personnaliser mon CV</title>
+<title>Mon CV — Candimail</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<style>
-:root{--bg:#F7F1E4;--surface:#FFF;--border:#DED2BC;--text:#2A141A;
-  --muted:#7A6E5B;--accent:#1E5AA8;--ok:#1E5AA8;--danger:#722F37;
-  --radius:10px;--shadow:0 1px 3px rgba(0,0,0,.06)}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
-header{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:18px 24px;box-shadow:var(--shadow);position:sticky;top:0;z-index:50}
-.header-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;
-  gap:14px;flex-wrap:wrap}
-h1{font-size:18px;font-weight:700;flex:1}
-h1 small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
-.btn{padding:9px 15px;border:1px solid var(--border);background:var(--surface);
-  color:var(--text);border-radius:7px;font-size:13px;font-weight:600;
-  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{background:#FBF6EA}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
-.btn.danger{color:var(--danger);border-color:#D9B3B8}
-.btn.small{padding:6px 11px;font-size:12px}
-main{max-width:1240px;margin:0 auto;padding:24px;display:grid;
-  grid-template-columns:1fr 1fr;gap:22px}
-@media(max-width:960px){main{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
-.panel h2{font-size:13px;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;
-  display:flex;align-items:center;gap:8px}
-.panel h2 .add{font-size:11px;margin-left:auto;cursor:pointer;color:var(--accent)}
-label{display:flex;flex-direction:column;gap:4px;font-size:11px;
-  font-weight:700;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.04em;margin-bottom:12px}
-input[type=text],input[type=email],textarea{
-  padding:9px 12px;border:1px solid var(--border);border-radius:6px;
-  font-size:13px;font-family:inherit;color:var(--text);background:#fff}
-textarea{resize:vertical;line-height:1.5;font-weight:400;text-transform:none}
-input:focus,textarea:focus{outline:none;border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(30,90,168,.1)}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;
-  padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#FBF6EA}
-.row input{flex:1;min-width:120px}
-.row textarea{flex:1 1 100%;font-weight:400}
-.row .del{cursor:pointer;color:var(--danger);border:1px solid #D9B3B8;
-  background:#FFF;border-radius:6px;width:30px;height:30px}
-.empty{font-size:12px;color:var(--muted);padding:8px 2px}
-.foot{grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:#2A141A;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;
-  opacity:0;pointer-events:none;transition:all .25s;z-index:200}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.ok{background:var(--ok)}
-.toast.err{background:var(--danger)}
-/* ---- Aperçu (feuille CV) ---- */
-.cv-sheet{background:#fff;border:1px solid var(--border);border-radius:var(--radius);
-  padding:34px 36px;box-shadow:var(--shadow);font-size:13px;line-height:1.55;color:#111}
-.cv-name{font-size:24px;font-weight:800}
-.cv-title{color:var(--accent);font-weight:600;margin-top:2px}
-.cv-contact{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:8px 0 14px}
-.cv-sect{margin-top:16px}
-.cv-sect h3{font-size:11px;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.08em;border-bottom:2px solid var(--accent);
-  padding-bottom:4px;margin-bottom:10px}
-.cv-item{margin-bottom:10px}
-.cv-item .d{color:var(--accent);font-size:12px;font-weight:600}
-.cv-item .t{font-weight:700}
-.cv-item .l{color:var(--muted);font-size:12px}
-.cv-item p{font-size:12.5px;color:#333;margin-top:2px}
-.cv-list{list-style:none;padding:0}
-.cv-list li{padding:4px 0 4px 16px;position:relative}
-.cv-list li::before{content:"•";position:absolute;left:2px;color:var(--accent);font-weight:700}
-@media print{
-  header,.panel,.foot{display:none}
-  body{background:#fff}
-  main{display:block;padding:0}
-  .cv-sheet{border:none;box-shadow:none;padding:0;border-radius:0;font-size:11.5px}
-}
-</style>
-<link rel="stylesheet" href="/static/brutalist.css">
-<link rel="stylesheet" href="/static/motion.css">
+<link rel="stylesheet" href="/static/app.css">
 </head>
-<body class="page-doc">
-<header>
-  <div class="header-inner">
-    <h1>📄 Personnaliser mon CV
-      <small>Modifie tes informations, sauvegarde et exporte en PDF</small>
-    </h1>
-    <a class="btn" href="/app">← Accueil Candimail</a>
-    <a class="btn" href="/suivi">📊 Suivi</a>
+<body>
+
+<header class="topbar">
+  <h1>📄 Mon CV</h1>
+  <div class="row" style="margin:0">
+    <a class="btn small" href="/app">← Retour à l'application</a>
   </div>
 </header>
 
 <main>
-  <div>
-    <section class="panel">
-      <h2>🧑 Identité</h2>
-      <div class="row">
-        <input type="text" id="cv-nom" aria-label="Nom complet" placeholder="Nom complet">
-        <input type="text" id="cv-ville" aria-label="Ville" placeholder="Ville, Côte d'Ivoire">
-      </div>
-      <label>Poste / objectif
-        <input type="text" id="cv-titre" placeholder="Ex : Stagiaire en Génie Civil">
-      </label>
-      <label>Résumé / accroche
-        <textarea id="cv-resume" rows="4"></textarea>
-      </label>
-    </section>
+  <section class="panel">
+    <h2>Éditeur de CV</h2>
+    <p class="help">Enregistré dans la base locale (une version par profil). Toutes les listes acceptent une ligne par élément.</p>
 
-    <section class="panel">
-      <h2>💼 Expériences <span class="add" data-add="experience">+ Ajouter</span></h2>
-      <div id="experience-list"></div>
-      <div class="empty" id="experience-empty">Aucune expérience renseignée.</div>
-    </section>
+    <div class="grid">
+      <div><label>Titre</label><input type="text" id="cv-titre"></div>
+      <div><label>Nom</label><input type="text" id="cv-nom"></div>
+      <div><label>Ville</label><input type="text" id="cv-ville"></div>
+    </div>
+    <div><label>Résumé</label><textarea id="cv-resume" rows="3"></textarea></div>
 
-    <section class="panel">
-      <h2>🎓 Formations <span class="add" data-add="formation">+ Ajouter</span></h2>
-      <div id="formation-list"></div>
-      <div class="empty" id="formation-empty">Aucune formation renseignée.</div>
-    </section>
+    <div class="grid" style="margin-top:14px">
+      <div><label>Expériences (une par ligne)</label><textarea id="cv-experiences" rows="5"></textarea></div>
+      <div><label>Formations (une par ligne)</label><textarea id="cv-formations" rows="5"></textarea></div>
+      <div><label>Compétences (une par ligne)</label><textarea id="cv-competences" rows="5"></textarea></div>
+      <div><label>Langues (une par ligne)</label><textarea id="cv-langues" rows="5"></textarea></div>
+      <div><label>Références (une par ligne)</label><textarea id="cv-references" rows="5"></textarea></div>
+    </div>
 
-    <section class="panel">
-      <h2>🛠️ Compétences <span class="add" data-add="competence">+ Ajouter</span></h2>
-      <div id="competence-list"></div>
-      <div class="empty" id="competence-empty">Aucune compétence renseignée.</div>
-    </section>
+    <div class="actions">
+      <button class="btn primary" id="btn-cv-save">💾 Enregistrer le CV</button>
+      <button class="btn" id="btn-cv-reload">🔄 Recharger</button>
+    </div>
+  </section>
 
-    <section class="panel">
-      <h2>🗣️ Langues <span class="add" data-add="langue">+ Ajouter</span></h2>
-      <div id="langue-list"></div>
-      <div class="empty" id="langue-empty">Aucune langue renseignée.</div>
-    </section>
-
-    <section class="panel">
-      <h2>📇 Références <span class="add" data-add="reference">+ Ajouter</span></h2>
-      <div id="reference-list"></div>
-      <div class="empty" id="reference-empty">Aucune référence renseignée.</div>
-    </section>
-  </div>
-
-  <div>
-    <section class="panel">
-      <h2>👁️ Aperçu</h2>
-      <div class="cv-sheet" id="cv-preview"></div>
-    </section>
-  </div>
-
-  <div class="foot">
-    <button class="btn" id="btn-print">🖨️ Exporter en PDF / Imprimer</button>
-    <button class="btn primary" id="btn-save">💾 Enregistrer (base de données)</button>
-  </div>
+  <section class="panel">
+    <h2>Aperçu</h2>
+    <div id="cv-aperçu"></div>
+  </section>
 </main>
 
-<div class="toast" id="toast"></div>
-<script>
-/* Sauvegarde navigateur (localStorage) */
-const LS_KEY = 'autogmail.cv.draft';
-function storeGet(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){ return null; } }
-function storeSet(d){ try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      } }
-
-/* État */
-const LIST_FIELDS = {
-  experience: ['date','titre','lieu','description'],
-  formation:  ['date','titre','lieu','description'],
-  competence: ['titre'],
-  langue:     ['titre'],
-  reference:  ['titre','lieu','description'],
-};
-let cv = { nom:'', ville:'', titre:'', resume:'',
-  experiences:[], formations:[], competences:[], langues:[], references:[] };
-
-/* Rendus */
-function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; }
-function escTxt(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
-function rowFor(cat, item){
-  const wrap = el('<div class="row"></div>');
-  LIST_FIELDS[cat].forEach(f => {
-    if (f === 'description') {
-      wrap.appendChild(el(`<textarea data-f="description" rows="2" placeholder="Description">${escTxt(item[f])}</textarea>`));
-    } else {
-      wrap.appendChild(el(`<input type="text" data-f="${f}" value="${escTxt(item[f])}" placeholder="${f}">`));
-    }
-  });
-  const del = el('<button class="del" title="Supprimer">✕</button>');
-  del.addEventListener('click', () => { cv[cat+'s'].splice(item._i,1); renderList(cat); renderPreview(); saveLocal(); });
-  wrap.appendChild(del);
-  return wrap;
-}
-function renderList(cat){
-  const list = cv[cat+'s'];
-  const box = document.getElementById(cat+'-list');
-  const empty = document.getElementById(cat+'-empty');
-  box.innerHTML = '';
-  list.forEach((item,i)=>{ item._i=i; box.appendChild(rowFor(cat,item)); });
-  empty.style.display = list.length ? 'none' : '';
-}
-function renderAllLists(){ Object.keys(LIST_FIELDS).forEach(renderList); }
-function readIdentity(){
-  cv.nom=document.getElementById('cv-nom').value.trim();
-  cv.ville=document.getElementById('cv-ville').value.trim();
-  cv.titre=document.getElementById('cv-titre').value.trim();
-  cv.resume=document.getElementById('cv-resume').value.trim();
-}
-function writeIdentity(){
-  document.getElementById('cv-nom').value=cv.nom;
-  document.getElementById('cv-ville').value=cv.ville;
-  document.getElementById('cv-titre').value=cv.titre;
-  document.getElementById('cv-resume').value=cv.resume;
-}
-function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
-function itemHTML(item){
-  const parts=[];
-  if(item.date) parts.push(`<span class="d">${esc(item.date)}</span>`);
-  if(item.titre) parts.push(`${parts.length?' ':''}<span class="t">${esc(item.titre)}</span>`);
-  if(item.lieu) parts.push(`${parts.length?' — ':''}<span class="l">${esc(item.lieu)}</span>`);
-  const head = parts.length?parts.join(''):esc(item.titre||'');
-  const desc = item.description?`<p>${esc(item.description)}</p>`:'';
-  return `<div class="cv-item">${head}${desc}</div>`;
-}
-function renderPreview(){
-  readIdentity();
-  const nom = cv.nom || 'Votre Nom';
-  const contact = [cv.ville?`${cv.ville}, Côte d\'Ivoire`:"Côte d'Ivoire",'Mobilité nationale'].filter(Boolean).join(' · ');
-  const H=(title,body)=>body?`<div class="cv-sect"><h3>${title}</h3>${body}</div>`:'';
-  document.getElementById('cv-preview').innerHTML = `
-    <div class="cv-name">${esc(nom)}</div>
-    ${cv.titre?`<div class="cv-title">${esc(cv.titre)}</div>`:''}
-    <div class="cv-contact">${esc(contact)}</div>
-    ${H('Profil', cv.resume?`<p>${esc(cv.resume)}</p>`:'')}
-    ${H('Expériences', cv.experiences.map(itemHTML).join(''))}
-    ${H('Formations', cv.formations.map(itemHTML).join(''))}
-    ${H('Compétences', cv.competences.filter(c=>c.titre&&c.titre.trim()).length?'<ul class="cv-list">'+cv.competences.filter(c=>c.titre&&c.titre.trim()).map(c=>`<li>${esc(c.titre)}</li>`).join('')+'</ul>':'')}
-    ${H('Langues', cv.langues.filter(c=>c.titre&&c.titre.trim()).length?'<ul class="cv-list">'+cv.langues.filter(c=>c.titre&&c.titre.trim()).map(c=>`<li>${esc(c.titre)}</li>`).join('')+'</ul>':'')}
-    ${H('Références', cv.references.map(itemHTML).join(''))}
-  `;
-}
-function cleanCv(){
-  const clean = JSON.parse(JSON.stringify(cv));
-  ['experiences','formations','references'].forEach(k=> clean[k]=(clean[k]||[]).map(({_i,...rest})=>rest));
-  return clean;
-}
-function saveLocal(){ readIdentity(); storeSet(cleanCv()); }
-async function loadServer(){
-  try { const r=await fetch('/api/cv');
-        if(r.status===401){ return false; }
-        const d=await r.json();
-        if(d.ok&&d.cv){ cv=Object.assign(cv,d.cv); return true; } } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-  return false;
-}
-function toast(msg,type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast show '+type;
-  clearTimeout(t._timer); t._timer=setTimeout(()=>t.className='toast',2600);
-}
-document.addEventListener('DOMContentLoaded', async () => {
-  const okServer = await loadServer();
-  if(!okServer){ const draft=storeGet(); if(draft&&typeof draft==='object') cv=Object.assign(cv,draft); }
-  const ident=['cv-nom','cv-ville','cv-titre','cv-resume'];
-  ident.forEach(id=>document.getElementById(id).addEventListener('input',()=>{renderPreview();saveLocal();}));
-  document.querySelectorAll('[data-add]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const cat=btn.dataset.add;
-      cv[cat+'s'].push({date:'',titre:'',lieu:'',description:''});
-      renderList(cat); renderPreview(); saveLocal();
-    });
-  });
-  document.getElementById('btn-save').addEventListener('click', async ()=>{
-    readIdentity(); saveLocal();
-    try{
-      const r=await fetch('/api/cv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cv:cleanCv()})});
-      if(r.status===401){ return; }
-      const d=await r.json();
-      toast(d.ok?'CV enregistré ✅':(d.error||'Erreur'), d.ok?'ok':'err');
-    }catch(e){ toast('Erreur réseau','err'); }
-  });
-  document.getElementById('btn-print').addEventListener('click',()=>{ renderPreview(); window.print(); });
-  renderAllLists(); writeIdentity(); renderPreview();
-});
-</script>
-
-<footer class="page-footer">
-  {{ COPYRIGHT }}
+<footer class="app-footer">
+  <span class="copyright">© {{ annee }} — Candimail · Licence MIT · {{ COPYRIGHT }}</span>
 </footer>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const LISTS = ['experiences', 'formations', 'competences', 'langues', 'references'];
+
+function collectCv() {
+  const cv = {
+    titre: $('cv-titre').value.trim(),
+    resume: $('cv-resume').value.trim(),
+    nom: $('cv-nom').value.trim(),
+    ville: $('cv-ville').value.trim(),
+  };
+  for (const k of LISTS) {
+    cv[k] = $('cv-' + k).value.split('\n').map(s => s.trim()).filter(Boolean);
+  }
+  return cv;
+}
+
+function fillCv(cv) {
+  cv = cv || {};
+  $('cv-titre').value = cv.titre || '';
+  $('cv-resume').value = cv.resume || '';
+  $('cv-nom').value = cv.nom || '';
+  $('cv-ville').value = cv.ville || '';
+  for (const k of LISTS) $('cv-' + k).value = (cv[k] || []).join('\n');
+  apercu();
+}
+
+function apercu() {
+  const cv = collectCv();
+  const li = arr => (arr || []).map(s => '<li>' + s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) + '</li>').join('');
+  $('cv-aperçu').innerHTML =
+    '<h3 style="text-transform:uppercase">' + (cv.titre || 'CV') + '</h3>' +
+    '<p><strong>' + (cv.nom || '—') + '</strong> · ' + (cv.ville || '—') + '</p>' +
+    '<p>' + (cv.resume || '') + '</p>' +
+    ['Expériences', 'Formations', 'Compétences', 'Langues', 'Références'].map((t, i) => {
+      const k = LISTS[i];
+      return (cv[k] || []).length ? '<h4>' + t + '</h4><ul>' + li(cv[k]) + '</ul>' : '';
+    }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#cv-titre,#cv-resume,#cv-nom,#cv-ville,' + LISTS.map(k => '#cv-' + k).join(','))
+    .forEach(el => el.addEventListener('input', apercu));
+  $('btn-cv-reload').addEventListener('click', load);
+  $('btn-cv-save').addEventListener('click', async () => {
+    const d = await fetch('/api/cv', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cv: collectCv() }) }).then(r => r.json());
+    if (d.ok !== false) { toast('CV enregistré', 'ok'); } else toast(d.error || 'Erreur', 'err');
+  });
+  async function load() {
+    try {
+      const d = await fetch('/api/cv').then(r => r.json());
+      fillCv(d.cv);
+    } catch (e) { /* page utilisable hors serveur */ }
+  }
+  load();
+});
+
+function toast(msg, kind = '') {
+  let el = $('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.className = 'toast show ' + kind;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
 </body>
 </html>

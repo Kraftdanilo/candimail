@@ -44,6 +44,81 @@ MISTRAL_MODELS = {
     "ministral-8b":       {"ctx": 256000},
 }
 
+# ---------------------------------------------------------------------------
+# OPENROUTER — tous les modèles gratuits (":free"), chargés dynamiquement
+# depuis https://openrouter.ai/api/v1/models. La liste est mise en cache
+# dans le fichier local (data/openrouter_models.json) pour éviter de
+# re-scan à chaque démarrage ; si le cache a plus de 24 h on le rafraîchit.
+# ---------------------------------------------------------------------------
+OPENROUTER_BASE = "https://openrouter.ai/api/v1"
+OPENROUTER_MODELS_CACHE = DATA_DIR / "openrouter_models.json"
+OPENROUTER_CACHE_TTL = 24 * 3600
+
+# Repli hors-ligne (scan du 2026-10-22) si l'API OpenRouter est injoignable.
+_OPENROUTER_FALLBACK = {
+    "recursive/flint-v1.0:free": {"ctx": 262144},
+    "xingchen-agi/xing4.0-29b-a4b:free": {"ctx": 262144},
+    "nvidia/nemotron-3.5-super-vl:free": {"ctx": 1000000},
+    "dots-studio/dots-3-note-preview:free": {"ctx": 512000},
+    "liquid/lfm-2.5-2.6b:free": {"ctx": 65536},
+    "nvidia/nemotron-3.5-lightning:free": {"ctx": 1000000},
+    "thinkingmachines/inkling-small:free": {"ctx": 1048576},
+    "poolside/laguna-s-2.1:free": {"ctx": 262144},
+    "thinkingmachines/inkling:free": {"ctx": 1048576},
+    "poolside/laguna-xs-2.1:free": {"ctx": 262144},
+    "cohere/north-mini-code:free": {"ctx": 256000},
+    "nvidia/nemotron-3.5-content-safety:free": {"ctx": 128000},
+    "nvidia/nemotron-3-ultra-550b-a55b:free": {"ctx": 1000000},
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {"ctx": 256000},
+    "google/gemma-4-26b-a4b-it:free": {"ctx": 262144},
+    "google/gemma-4-31b-it:free": {"ctx": 262144},
+    "nvidia/nemotron-3-super-120b-a12b:free": {"ctx": 262144},
+}
+
+
+def _charger_cache_openrouter() -> dict:
+    try:
+        if OPENROUTER_MODELS_CACHE.exists():
+            d = json.loads(OPENROUTER_MODELS_CACHE.read_text(encoding="utf-8"))
+            if isinstance(d, dict) and d.get("scan_le", 0) > time.time() - OPENROUTER_CACHE_TTL:
+                return d.get("models", {})
+    except Exception:
+        pass
+    return {}
+
+
+def _ecrire_cache_openrouter(models: dict) -> None:
+    try:
+        OPENROUTER_MODELS_CACHE.write_text(
+            json.dumps({"scan_le": time.time(), "models": models}, indent=1),
+            encoding="utf-8")
+    except Exception:
+        pass
+
+
+def openrouter_models() -> dict:
+    """Tous les modèles gratuits OpenRouter (ids finissant par ':free').
+    Cache disque 24 h, repli sur la dernière liste connue si offline."""
+    cached = _charger_cache_openrouter()
+    if cached:
+        return cached
+    try:
+        import httpx
+        r = httpx.get(f"{OPENROUTER_BASE}/models", timeout=15)
+        r.raise_for_status()
+        data = r.json().get("data", [])
+        models = {m["id"]: {"ctx": m.get("context_length", 0)}
+                  for m in data if m.get("id", "").endswith(":free")}
+        if models:
+            _ecrire_cache_openrouter(models)
+            return models
+    except Exception:
+        pass
+    return dict(_OPENROUTER_FALLBACK)
+
+
+OPENROUTER_MODELS = _OPENROUTER_FALLBACK  # repli immédiat (avant le 1er scan)
+
 # Tâches IA supportées
 IA_TASKS = {
     "rediger":   {"label": "Rédiger une réponse", "default_model": "openai/gpt-oss-120b"},
@@ -72,7 +147,7 @@ def sauver_config_ia(data: dict) -> None:
 
 @dataclass
 class IAConfig:
-    provider: str = "groq"          # groq | google | mistral
+    provider: str = "groq"          # groq | google | mistral | openrouter
     api_key: str = ""
     model: str = "openai/gpt-oss-120b"
     temperature: float = 0.7
@@ -86,6 +161,8 @@ class IAConfig:
             return "https://generativelanguage.googleapis.com/v1beta"
         if self.provider == "mistral":
             return "https://api.mistral.ai/v1"
+        if self.provider == "openrouter":
+            return OPENROUTER_BASE
         return ""
 
 
@@ -181,6 +258,8 @@ class IAAgent:
                 return await self._chat_google(cfg, messages, start, task_id)
             if cfg.provider == "mistral":
                 return await self._chat_mistral(cfg, messages, start, task_id)
+            if cfg.provider == "openrouter":
+                return await self._chat_openrouter(cfg, messages, start, task_id)
             raise IAAgentError(f"Fournisseur IA inconnu : {cfg.provider}")
         except httpx.HTTPStatusError as e:
             detail = ""
@@ -290,6 +369,41 @@ class IAAgent:
         headers = {
             "Authorization": f"Bearer {cfg.api_key}",
             "Content-Type": "application/json",
+        }
+        r = await client.post(url, json=payload, headers=headers)
+        r.raise_for_status()
+        data = r.json()
+        choice = data["choices"][0]
+        text = choice.get("message", {}).get("content", "")
+        usage = data.get("usage", {})
+        return IAResponse(
+            text=text,
+            model=cfg.model,
+            provider=cfg.provider,
+            tokens_in=usage.get("prompt_tokens"),
+            tokens_out=usage.get("completion_tokens"),
+            duration_ms=int((time.time() - start) * 1000),
+        )
+
+    # ---------------------------------------------------------------
+    # OPENROUTER (OpenAI-compatible, modèles gratuits ":free")
+    # ---------------------------------------------------------------
+    async def _chat_openrouter(self, cfg, messages, start, task_id):
+        client = await self._get_client()
+        url = f"{cfg.default_base_url()}/chat/completions"
+        payload = {
+            "model": cfg.model,
+            "messages": messages,
+            "temperature": cfg.temperature,
+            "max_tokens": cfg.max_tokens,
+            "stream": False,
+        }
+        headers = {
+            "Authorization": f"Bearer {cfg.api_key}",
+            "Content-Type": "application/json",
+            # En-têtes recommandés par OpenRouter pour l'attribution d'usage
+            "HTTP-Referer": "http://127.0.0.1",
+            "X-Title": "Candimail",
         }
         r = await client.post(url, json=payload, headers=headers)
         r.raise_for_status()

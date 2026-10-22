@@ -4,412 +4,41 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Candimail — Messagerie & suivi</title>
+<title>Candimail — application</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<style>
-:root {
-  --bg:#F7F1E4; --surface:#FFF; --border:#DED2BC;
-  --text:#2A141A; --muted:#7A6E5B;
-  --accent:#1E5AA8; --accent2:#143E77;
-  --ok:#1E5AA8; --warn:#C98F0D; --danger:#722F37;
-  --purple:#143E77;
-  --sent:#EAF2FB; --radius:10px;
-  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-  --shadow-h:0 4px 12px rgba(0,0,0,.08);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;
-  padding-bottom:60px;
-}
-header{
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:20px 32px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);
-}
-.header-inner{
-  max-width:1200px;margin:0 auto;display:flex;align-items:center;
-  gap:16px;flex-wrap:wrap;
-}
-h1{font-size:19px;font-weight:700;flex:1;min-width:240px}
-h1 small{display:block;font-size:12px;color:var(--muted);margin-top:2px;font-weight:400}
-.badge-cv{
-  padding:6px 12px;background:#FCEFC2;color:#8A6410;border-radius:20px;
-  font-size:12px;font-weight:600;white-space:nowrap;
-}
-.badge-cv.ok{background:#DCEAFB;color:#143E77}
-.badge-cv.warn{background:#F3E0E2;color:#722F37}
-.badge-cv.purple{background:#DCEAFB;color:#143E77}
-.top-actions{display:flex;gap:6px;flex-wrap:wrap}
-main{max-width:1200px;margin:0 auto;padding:24px 32px}
-.panel{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px 24px;margin-bottom:20px;box-shadow:var(--shadow);
-}
-.panel h2{
-  font-size:13px;font-weight:600;margin-bottom:12px;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.05em;
-  display:flex;align-items:center;gap:8px;
-}
-.panel h2 .badge-count{
-  display:inline-block;padding:2px 8px;background:var(--bg);border-radius:10px;
-  font-size:11px;letter-spacing:0;color:var(--text);font-weight:700;
-}
-.pj-warning{
-  background:#FCEFC2;border:1px solid #E8CE74;border-radius:8px;
-  padding:12px 18px;margin-bottom:20px;font-size:13px;color:#8A6410;
-}
-.config-row{
-  display:flex;gap:16px;flex-wrap:wrap;align-items:center;
-  margin-top:14px;padding-top:14px;border-top:1px solid var(--border);
-}
-.config-row:first-of-type{border-top:none;padding-top:0;margin-top:0}
-.config-row label{display:flex;align-items:center;gap:8px;font-size:13px}
-.config-row input[type=number]{
-  width:80px;padding:6px 10px;border:1px solid var(--border);
-  border-radius:6px;font-size:13px;font-family:inherit;
-}
-.config-row input[type=text],
-.config-row input[type=email],
-.config-row input[type=password]{
-  padding:8px 10px;border:1px solid var(--border);border-radius:6px;
-  font-size:13px;font-family:inherit;
-}
-.config-row select{
-  padding:6px 10px;border:1px solid var(--border);border-radius:6px;
-  font-size:13px;font-family:inherit;background:var(--surface);
-}
-.config-row input:disabled{background:#EFE7D4;color:var(--muted)}
-.stats{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
-  gap:12px;margin-bottom:20px;
-}
-.stat{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:14px;box-shadow:var(--shadow);
-}
-.stat .n{font-size:24px;font-weight:700}
-.stat .l{
-  font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.05em;margin-top:2px;
-}
-.stat.ok .n{color:var(--ok)}
-.stat.warn .n{color:var(--warn)}
-.stat.err .n{color:var(--danger)}
-.stat.purple .n{color:var(--purple)}
-.bulk-panel{
-  background:#F2E7CE;border:1px solid #E0C979;border-radius:var(--radius);
-  padding:16px 20px;margin-bottom:20px;display:flex;gap:14px;
-  align-items:center;flex-wrap:wrap;
-}
-.bulk-panel strong{font-size:14px}
-.bulk-panel .info{flex:1;min-width:200px}
-.bulk-panel .progress{
-  height:6px;background:#EFE0BC;border-radius:3px;overflow:hidden;margin-top:6px;
-}
-.bulk-panel .progress-bar{
-  height:100%;background:var(--accent);width:0%;transition:width .3s;
-}
-.bulk-panel.running{background:#FCEFC2;border-color:#E8CE74}
-.bulk-panel.running .progress{background:#E8CE74}
-.bulk-panel.running .progress-bar{background:var(--warn)}
-.search-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-.search-bar input{
-  flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--border);
-  border-radius:8px;font-size:14px;font-family:inherit;background:var(--surface);
-}
-.search-bar input:focus{
-  outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(30,90,168,.1);
-}
-.filters{display:flex;gap:6px;flex-wrap:wrap}
-.chip{
-  padding:8px 14px;border:1px solid var(--border);background:var(--surface);
-  border-radius:20px;font-size:12px;font-weight:500;color:var(--muted);
-  cursor:pointer;transition:all .15s;
-}
-.chip:hover{border-color:#C8B896;color:var(--text)}
-.chip.active{background:var(--text);color:#fff;border-color:var(--text)}
-.category{margin-bottom:24px}
-.category-head{
-  display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:0 4px;
-}
-.category-head h3{
-  font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-}
-.category-head .count{
-  padding:2px 8px;background:var(--bg);color:var(--muted);font-size:11px;
-  font-weight:700;border-radius:10px;
-}
-.category-head hr{flex:1;border:none;border-top:1px solid var(--border)}
-.card{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  margin-bottom:10px;transition:all .15s;overflow:hidden;
-}
-.card:hover{box-shadow:var(--shadow-h);border-color:#C8B896}
-.card.sent{background:var(--sent);border-color:#BFD7F2}
-.card.error{background:#F6E9EA;border-color:#D9B3B8}
-.card.responded{background:#DCEAFB;border-color:#BFD7F2}
-.card.bounce{background:#FCEFC2;border-color:#E8CE74}
-.card-head{
-  padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;
-}
-.card-head .title{flex:1;min-width:0}
-.card-head .name{
-  font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.card.sent .name{color:var(--muted);text-decoration:line-through}
-.card-head .email{
-  font-size:12px;color:var(--muted);
-  font-family:ui-monospace,"SF Mono",Consolas,monospace;margin-top:2px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.card-head .badge{
-  padding:3px 8px;font-size:10px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.05em;border-radius:4px;background:var(--bg);color:var(--muted);
-  flex-shrink:0;
-}
-.card-head .badge.grand{background:#F3E0E2;color:#722F37}
-.card-head .badge.port{background:#F2E7CE;color:#8A6410}
-.card-head .badge.response{background:#BFD7F2;color:#143E77}
-.card-head .badge.bounce{background:#E8CE74;color:#8A6410}
-.card-head .badge.nopj{background:#F3E0E2;color:#722F37}
-.card-head .date{font-size:11px;color:var(--muted);flex-shrink:0}
-.card-head .toggle{
-  font-size:12px;color:var(--muted);flex-shrink:0;transition:transform .2s;
-}
-.card.open .card-head .toggle{transform:rotate(90deg)}
-.card-body{
-  display:none;padding:16px 18px 18px;border-top:1px solid var(--border);
-}
-.card.open .card-body{display:block}
-.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
-.btn{
-  padding:9px 16px;border:1px solid var(--border);background:var(--surface);
-  color:var(--text);border-radius:6px;font-size:13px;font-weight:600;
-  cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;
-  gap:6px;text-decoration:none;
-}
-.btn:hover:not(:disabled){background:#FBF6EA;border-color:#C8B896}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn.primary:hover:not(:disabled){background:var(--accent2);border-color:var(--accent2)}
-.btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
-.btn.danger{color:var(--danger);border-color:#D9B3B8}
-.btn.danger:hover:not(:disabled){background:#F6E9EA}
-.btn.small{padding:6px 12px;font-size:12px}
-.piece-item{
-  display:flex;align-items:center;gap:12px;padding:10px 14px;
-  border:1px solid var(--border);border-radius:8px;background:#EAF2FB;
-}
-.piece-item.inactive{background:#FBF6EA}
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(10,14,20,.65);z-index:200;
-  display:none;align-items:center;justify-content:center;padding:20px;
-}
-.modal-overlay.visible{display:flex}
-.modal{
-  background:#fff;border-radius:12px;max-width:760px;width:100%;
-  max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
-  box-shadow:0 20px 60px rgba(0,0,0,.3);
-}
-.modal-head{
-  padding:18px 22px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:12px;
-}
-.modal-head h3{font-size:16px;font-weight:700;flex:1}
-.modal-close{
-  background:none;border:none;font-size:20px;cursor:pointer;
-  color:var(--muted);padding:4px 8px;border-radius:6px;
-}
-.modal-close:hover{background:#EFE7D4}
-.modal-body{padding:20px 22px;overflow-y:auto;flex:1}
-.modal-body label{
-  display:block;font-size:11px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.05em;color:var(--muted);margin-bottom:6px;margin-top:14px;
-}
-.modal-body label:first-child{margin-top:0}
-.modal-body input[type=text],.modal-body textarea,.modal-body input[type=email]{
-  width:100%;padding:10px 12px;border:1px solid var(--border);
-  border-radius:6px;font-size:13px;font-family:inherit;background:#FBF6EA;
-}
-.modal-body input:focus,.modal-body textarea:focus{
-  outline:none;border-color:var(--accent);background:#fff;
-  box-shadow:0 0 0 3px rgba(30,90,168,.1);
-}
-.modal-body textarea{
-  min-height:200px;resize:vertical;line-height:1.5;
-  font-family:ui-monospace,Consolas,monospace;font-size:12px;
-}
-.modal-foot{
-  padding:16px 22px;border-top:1px solid var(--border);
-  display:flex;gap:10px;justify-content:flex-end;align-items:center;
-  background:#FBF6EA;
-}
-.modal-foot .info{flex:1;font-size:12px;color:var(--muted)}
-.toast{
-  position:fixed;bottom:24px;left:50%;
-  transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;
-  padding:12px 22px;border-radius:8px;font-size:13px;font-weight:500;
-  box-shadow:0 10px 25px rgba(0,0,0,.15);opacity:0;transition:all .25s;
-  pointer-events:none;z-index:999;max-width:90%;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.ok{background:var(--ok)}
-.toast.err{background:var(--danger)}
-.toast.warn{background:var(--warn)}
-.empty-box{
-  padding:14px;background:#FCEFC2;border-radius:6px;
-  font-size:13px;color:#8A6410;
-}
-@media(max-width:640px){
-  header,main{padding:16px}
-  h1{font-size:16px}
-  .card-head{padding:12px 14px}
-  .card-head .badge,.card-head .date{display:none}
-  .badge-cv{font-size:11px;padding:5px 10px}
-}
-
-/* ============ SPLASH DE DÉMARRAGE ============ */
-.splash{
-  position:fixed;inset:0;z-index:1000;background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  transition:opacity .5s ease,visibility .5s;
-}
-.splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.splash-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
-.splash-logo{
-  width:72px;height:72px;border-radius:18px;background:var(--accent);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:34px;
-  animation:splash-pop .6s cubic-bezier(.2,1.4,.4,1),splash-pulse 1.8s ease-in-out .6s infinite;
-  box-shadow:0 8px 30px rgba(30,90,168,.35);
-}
-@keyframes splash-pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes splash-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
-.splash-titre{font-size:22px;font-weight:800;letter-spacing:.04em}
-.splash-barre{
-  width:220px;height:6px;background:#E8DCC4;border-radius:3px;overflow:hidden;
-}
-.splash-prog{
-  height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));
-  border-radius:3px;transition:width .35s ease;
-}
-.splash-etat{font-size:12px;color:var(--muted);min-height:18px}
-
-/* ============ PAGES (vue multi-pages fluide) ============ */
-.page{display:none}
-.page.active{display:block;animation:page-in .28s ease both}
-@keyframes page-in{
-  from{opacity:0;transform:translateX(14px)}
-  to{opacity:1;transform:translateX(0)}
-}
-
-/* ============ SIDEBAR + LAYOUT (modèle bureau) ============ */
-.layout{display:flex;min-height:100vh}
-.sidebar{
-  width:230px;flex-shrink:0;background:var(--surface);
-  border-right:1px solid var(--border);display:flex;flex-direction:column;
-  position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 14px;
-}
-.sidebar .logo{
-  display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;
-  padding:4px 8px 18px;border-bottom:1px solid var(--border);margin-bottom:14px;
-}
-.sidebar .logo .dot{
-  width:30px;height:30px;border-radius:8px;background:var(--accent);
-  color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;
-}
-.sidebar .recherche{
-  display:flex;align-items:center;gap:8px;padding:8px 10px;
-  border:1px solid var(--border);border-radius:8px;background:var(--bg);margin-bottom:16px;
-}
-.sidebar .recherche input{
-  border:none;background:transparent;font-family:inherit;font-size:13px;
-  outline:none;flex:1;min-width:0;
-}
-.sidebar .recherche kbd{
-  font-size:10px;background:#fff;border:1px solid var(--border);
-  border-radius:4px;padding:1px 5px;color:var(--muted);
-}
-.sidebar .nav-group{margin-bottom:16px}
-.sidebar .nav-label{
-  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--muted);padding:0 8px 6px;
-}
-.sidebar a.nav-item{
-  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;
-  color:var(--text);text-decoration:none;font-size:13px;font-weight:500;
-  transition:background .12s;cursor:pointer;border:none;background:none;
-  width:100%;text-align:left;font-family:inherit;
-}
-.sidebar a.nav-item:hover{background:var(--bg)}
-.sidebar a.nav-item.active{background:var(--sent);color:var(--accent2);font-weight:700}
-.sidebar a.nav-item .ico{width:20px;text-align:center;flex-shrink:0}
-.sidebar .spacer{flex:1}
-.sidebar .bas-de-page{
-  border-top:1px solid var(--border);padding-top:10px;font-size:11px;color:var(--muted);
-  padding-left:8px;
-}
-.content{flex:1;min-width:0;display:flex;flex-direction:column}
-.breadcrumb{
-  display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
-  padding:14px 32px 0;
-}
-.breadcrumb b{color:var(--text);font-weight:600}
-.breadcrumb .sep{opacity:.5}
-/* ===== PAGES (vues avec transition fluide) ===== */
-.page{display:none}
-.page.active{display:block;animation:pageIn .28s cubic-bezier(.2,.7,.3,1)}
-@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){
-  .page.active{animation:none}
-}
-@media(max-width:900px){
-  .sidebar{display:none}
-  .breadcrumb{padding:14px 16px 0}
-}
-/* ===== PIED DE PAGE (pleine largeur, sous le contenu) ===== */
-.app-footer{ width:100%; margin-top:auto; padding:16px 24px;
-  border-top:2px solid var(--border,#1a1a1a);
-  display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px;
-  font-size:12px; font-weight:700; text-transform:uppercase;
-  letter-spacing:.03em; }
-.app-footer .sp{ flex:1 }
-.app-footer a{ color:inherit; text-decoration:none;
-  border-bottom:2px solid transparent; padding-bottom:1px; }
-.app-footer a:hover{ border-bottom-color:currentColor; }
-.app-footer .info{ opacity:.65; text-transform:none; letter-spacing:0; font-weight:600 }
-.app-footer .copyright{ flex:100%; opacity:.6; text-transform:none;
-  letter-spacing:0; font-weight:600; font-size:11px; }
-@media(max-width:900px){ .app-footer .sp{ display:none } }
-</style>
-<link rel="stylesheet" href="/static/brutalist.css">
-<link rel="stylesheet" href="/static/motion.css">
+<link rel="stylesheet" href="/static/app.css">
 <script>
-/* Garde-fou anti-splash figé, posé DÈS le <head> (avant tout le
-   reste du script). Si une erreur survient très tôt — donc avant
-   que le gestionnaire du splash ne soit enregistré — on retire le
-   splash quand même, sinon l'utilisateur reste bloqué devant une
-   fenêtre vide sans aucun moyen de réagir. */
-window.__candimailSauvetage = setTimeout(function () {
+/* Garde-fou : si l'init échoue très tôt, le splash ne doit pas rester figé. */
+window.__cmSauvetage = setTimeout(function () {
   var s = document.getElementById('splash');
-  if (!s) return;                       // splash absent : rien a faire
-  var e = document.getElementById('splash-etat');
-  if (e) e.textContent = 'Chargement prolongé — ouverture…';
-  s.classList.add('hidden');
-  setTimeout(function () { s.remove(); }, 600);
-}, 12000);
+  if (s) { s.classList.add('hidden'); setTimeout(function () { s.remove(); }, 300); }
+}, 10000);
 </script>
 </head>
 <body>
 
-<!-- ===== SPLASH DE DÉMARRAGE (préchargement) ===== -->
+<!-- SPLASH -->
 <div class="splash" id="splash">
   <div class="splash-inner">
     <div class="splash-logo">📧</div>
     <div class="splash-titre">Candimail</div>
-    <div class="splash-barre"><div class="splash-prog" id="splash-prog"></div></div>
-    <div class="splash-etat" id="splash-etat">Démarrage…</div>
+    <p class="help">Chargement…</p>
+  </div>
+</div>
+
+<!-- SÉLECTION DE PROFIL -->
+<div class="profil-overlay" id="profil-overlay">
+  <div class="profil-box">
+    <h2>👤 Choisir un profil</h2>
+    <p class="help">Chaque profil a ses propres données : entreprises, envois, historique.</p>
+    <div id="profil-liste" style="margin:12px 0"></div>
+    <div class="row">
+      <input type="text" id="profil-nom" placeholder="Nom du nouveau profil" maxlength="30" style="flex:1">
+      <button class="btn primary small" data-action="profils-creer">+ Créer</button>
+    </div>
+    <div class="actions">
+      <button class="btn" data-action="profils-close">Voir le profil système (démo, lecture seule)</button>
+    </div>
   </div>
 </div>
 
@@ -418,3162 +47,370 @@ window.__candimailSauvetage = setTimeout(function () {
 <!-- ===== BARRE LATÉRALE ===== -->
 <aside class="sidebar">
   <div class="logo"><span class="dot">📧</span> Candimail</div>
-  <div class="recherche">
-    <span>🔍</span>
-    <input type="search" id="search-side" aria-label="Rechercher" placeholder="Rechercher…">
-    <kbd>/</kbd>
-  </div>
-  <nav class="nav-group">
+  <nav>
+    <div class="nav-label">Ciblage</div>
+    <button class="nav-item" data-nav="dash">▦ Tableau de bord</button>
+    <button class="nav-item" data-nav="envoi">✉ Nouvel envoi</button>
     <div class="nav-label">Messagerie</div>
-    <a class="nav-item active" data-nav="overview"><span class="ico">◈</span> Vue d'ensemble</a>
-    <a class="nav-item" data-nav="messages"><span class="ico">▤</span> Mes messages</a>
-    <a class="nav-item" data-nav="groupes"><span class="ico">◍</span> Mes groupes</a>
-    <a class="nav-item" data-nav="imap"><span class="ico">⌁</span> Réponses & filtres</a>
+    <button class="nav-item" data-nav="comptes">📧 Comptes & pièces</button>
+    <button class="nav-item" data-nav="messages">📝 Mes modèles</button>
+    <button class="nav-item" data-nav="groupes">👥 Mes groupes</button>
+    <button class="nav-item" data-nav="imap">⌁ Réponses & filtres</button>
+    <div class="nav-label">Divers</div>
+    <button class="nav-item" data-nav="profil">👤 Profil</button>
+    <button class="nav-item" data-nav="historique">🕓 Historique</button>
+    <button class="nav-item" data-nav="ia">🤖 Agent IA</button>
+    <button class="nav-item" data-nav="chat">💬 Assistant IA</button>
+    <button class="nav-item" data-nav="params">⚙ Paramètres</button>
   </nav>
-
-  <nav class="nav-group">
-    <div class="nav-label">Envois</div>
-    <a class="nav-item" data-nav="dash"><span class="ico">▦</span> Cibles <span class="badge-count" id="side-entreprises">0</span></a>
-    <a class="nav-item" data-nav="envoi"><span class="ico">✉</span> Nouvel envoi</a>
-    <a class="nav-item" data-nav="suivi"><span class="ico">◔</span> Suivi des envois</a>
-  </nav>
-
-<div class="spacer"></div>
-  <div class="bas-de-page">Candimail — Démonstration</div>
+  <div class="spacer"></div>
+  <div class="bas-de-page">
+    <div id="profil-actif-box" style="border:var(--border);background:var(--jaune);
+         padding:8px 10px;margin-bottom:10px;font-size:11px;font-weight:700">
+      👤 Profil actif : <span id="profil-actif-nom">#0</span>
+    </div>
+    <button class="btn small" data-action="profils-open" style="width:100%">👤 Changer de profil</button>
+  </div>
 </aside>
 
 <!-- ===== COLONNE PRINCIPALE ===== -->
 <div class="content">
 
-<header>
-  <div class="header-inner">
-    <h1 id="page-titre">
-      Tableau de bord
-      <small id="header-sub">Candimail · Messagerie & suivi Stage Génie Civil</small>
-    </h1>
-    <div class="badge-cv" id="cv-badge">📎 0 pièce(s)</div>
-    <div class="badge-cv warn" id="pj-warn-badge" style="display:none"
-         title="Aucune pièce jointe — emails sans CV">⚠️ Sans PJ</div>
-    <div class="badge-cv" id="comptes-badge" title="Comptes Gmail actifs">📧 0</div>
-    <div class="badge-cv" id="rate-badge" title="Rate limit horaire">⏱️ 0/30</div>
-    <div class="top-actions">
-      <button class="btn small" id="btn-refresh-backend"
-              title="Recharger le back-end (en cas de ralentissement ou de bug)">🔄 Actualiser</button>
-      <a class="btn small" href="/api/export-excel">⬇️ Excel</a>
-      <a class="btn small" href="/api/export-csv">⬇️ CSV</a>
-    </div>
+<header class="topbar">
+  <h1>Candimail <small id="header-sub" class="help" style="display:block">Candidat · Ma ville</small></h1>
+  <div class="badges">
+    <span class="badge" id="cv-badge">📎 0 pièce(s)</span>
+    <span class="badge" id="comptes-badge">📧 0</span>
+    <span class="badge" id="rate-badge">⏱ 0/0</span>
+  </div>
+  <div class="row" style="margin:0">
+    <a class="btn small" href="/api/export-excel">⬇ Excel</a>
+    <a class="btn small" href="/api/export-csv">⬇ CSV</a>
+    <a class="btn small" href="/api/export-json">⬇ JSON</a>
+    <a class="btn small" href="/cv">📄 CV</a>
+    <a class="btn small" href="/suivi">◔ Suivi</a>
   </div>
 </header>
 
-<div class="breadcrumb">
-  <span>Candimail</span><span class="sep">/</span><b id="bc-page">Tableau de bord</b>
-</div>
-
 <main>
 
-  <!-- Banner PJ -->
-  <div class="pj-warning" id="pj-warning" style="display:none">
-    ⚠️ <strong>Aucune pièce jointe active</strong> — les emails partiront sans CV.
+  <div class="empty-box" id="profil-systeme-banniere" style="display:none">
+    🔒 <strong>Profil système actif</strong> — ce profil ne sert qu'à la démonstration,
+    il est en lecture seule. Clique sur <b>👤 Profils</b> pour créer ton vrai profil
+    et saisir tes informations réelles.
+  </div>
+
+  <div class="empty-box" id="pj-warning" style="display:none">
+    ⚠ <strong>Aucune pièce jointe active</strong> — les emails partiront sans CV.
+  </div>
+
+  <div class="empty-box" id="compte-sans-mdp-banniere" style="display:none">
+    🔴 <strong>Compte Gmail sans mot de passe d'application</strong> — l'automatisation
+    <strong>ne fonctionnera pas</strong> tant que tu n'auras pas collé un mot de passe
+    d'application généré sur
+    <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener"
+       style="font-weight:700">myaccount.google.com/apppasswords</a>.
+    (Page <b>Comptes & pièces</b> → bouton « + Ajouter »)
   </div>
 
   <!-- ============================================================
-       PAGE 1 : TABLEAU DE BORD (entreprises, stats, envoi de masse)
+       PAGE : TABLEAU DE BORD
        ============================================================ -->
-  <div class="page active" id="page-dash">
+  <div class="page" id="page-dash">
 
-  <div class="stats">
-    <div class="stat"><div class="n" id="stat-total">0</div><div class="l">Entreprises</div></div>
-    <div class="stat ok"><div class="n" id="stat-sent">0</div><div class="l">Envoyées</div></div>
-    <div class="stat warn"><div class="n" id="stat-pending">0</div><div class="l">En attente</div></div>
-    <div class="stat purple"><div class="n" id="stat-responded">0</div><div class="l">Réponses</div></div>
-  </div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="stat-total">0</div><div class="l">Entreprises</div></div>
+      <div class="stat acc"><div class="n" id="stat-sent">0</div><div class="l">Envoyées</div></div>
+      <div class="stat"><div class="n" id="stat-pending">0</div><div class="l">En attente</div></div>
+      <div class="stat acc"><div class="n" id="stat-responded">0</div><div class="l">Réponses</div></div>
+    </div>
 
-  <!-- BULK -->
-  <div class="bulk-panel" id="bulk-panel">
-    <div class="info">
-      <strong id="bulk-title">🚀 Envoi en masse</strong>
-      <div id="bulk-desc" style="font-size:12px;color:var(--muted);margin-top:2px">
-        Envoie aux entreprises non contactées
-      </div>
+    <div class="bulk" id="bulk-panel">
+      <strong id="bulk-title">🚀 Envoi de masse</strong>
+      <p class="help" id="bulk-desc">Envoie aux entreprises non contactées</p>
       <div class="progress"><div class="progress-bar" id="bulk-bar"></div></div>
+      <div class="actions">
+        <button class="btn primary" id="bulk-start">▶ Tout envoyer</button>
+        <button class="btn danger" id="bulk-stop" style="display:none">⏹ Arrêter</button>
+        <span class="help" id="sel-count">0 sélectionnée(s)</span>
+        <button class="btn small primary" id="sel-send" disabled>📤 Envoyer la sélection</button>
+        <button class="btn small danger" id="sel-del" disabled>🗑 Supprimer la sélection</button>
+      </div>
     </div>
-    <button class="btn primary" id="bulk-start">▶️ Tout envoyer</button>
-    <button class="btn danger" id="bulk-stop" style="display:none">⏹️ Arrêter</button>
-    <div class="sel-bar">
-      <span class="sel-count" id="sel-count">0 sélectionnée(s)</span>
-      <button class="btn small" id="sel-all">☑️ Tout cocher</button>
-      <button class="btn small" id="sel-none">☐ Tout décocher</button>
-      <button class="btn primary small" id="sel-send" disabled>📤 Envoyer la sélection</button>
-      <button class="btn danger small" id="sel-del" disabled>🗑️ Supprimer la sélection</button>
+
+    <div class="search-bar">
+      <input type="search" id="search" placeholder="Recher une entreprise…">
+      <div class="chips" id="filters"></div>
+      <button class="btn primary small" data-action="add-company">+ Entreprise</button>
     </div>
+
+    <div id="list"></div>
   </div>
-
-  <!-- RECHERCHE -->
-  <div class="search-bar">
-    <input type="search" id="search" aria-label="Rechercher une entreprise" placeholder="Rechercher une entreprise...">
-    <div class="filters" id="filters"></div>
-    <button class="btn primary small" id="btn-add-company">➕ Entreprise</button>
-  </div>
-
-  <div id="list"></div>
-
-  </div><!-- /page-dash -->
 
   <!-- ============================================================
-       PAGE 2 : ENVOI EXPRESS (email libre)
+       PAGE : NOUVEL ENVOI (email libre)
        ============================================================ -->
   <div class="page" id="page-envoi">
-
-  <section class="panel">
-    <h2>✉️ Envoi personnalisé <span class="badge-count">email libre</span></h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;grid-column:1/-1">
-        Destinataire(s) *
-        <textarea id="custom-email" rows="2"
-                  placeholder="dan@gmail.com, dan1dan@gmail.com, autre@exemple.com&#10;(virgule, point-virgule ou retour ligne)"
-                  style="padding:9px 12px;border:1px solid var(--border);border-radius:6px;
-                         font-size:13px;font-family:ui-monospace,Consolas,monospace;
-                         resize:vertical;line-height:1.5"></textarea>
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;grid-column:1/-1">
-        Nom de l'entreprise / organisation *
-        <input type="text" id="custom-company"
-               placeholder="Ex : SOTRA, Groupe X, Cabinet Y…"
-               style="padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-    </div>
-
-    <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                  font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-      Contexte personnalisé (optionnel)
-      <textarea id="custom-context" rows="3"
-                placeholder="Ex : Je vous contacte car je suis particulièrement intéressé par votre projet…"
-                style="padding:9px 12px;border:1px solid var(--border);border-radius:6px;
-                       font-size:13px;font-family:inherit;resize:vertical;line-height:1.5"></textarea>
-    </label>
-
-    <div class="config-row">
-      <label>
-        Template :
-        <select id="custom-template"></select>
-      </label>
-      <button class="btn small" id="btn-custom-preview">👁️ Aperçu</button>
-      <button class="btn primary small" id="btn-custom-send">📤 Envoyer maintenant</button>
-      <span id="custom-info" style="font-size:11px;color:var(--muted)"></span>
-    </div>
-
-    <div id="custom-preview-zone" style="display:none;margin-top:14px">
-      <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);
-                    text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">
-        Aperçu de la lettre
-      </label>
-      <textarea id="custom-preview-body" aria-label="Apercu du corps du message" readonly
-                style="width:100%;min-height:280px;padding:12px;border:1px solid var(--border);
-                       border-radius:6px;font-size:12px;font-family:ui-monospace,Consolas,monospace;
-                       line-height:1.5;background:#FBF6EA;resize:vertical"></textarea>
-    </div>
-  </section>
-
-  </div><!-- /page-envoi -->
+    <section class="panel">
+      <h2>✉ Envoi personnalisé</h2>
+      <label>Destinataire(s) * — virgule, point-virgule ou retour à la ligne</label>
+      <textarea id="custom-email" rows="2" placeholder="contact@entreprise.com, autre@exemple.com"></textarea>
+      <label>Nom de l'entreprise / organisation *</label>
+      <input type="text" id="custom-company" placeholder="Ex : SOTRA, Groupe X…">
+      <label>Contexte personnalisé (optionnel)</label>
+      <textarea id="custom-context" rows="3" placeholder="Pourquoi tu contactes cette entreprise précisément…"></textarea>
+      <label>Template</label>
+      <select id="custom-template"></select>
+      <div class="actions">
+        <button class="btn" id="btn-custom-preview">👁 Aperçu</button>
+        <button class="btn primary" id="btn-custom-send">📤 Envoyer maintenant</button>
+        <span class="help" id="custom-info"></span>
+      </div>
+      <div id="custom-preview-zone" style="display:none;margin-top:14px">
+        <label>Objet</label><input id="custom-preview-subject" readonly>
+        <label>Corps</label><textarea id="custom-preview-body" rows="12" readonly></textarea>
+      </div>
+    </section>
+  </div>
 
   <!-- ============================================================
-       PAGE 3 : COMPTES GMAIL
+       PAGE : COMPTES & PIÈCES
        ============================================================ -->
   <div class="page" id="page-comptes">
-
-  <!-- COMPTES GMAIL -->
-  <section class="panel" id="sec-comptes">
-    <h2>📧 Comptes Gmail <span class="badge-count" id="comptes-count">0 actif(s)</span></h2>
-    <div id="comptes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-    <div class="config-row">
-      <input type="email" id="new-email" aria-label="Adresse Gmail" placeholder="vous@gmail.com"
-             style="flex:1;min-width:220px">
-      <input type="password" id="new-password" aria-label="Mot de passe d'application Gmail"
-             placeholder="xxxx xxxx xxxx xxxx"
-             style="flex:1;min-width:260px">
-      <button class="btn primary small" id="btn-add-compte">+ Ajouter</button>
-      <button class="btn small" id="btn-help-password">❓ Où trouver mon mot de passe ?</button>
-    </div>
-  </section>
-
-  <!-- PIÈCES JOINTES -->
-  <section class="panel">
-    <h2>📎 Pièces jointes <span class="badge-count" id="pieces-count">0 active(s)</span></h2>
-    <div id="pieces-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-    <div class="config-row">
-      <label class="btn small" style="cursor:pointer">
+    <section class="panel">
+      <h2>📧 Comptes Gmail <span class="badge-count" id="comptes-count">0</span></h2>
+      <div id="comptes-list" style="margin-bottom:14px"></div>
+      <div class="row">
+        <input type="email" id="new-email" placeholder="vous@gmail.com" style="flex:1;min-width:200px">
+        <input type="password" id="new-password" placeholder="mot de passe d'application (16 caractères)" style="flex:1;min-width:220px">
+        <button class="btn primary small" id="btn-add-compte">+ Ajouter</button>
+      </div>
+      <div class="empty-box" style="margin-top:12px">
+        🔑 <strong>Mot de passe d'application requis</strong> — sans lui, <strong>l'automatisation
+        ne fonctionnera pas</strong> (envoi et détection de réponses).<br>
+        1️⃣ Active la validation en deux étapes sur ton compte Google.
+        2️⃣ Génère un mot de passe d'application sur
+        <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener"
+           style="font-weight:700">myaccount.google.com/apppasswords</a>
+        3️⃣ Colle ici les 16 caractères (ex : <code>abcd efgh ijkl mnop</code>).
+        Ton mot de passe Gmail principal ne marche pas — Google le refuse en SMTP/IMAP.
+      </div>
+    </section>
+    <section class="panel">
+      <h2>📎 Pièces jointes <span class="badge-count" id="pieces-count">0</span></h2>
+      <div id="pieces-list" style="margin-bottom:14px"></div>
+      <label class="btn small" style="cursor:pointer;display:inline-flex">
         📄 Ajouter un PDF
         <input type="file" id="pj-input" accept="application/pdf" hidden multiple>
       </label>
-      <span style="font-size:12px;color:var(--muted)">CV, LM, diplôme…</span>
-    </div>
-  </section>
-
-  </div><!-- /page-comptes -->
+      <span class="help">CV, lettre de motivation, diplôme… (PDF uniquement)</span>
+    </section>
+  </div>
 
   <!-- ============================================================
-       PAGE 4 : MES MESSAGES (templates)
+       PAGE : MES MODÈLES
        ============================================================ -->
   <div class="page" id="page-messages">
-
-  <!-- MES MESSAGES (TEMPLATES) -->
-  <section class="panel">
-    <h2>📝 Mes messages <span class="badge-count" id="tpl-count">0</span></h2>
-    <div id="tpl-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-    <div class="config-row">
-      <button class="btn primary small" id="btn-new-tpl">+ Nouveau message</button>
-      <span style="font-size:12px;color:var(--muted)">
-        Modèles réutilisables (candidature, parents, collègues…)
-      </span>
-    </div>
-  </section>
-
-  </div><!-- /page-messages -->
+    <section class="panel">
+      <h2>📝 Mes modèles <span class="badge-count" id="tpl-count">0</span></h2>
+      <div id="tpl-list" style="margin-bottom:14px"></div>
+      <button class="btn primary small" data-action="add-tpl">+ Nouveau modèle</button>
+    </section>
+  </div>
 
   <!-- ============================================================
-       PAGE 5 : GROUPES
+       PAGE : MES GROUPES
        ============================================================ -->
   <div class="page" id="page-groupes">
-
-  <!-- MES GROUPES -->
-  <section class="panel">
-    <h2>👥 Mes groupes <span class="badge-count" id="groupes-count">0</span></h2>
-    <div id="groupes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-    <div class="config-row">
-      <button class="btn primary small" id="btn-new-groupe">+ Nouveau groupe</button>
-      <span style="font-size:12px;color:var(--muted)">
-        Pour envoyer le même message à plusieurs personnes (parents d'élèves, collègues…)
-      </span>
-    </div>
-  </section>
-
-  </div><!-- /page-groupes -->
+    <section class="panel">
+      <h2>👥 Mes groupes <span class="badge-count" id="groupes-count">0</span></h2>
+      <div id="groupes-list" style="margin-bottom:14px"></div>
+      <button class="btn primary small" data-action="add-groupe">+ Nouveau groupe</button>
+    </section>
+  </div>
 
   <!-- ============================================================
-       PAGE 6 : RÉPONSES & FILTRES (IMAP)
+       PAGE : RÉPONSES & FILTRES
        ============================================================ -->
   <div class="page" id="page-imap">
-
-  <!-- IMAP -->
-  <section class="panel" id="sec-imap">
-    <h2>📨 Détection des réponses <span class="badge-count" id="imap-status-badge">—</span></h2>
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-      <button class="btn primary small" id="btn-imap-check">🔄 Vérifier maintenant</button>
-      <span style="font-size:12px;color:var(--muted)">
-        Analyse les boîtes Gmail (30 derniers jours) : réponses + bounces.
-      </span>
-    </div>
-  </section>
-
-  <!-- FILTRES GMAIL -->
-  <section class="panel" id="sec-filtres">
-    <h2>🗂️ Règles de classement <span class="badge-count" id="regles-count">0</span></h2>
-    <p style="font-size:12px;color:var(--muted);margin:4px 0 10px">
-      Les règles sont testées PAR ORDRE DE PRIORITÉ (1 = en premier) : la première
-      qui correspond gagne. Glisse-dépose pour réordonner, ⏸️ pour mettre en pause.
-      🔔 = déclenche une notification. Sans match, le mail reste tel quel.
-    </p>
-    <div id="regles-liste" style="margin-bottom:12px"></div>
-    <details open style="border:1px solid var(--border);border-radius:8px;padding:10px 12px">
-      <summary style="font-size:13px;font-weight:700;cursor:pointer">➕ Nouvelle règle</summary>
-      <div class="config-row" style="align-items:flex-end;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <label style="display:flex;flex-direction:column;font-size:12px">
-          Nom de la règle
-          <input type="text" id="flt-nom" placeholder="ex : Bourse" style="padding:6px">
-        </label>
-        <label style="display:flex;flex-direction:column;font-size:12px">
-          Champ
-          <select id="flt-champ" style="padding:6px">
-            <option value="motcle">Mot-clé (sujet ou texte)</option>
-            <option value="from">Expéditeur</option>
-            <option value="sujet">Sujet</option>
-          </select>
-        </label>
-        <label style="display:flex;flex-direction:column;font-size:12px">
-          Valeur
-          <input type="text" id="flt-valeur" placeholder="ex : recrutement" style="padding:6px">
-        </label>
-        <label style="display:flex;flex-direction:column;font-size:12px">
-          Libellé (🏷️)
-          <input type="text" id="flt-label" placeholder="ex : Candidatures" style="padding:6px">
-        </label>
-        <div style="display:flex;flex-direction:column;font-size:12px;gap:4px">
-          <label><input type="checkbox" id="act-label" checked> 🏷️ Libellé</label>
-          <label><input type="checkbox" id="act-lu"> 👁️ Marquer comme lu</label>
-          <label><input type="checkbox" id="act-notif"> 🔔 Notifier</label>
-          <label><input type="checkbox" id="act-archive"> 📦 Archiver</label>
-          <label><input type="checkbox" id="act-supprimer"> 🗑️ Supprimer</label>
+    <section class="panel">
+      <h2>📨 Détection des réponses</h2>
+      <div class="row">
+        <button class="btn primary small" id="btn-imap-check">🔄 Vérifier maintenant</button>
+        <span class="help">Analyse les boîtes Gmail (30 derniers jours) : réponses + bounces.</span>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>🗂 Règles de classement <span class="badge-count" id="regles-count">0</span></h2>
+      <p class="help">Priorité croissante (1 = en premier) : la première règle qui correspond gagne.
+        Glisse-dépose pour réordonner. 🔔 déclenche une notification.</p>
+      <div id="regles-liste" style="margin-bottom:14px"></div>
+      <details style="border:var(--border);padding:10px 12px">
+        <summary style="cursor:pointer;font-weight:700">➕ Nouvelle règle</summary>
+        <div class="row" style="align-items:flex-end;margin-top:10px">
+          <div><label>Nom</label><input id="flt-nom" placeholder="ex : Bourse"></div>
+          <div><label>Champ</label>
+            <select id="flt-champ">
+              <option value="motcle">Mot-clé</option>
+              <option value="from">Expéditeur</option>
+              <option value="sujet">Sujet</option>
+            </select></div>
+          <div><label>Valeur</label><input id="flt-valeur" placeholder="ex : recrutement"></div>
+          <div><label>Libellé (🏷)</label><input id="flt-label" placeholder="ex : Candidatures"></div>
         </div>
-        <button class="btn primary small" id="btn-flt-add">➕ Ajouter la règle</button>
-        <button class="btn small" id="btn-flt-appliquer">⚡ Appliquer maintenant</button>
-        <button class="btn small" id="btn-flt-libelles">🏷️ Créer les libellés dans Gmail</button>
-      </div>
-    </details>
-    <details style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px">
-      <summary style="font-size:13px;font-weight:700;cursor:pointer">🧠 Apprentissage — corriger un classement</summary>
-      <p style="font-size:12px;color:var(--muted);margin:8px 0">
-        Indique que les mails d'un expéditeur doivent aller dans un libellé précis :
-        l'app crée une règle prioritaire qui passe devant toutes les autres.
-      </p>
-      <div class="config-row" style="align-items:flex-end;gap:8px;flex-wrap:wrap">
-        <label style="display:flex;flex-direction:column;font-size:12px">
-          Email expéditeur
-          <input type="text" id="app-email" placeholder="ex : contact@boursorama.fr" style="padding:6px;min-width:220px">
-        </label>
-        <label style="display:flex;flex-direction:column;font-size:12px">
-          Libellé correct
-          <input type="text" id="app-label" placeholder="ex : Bourse" style="padding:6px">
-        </label>
-        <button class="btn small" id="btn-app-corriger">🧠 Enseigner</button>
-      </div>
-      <div id="app-liste" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
-    </details>
-  </section>
-
-  <!-- NOTIFICATIONS -->
-  <section class="panel" id="sec-notifs">
-    <h2>🔔 Notifications <span class="badge-count" id="notifs-badge">0</span></h2>
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-      <button class="btn small" id="btn-notifs-activer">📱 Activer les notifications</button>
-      <span style="font-size:12px;color:var(--muted)">
-        Notifié quand un mail est classé dans une règle avec 🔔 (ex : Travail, Opportunité).
-      </span>
-    </div>
-    <div id="notifs-liste" style="font-size:13px;max-height:200px;overflow-y:auto"></div>
-  </section>
-
-  </div><!-- /page-imap -->
+        <div class="row" style="margin-top:10px">
+          <label style="margin:0"><input type="checkbox" id="act-label" checked style="width:auto"> 🏷 Libellé</label>
+          <label style="margin:0"><input type="checkbox" id="act-lu" style="width:auto"> 👁 Marquer lu</label>
+          <label style="margin:0"><input type="checkbox" id="act-notif" style="width:auto"> 🔔 Notifier</label>
+          <label style="margin:0"><input type="checkbox" id="act-archive" style="width:auto"> 📦 Archiver</label>
+          <label style="margin:0"><input type="checkbox" id="act-supprimer" style="width:auto"> 🗑 Supprimer</label>
+        </div>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn primary small" id="btn-flt-add">➕ Ajouter</button>
+          <button class="btn small" id="btn-flt-appliquer">⚡ Appliquer maintenant</button>
+          <button class="btn small" id="btn-flt-libelles">🏷 Créer les libellés dans Gmail</button>
+        </div>
+      </details>
+      <details style="border:var(--border);padding:10px 12px;margin-top:10px">
+        <summary style="cursor:pointer;font-weight:700">🧠 Apprentissage — corriger un classement</summary>
+        <div class="row" style="align-items:flex-end;margin-top:10px">
+          <div style="flex:1;min-width:200px"><label>Email expéditeur</label><input id="app-email" placeholder="ex : contact@exemple.fr"></div>
+          <div><label>Libellé correct</label><input id="app-label" placeholder="ex : Bourse"></div>
+          <button class="btn small" id="btn-app-corriger">🧠 Enseigner</button>
+        </div>
+        <div id="app-liste" style="margin-top:10px"></div>
+      </details>
+    </section>
+    <section class="panel">
+      <h2>🔔 Notifications <span class="badge-count" id="notifs-badge">0</span></h2>
+      <div id="notifs-liste"></div>
+    </section>
+  </div>
 
   <!-- ============================================================
-       PAGE 7 : PROFIL & CV
+       PAGE : PROFIL
        ============================================================ -->
   <div class="page" id="page-profil">
-
-  <!-- INFORMATIONS CANDIDAT -->
-  <section class="panel">
-    <h2>👤 Informations du profil</h2>
-    <p style="font-size:12px;color:var(--muted);margin:-4px 0 12px">
-      Ces informations sont insérées automatiquement dans chaque lettre envoyée
-      (nom, ville, pays, téléphone, diplôme).
-    </p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Nom complet
-        <input type="text" id="cfg-nom"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Téléphone
-        <input type="text" id="cfg-tel"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Email
-        <input type="email" id="cfg-email"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Ville
-        <input type="text" id="cfg-ville"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Pays
-        <input type="text" id="cfg-pays" list="cfg-pays-liste" placeholder="Côte d'Ivoire"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <datalist id="cfg-pays-liste">
-        <option value="Côte d'Ivoire"></option>
-        <option value="Sénégal"></option>
-        <option value="Burkina Faso"></option>
-        <option value="Mali"></option>
-        <option value="Bénin"></option>
-        <option value="Togo"></option>
-        <option value="Guinée"></option>
-        <option value="Cameroun"></option>
-        <option value="France"></option>
-      </datalist>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Diplôme
-        <input type="text" id="cfg-diplome"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Spécialité
-        <input type="text" id="cfg-spec"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-    </div>
-    <div class="config-row">
-      <label>
-        Template par défaut :
-        <select id="cfg-template"></select>
-      </label>
-      <button class="btn primary small" id="btn-save-config">💾 Enregistrer le profil</button>
-      <button class="btn small" id="btn-reinit-profil" title="Restaurer les valeurs d'origine">↩️ Valeurs d'origine</button>
-    </div>
-    <div class="signature-preview" id="cfg-apercu-wrap">
-      <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Signature générée</span>
-      <span id="cfg-apercu" style="font-size:13px;font-family:var(--mono,monospace)">—</span>
-      <span style="font-size:11px;color:var(--muted)">apparait en bas de chaque lettre</span>
-    </div>
-  </section>
-
-  </div><!-- /page-profil -->
+    <section class="panel">
+      <h2>👤 Informations du profil</h2>
+      <p class="help">Insérées automatiquement dans chaque lettre ({nom}, {email}, {ville}…).</p>
+      <div class="grid">
+        <div><label>Nom complet</label><input type="text" id="cfg-nom"></div>
+        <div><label>Téléphone</label><input type="text" id="cfg-tel" placeholder="+225 00 00 00 00 00"></div>
+        <div><label>Email</label><input type="email" id="cfg-email"></div>
+        <div><label>Ville</label><input type="text" id="cfg-ville"></div>
+        <div><label>Pays</label><input type="text" id="cfg-pays" placeholder="Côte d'Ivoire"></div>
+        <div><label>Diplôme</label><input type="text" id="cfg-diplome"></div>
+        <div><label>Spécialité</label><input type="text" id="cfg-spec"></div>
+        <div><label>Template par défaut</label><select id="cfg-template"></select></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="btn-save-config">💾 Enregistrer le profil</button>
+      </div>
+    </section>
+  </div>
 
   <!-- ============================================================
-       PAGE 8 : PARAMÈTRES & MAINTENANCE
+       PAGE : ASSISTANT IA (chat)
+       ============================================================ -->
+  <div class="page" id="page-chat">
+    <section class="panel">
+      <h2>💬 Assistant IA</h2>
+      <p class="help">Demande ce que tu veux faire : résumer tes derniers emails, classer le courrier,
+        rédiger un mail à quelqu'un, conseiller sur une candidature…</p>
+      <div id="chat-log" style="border:var(--border);padding:12px;min-height:280px;max-height:420px;
+           overflow-y:auto;margin:12px 0;display:flex;flex-direction:column;gap:10px">
+        <div class="help">Exemples : « Résume mes derniers emails » · « Classe mon courrier » ·
+          « Écris un mail à rh@entreprise.com pour relancer ma candidature »</div>
+      </div>
+      <div class="row">
+        <input type="text" id="chat-input" placeholder="Écris ta demande…" style="flex:1"
+               onkeydown="if(event.key==='Enter'){envoyerChat();}">
+        <button class="btn primary" id="btn-chat-envoyer" onclick="envoyerChat()">➤ Envoyer</button>
+        <button class="btn small" onclick="document.getElementById('chat-log').innerHTML='';">🗑 Effacer</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================
+       PAGE : HISTORIQUE
+       ============================================================ -->
+  <div class="page" id="page-historique">
+    <section class="panel">
+      <h2>🕓 Historique</h2>
+      <p class="help">Chaque action (suppression, modification de profil…) est annulable ici.</p>
+      <div id="hist-liste" style="margin:14px 0"></div>
+      <button class="btn danger small" id="btn-hist-vider">🗑 Vider l'historique</button>
+    </section>
+  </div>
+
+  <!-- ============================================================
+       PAGE : AGENT IA
+       ============================================================ -->
+  <div class="page" id="page-ia">
+    <section class="panel">
+      <h2>🤖 Agent IA</h2>
+      <div id="ia-liste" style="margin:14px 0"></div>
+      <button class="btn small" id="btn-ia-reload">🔄 Recharger le catalogue</button>
+    </section>
+  </div>
+
+  <!-- ============================================================
+       PAGE : PARAMÈTRES
        ============================================================ -->
   <div class="page" id="page-params">
-
-  <!-- PARAMÈTRES -->
-  <section class="panel" id="sec-params">
-    <h2>⚙️ Paramètres d'envoi</h2>
-    <div class="config-row">
-      <label>
-        Délai anti-spam :
-        <input type="number" id="cfg-delai" min="5" max="300" value="40">
-        <span style="font-size:12px;color:var(--muted)">s</span>
-      </label>
-      <label>
-        <input type="checkbox" id="cfg-delai-alea"> 🎲 Aléatoire (35-55s)
-      </label>
-      <span id="delai-info" style="font-size:11px;color:var(--muted)"></span>
-      <label>
-        Max / heure :
-        <input type="number" id="cfg-maxh" min="1" max="500" value="100">
-      </label>
-    </div>
-  </section>
-
-  <!-- MAINTENANCE / SANTÉ -->
-  <!-- NOTICE D'UTILISATION -->
-  <section class="panel" id="sec-notice">
-    <h2>📖 Notice d'utilisation des outils</h2>
-    <p style="font-size:12px;color:var(--muted);margin:-4px 0 12px">
-      Guide rapide de chaque outil de l'application. <b>Important :</b> les données
-      préinstallées (profil, compte, entreprises) sont <b>fictives</b> et servent
-      uniquement de démonstration — remplacez-les par vos informations réelles avant
-      tout envoi.
-    </p>
-    <div style="display:grid;gap:10px;font-size:13px">
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">1. 👤 Profil — vos informations personnelles</summary>
-        <p style="margin-top:8px">Remplacez le profil de démonstration par vos vraies informations : nom,
-        téléphone, e-mail, ville, diplôme et spécialité. Ces champs alimentent les
-        messages ({nom}, {email}, {ville}…) et sont visibles par les destinataires.
-        <b>Sans un profil correct, vos candidatures ne peuvent pas aboutir.</b></p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">2. 📧 Comptes Gmail — l'expéditeur des messages</summary>
-        <p style="margin-top:8px">Ajoutez votre <b>vrai compte Gmail</b> (l'adresse d'envoi) et son mot de passe
-        d'application (16 caractères, généré sur
-        <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a>).
-        Le compte préinstallé « compte.demo@exemple.com » est <b>fictif et inactif</b> :
-        il sert uniquement d'exemple et ne peut rien envoyer. Activez-le seulement après
-        avoir mis votre vrai compte.</p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">3. 🏢 Tableau de bord — les entreprises cibles</summary>
-        <p style="margin-top:8px">Les entreprises préinstallées sont <b>toutes fictives</b> (marquées « [Démo] »).
-        Supprimez-les (case à cocher → Supprimer) puis ajoutez vos vraies cibles : nom,
-        e-mail de recrutement, catégorie et — très important — un <b>contexte personnalisé</b>
-        qui explique pourquoi vous contactez cette entreprise précisément.</p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">4. 📝 Mes messages — les modèles de lettres</summary>
-        <p style="margin-top:8px">Chaque modèle contient des variables {entreprise}, {contexte}, {nom}…
-        remplies automatiquement. Vous pouvez créer, modifier, dupliquer et supprimer vos
-        propres modèles. Choisissez le modèle par défaut dans les Paramètres d'envoi.</p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">5. 👥 Mes groupes — envois ciblés</summary>
-        <p style="margin-top:8px">Regroupez plusieurs entreprises (par secteur, par zone…) pour leur envoyer
-        le même modèle en un clic, avec le délai anti-spam appliqué entre chaque message.</p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">6. ✂️ Envoi express — un message à la fois</summary>
-        <p style="margin-top:8px">Pour un envoi unique et soigné : choisissez l'entreprise, le modèle, vérifiez
-        l'aperçu, joignez votre CV, puis envoyez. Idéal pour les candidatures importantes.</p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">7. ⚙️ Paramètres d'envoi — anti-spam</summary>
-        <p style="margin-top:8px">Délai entre messages (40 s par défaut, aléatoire 35–55 s conseillé),
-        maximum par heure (100), tentatives SMTP. Ces protections évitent que Gmail ne bloque
-        votre compte pour spam. <b>Ne les désactivez pas.</b></p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">8. 📨 Réponses & filtres — suivi automatique</summary>
-        <p style="margin-top:8px">L'app vérifie votre boîte via IMAP pour détecter les réponses, classe les
-        e-mails (étiquettes, archive, marque comme lu) selon des règles configurables, et
-        affiche les notifications quand une entreprise répond.</p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">9. 🕓 Historique — tout est annulable</summary>
-        <p style="margin-top:8px">Chaque action (suppression d'entreprise, modification de profil…) est
-        enregistrée et peut être annulée depuis la page Historique.</p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">10. 🛠️ Maintenance — sauvegarde et dépannage</summary>
-        <p style="margin-top:8px">« Actualiser le back-end » recharge les données sans perdre la session ;
-        « Sauvegarde JSON » exporte toutes vos données ; « Importer JSON » les restaure ;
-        « Réinitialiser le log » vide le journal des envois (définitif).</p>
-      </details>
-      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
-        <summary style="cursor:pointer;font-weight:700">⚠️ Rappels importants</summary>
-        <ul style="margin:8px 0 0 18px">
-          <li>Les données préinstallées sont fictives : <b>aucun vrai e-mail ne peut partir</b> tant que vous n'avez pas configuré votre vrai compte Gmail.</li>
-          <li>Utilisez toujours un mot de passe d'application Gmail (jamais votre mot de passe principal).</li>
-          <li>Respectez la loi et les règles anti-spam : n'envoyez qu'à des entreprises pour lesquelles vous avez une candidature légitime.</li>
-          <li>Vos données restent sur votre ordinateur (base locale chiffrée).</li>
-        </ul>
-      </details>
-    </div>
-  </section>
-
-  <section class="panel" id="sec-maintenance">
-    <h2>🛠️ Maintenance & santé de l'application</h2>
-    <p style="font-size:12px;color:var(--muted);margin:-4px 0 12px">
-      Si l'application ralentit ou se comporte bizarrement, utilise ces outils :
-      ils rechargent le back-end sans redémarrer, et ne touchent jamais à un envoi en cours.
-    </p>
-    <div class="config-row">
-      <button class="btn primary small" id="btn-refresh-backend-2"
-              title="Recharger le back-end (en cas de ralentissement ou de bug)">🔄 Actualiser le back-end</button>
-      <button class="btn small danger" id="btn-reset-log">🗑️ Réinitialiser le log</button>
-      <button class="btn small" id="btn-import-json">⬆️ Importer JSON</button>
-      <input type="file" id="import-json-input" aria-label="Fichier JSON a importer" accept=".json" hidden>
-      <a class="btn small" href="/api/export-json">💾 Sauvegarde JSON</a>
-    </div>
-  </section>
-
-  </div><!-- /page-params -->
+    <section class="panel">
+      <h2>⚙ Paramètres d'envoi</h2>
+      <div class="row">
+        <div><label>Délai anti-spam (s)</label><input type="number" id="cfg-delai" min="5" max="300" value="40" style="width:100px"></div>
+        <label style="margin:0 0 10px"><input type="checkbox" id="cfg-delai-alea" style="width:auto"> 🎲 Aléatoire (35-55 s)</label>
+        <div><label>Max / heure</label><input type="number" id="cfg-maxh" min="1" max="500" value="100" style="width:100px"></div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>🛠 Maintenance & sauvegardes</h2>
+      <div class="row">
+        <button class="btn danger small" id="btn-reset-log">🗑 Réinitialiser le journal</button>
+        <button class="btn small" id="btn-import-json">⬆ Importer JSON</button>
+        <input type="file" id="import-json-input" accept=".json" hidden>
+        <a class="btn small" href="/api/export-json">💾 Sauvegarde JSON</a>
+        <a class="btn small" href="/api/export-excel">⬇ Export Excel</a>
+        <a class="btn small" href="/api/export-csv">⬇ Export CSV</a>
+      </div>
+      <p class="help" style="margin-top:10px">Le journal des envois est remis à zéro définitivement
+        (une sauvegarde <code>.backup.json</code> est créée avant).</p>
+    </section>
+  </div>
 
 </main>
-</div><!-- /content -->
-</div><!-- /layout -->
 
-<!-- ===== PIED DE PAGE ===== -->
 <footer class="app-footer">
   <a href="/cv">Mon CV</a>
   <a href="/suivi">Suivi des envois</a>
   <span class="sp"></span>
   <a href="/cgu">CGU</a>
-  <a href="/rgpd">RGPD</a>
-  <span class="info">Candimail r0.0.1 — licence MIT</span>
-  <span class="sp"></span>
-  <span class="copyright">{{ COPYRIGHT }}</span>
+  <a href="/rgpd">Confidentialité</a>
+  <span class="copyright">© {{ annee }} — Candimail · Licence MIT · {{ COPYRIGHT }}</span>
 </footer>
 
-<!-- MODAL APERÇU -->
-<div class="modal-overlay" id="modal">
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<!-- MODALE GÉNÉRIQUE -->
+<div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-head">
-      <h3 id="modal-title">✏️ Aperçu avant envoi</h3>
-      <button class="modal-close" id="modal-close">✕</button>
+      <h3 id="modal-title">—</h3>
+      <button class="btn small" data-action="modal-close">✖</button>
     </div>
-    <div class="modal-body">
-      <label>Destinataire</label>
-      <input type="text" id="modal-dest" aria-label="Destinataire" readonly style="background:#EFE7D4">
-      <label>Objet</label>
-      <input type="text" id="modal-subject" aria-label="Objet du message">
-      <label>Corps du message</label>
-      <textarea id="modal-body" aria-label="Corps du message"></textarea>
-    </div>
+    <div class="modal-body" id="modal-body"></div>
     <div class="modal-foot">
-      <span class="info" id="modal-info"></span>
-      <button class="btn" id="modal-cancel">Annuler</button>
-      <button class="btn primary" id="modal-send">📤 Envoyer</button>
+      <button class="btn" data-action="modal-close">Annuler</button>
+      <button class="btn primary" id="modal-ok">OK</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL AIDE GMAIL -->
-<div class="modal-overlay" id="help-modal">
-  <div class="modal" style="max-width:680px">
-    <div class="modal-head">
-      <h3>🔑 Mot de passe d'application Gmail</h3>
-      <button class="modal-close" id="help-close">✕</button>
-    </div>
-    <div class="modal-body" style="line-height:1.65;font-size:14px">
-      <div style="padding:14px;background:#FCEFC2;border-left:4px solid #C98F0D;
-                  border-radius:6px;margin-bottom:18px">
-        <strong>⚠️ Important :</strong> il faut un <strong>mot de passe d'application</strong>,
-        pas ton mot de passe Gmail habituel.
-      </div>
-
-      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px">
-        Étape 1 — Activer la validation en deux étapes
-      </h4>
-      <ol style="padding-left:20px;margin-bottom:16px">
-        <li>Va sur <a href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer"
-            style="color:var(--accent)">myaccount.google.com/security</a></li>
-        <li>Clique sur <strong>Validation en deux étapes</strong></li>
-        <li>Suis les instructions (SMS ou appli Authenticator)</li>
-      </ol>
-
-      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px">
-        Étape 2 — Générer un mot de passe d'application
-      </h4>
-      <ol style="padding-left:20px;margin-bottom:16px">
-        <li>Va sur <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer"
-            style="color:var(--accent)">myaccount.google.com/apppasswords</a></li>
-        <li>Dans « Nom de l'application », tape <strong>Candimail</strong></li>
-        <li>Clique sur <strong>Créer</strong></li>
-        <li>Google affiche un mot de passe de 16 caractères :
-          <code style="background:#EFE7D4;padding:2px 6px;border-radius:4px">abcd efgh ijkl mnop</code></li>
-      </ol>
-
-      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px">
-        Étape 3 — Colle-le dans l'application
-      </h4>
-      <p style="margin-bottom:16px">
-        Copie ce mot de passe et colle-le dans le champ « mot de passe d'application ».
-        Clique ensuite sur <strong>🧪 Tester</strong> pour vérifier.
-      </p>
-
-      <div style="padding:14px;background:#F2E7CE;border-left:4px solid var(--accent);
-                  border-radius:6px">
-        <strong>💡 Astuce :</strong> tu peux ajouter plusieurs comptes Gmail. Ils sont
-        utilisés en rotation automatique à chaque envoi.
-      </div>
-    </div>
-    <div class="modal-foot">
-      <a class="btn primary" href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer">
-        🔗 Ouvrir Google
-      </a>
-      <button class="btn" id="help-close-btn">Fermer</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL GROUPE (création/édition) -->
-<div class="modal-overlay" id="grp-modal">
-  <div class="modal" style="max-width:600px">
-    <div class="modal-head">
-      <h3 id="grp-modal-title">👥 Nouveau groupe</h3>
-      <button class="modal-close" id="grp-modal-close">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="grp-id">
-      <label>Nom du groupe *</label>
-      <input type="text" id="grp-nom" aria-label="Nom du groupe" placeholder="Ex : Parents 6ème A">
-      <label>Description (optionnel)</label>
-      <input type="text" id="grp-desc" aria-label="Description du groupe" placeholder="Ex : Groupe WhatsApp parents">
-      <label>Emails des membres * (un par ligne ou séparés par virgule)</label>
-      <textarea id="grp-emails" aria-label="Adresses e-mail du groupe" rows="6"
-                placeholder="parent1@gmail.com&#10;parent2@gmail.com&#10;parent3@gmail.com"></textarea>
-      <div id="grp-email-count" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
-    </div>
-    <div class="modal-foot">
-      <span class="info" id="grp-modal-info"></span>
-      <button class="btn" id="grp-modal-cancel">Annuler</button>
-      <button class="btn primary" id="grp-modal-save">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL ENVOI GROUPE -->
-<div class="modal-overlay" id="grp-send-modal">
-  <div class="modal" style="max-width:720px">
-    <div class="modal-head">
-      <h3 id="grp-send-title">📤 Envoyer au groupe</h3>
-      <button class="modal-close" id="grp-send-close">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="grp-send-id">
-      <label>Template (optionnel)</label>
-      <select id="grp-send-template" aria-label="Template d'envoi" style="width:100%;padding:10px 12px;
-              border:1px solid var(--border);border-radius:6px;
-              font-size:13px;font-family:inherit;margin-bottom:12px">
-        <option value="">— Message libre —</option>
-      </select>
-
-      <label>Objet *</label>
-      <input type="text" id="grp-send-subject" aria-label="Objet de l'envoi" placeholder="Ex : Réunion parents jeudi 20h">
-
-      <label>Message *</label>
-      <textarea id="grp-send-body" aria-label="Corps de l'envoi" rows="10"
-                placeholder="Bonjour à tous,&#10;&#10;Je vous informe que…"></textarea>
-
-      <div style="margin-top:16px;padding:12px 14px;background:#FBF6EA;border-radius:8px;
-                  display:flex;flex-direction:column;gap:10px">
-        <strong style="font-size:12px;color:var(--muted);text-transform:uppercase;
-                       letter-spacing:.05em">Options d'envoi</strong>
-
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="radio" name="grp-mode" value="individuel" checked>
-          📧 <strong>Individuel</strong> — un email séparé pour chacun
-          <span style="color:var(--muted);font-size:11px">(personne ne voit personne)</span>
-        </label>
-
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="radio" name="grp-mode" value="groupe">
-          👥 <strong>Groupé (Cci)</strong> — 1 seul email en copie cachée
-          <span style="color:var(--muted);font-size:11px">(rapide, invisible)</span>
-        </label>
-
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;
-                      padding-top:8px;border-top:1px solid var(--border)">
-          <input type="checkbox" id="grp-send-pj">
-          📎 <strong>Joindre les pièces jointes actives</strong>
-        </label>
-      </div>
-
-      <div id="grp-send-info"
-           style="margin-top:12px;font-size:12px;color:var(--muted)"></div>
-    </div>
-    <div class="modal-foot">
-      <span class="info" id="grp-send-status"></span>
-      <button class="btn" id="grp-send-cancel">Annuler</button>
-      <button class="btn primary" id="grp-send-go">📤 Envoyer</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL TEMPLATE -->
-<div class="modal-overlay" id="tpl-modal">
-  <div class="modal" style="max-width:800px">
-    <div class="modal-head">
-      <h3 id="tpl-modal-title">📝 Nouveau message</h3>
-      <button class="modal-close" id="tpl-modal-close">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="tpl-id">
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
-        <div>
-          <label>Nom *</label>
-          <input type="text" id="tpl-nom" aria-label="Nom du template" placeholder="Ex : Candidature stage">
-        </div>
-        <div>
-          <label>Catégorie</label>
-          <select id="tpl-categorie" aria-label="Categorie du template" style="width:100%;padding:10px 12px;
-                  border:1px solid var(--border);border-radius:6px;
-                  font-size:13px;font-family:inherit">
-            <option value="candidature">💼 Candidature</option>
-            <option value="parents">👨‍👩‍👧 Parents</option>
-            <option value="collegues">👥 Collègues</option>
-            <option value="amis">🎉 Amis</option>
-            <option value="autre">📌 Autre</option>
-          </select>
-        </div>
-      </div>
-      <label>Objet *</label>
-      <input type="text" id="tpl-objet" aria-label="Objet du template" placeholder="Ex : Demande de stage — {entreprise}">
-      <label>Corps du message *</label>
-      <textarea id="tpl-corps" aria-label="Corps du template" rows="14" style="min-height:280px"
-                placeholder="Bonjour,&#10;&#10;{contexte}&#10;&#10;Cordialement,&#10;{nom}"></textarea>
-
-      <div style="margin-top:12px;padding:12px 14px;background:#F2E7CE;border-radius:8px;
-                  font-size:12px;line-height:1.6;color:#143E77">
-        <strong>💡 Variables :</strong>
-        <code>{contexte}</code> <code>{entreprise}</code> <code>{nom}</code>
-        <code>{tel}</code> <code>{email}</code> <code>{ville}</code>
-        <code>{diplome}</code> <code>{spec}</code>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <span class="info" id="tpl-modal-info"></span>
-      <button class="btn" id="tpl-modal-cancel">Annuler</button>
-      <button class="btn primary" id="tpl-modal-save">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL ENTREPRISE (ajout / édition) -->
-<div class="modal-overlay" id="company-modal">
-  <div class="modal" style="max-width:560px">
-    <div class="modal-head">
-      <h3 id="company-modal-title">➕ Nouvelle entreprise</h3>
-      <button class="modal-close" id="company-modal-close">✕</button>
-    </div>    <div class="modal-body">
-      <label>Nom de l'entreprise</label>
-      <input type="text" id="company-f-name" aria-label="Nom de l'entreprise" placeholder="Ex : COLAS Afrique">
-      <label>Email destinataire</label>
-      <input type="text" id="company-f-email" aria-label="Adresse e-mail de l'entreprise" placeholder="recrutement@entreprise.com">
-      <label>Catégorie</label>
-      <select id="company-f-cat" aria-label="Categorie de l'entreprise">
-        <option value="pme">PME</option>
-        <option value="grands">Grands groupes</option>
-        <option value="port">Port / Maritime</option>
-      </select>
-      <label>Contexte (inséré dans le message)</label>
-      <textarea id="company-f-context" aria-label="Contexte personnalise" rows="4"
-                placeholder="Pourquoi cette entreprise t'intéresse..."></textarea>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" id="company-cancel">Annuler</button>
-      <button class="btn primary" id="company-save">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL FILTRE (ajout / édition) -->
-<div class="modal-overlay" id="filter-modal">
-  <div class="modal" style="max-width:560px">
-    <div class="modal-head">
-      <h3 id="filter-modal-title">✏️ Modifier la règle</h3>
-      <button class="modal-close" id="filter-modal-close">✕</button>
-    </div>
-    <div class="modal-body">
-      <label>Nom de la règle</label>
-      <input type="text" id="filter-f-name" aria-label="Nom du filtre">
-      <label>Type de règle</label>
-      <select id="filter-f-type" aria-label="Type de filtre">
-        <option value="sender">Adresse de l'expéditeur</option>
-        <option value="subject">Objet du mail</option>
-        <option value="domain">Domaine de l'expéditeur</option>
-      </select>
-      <label>Valeur (adresse, domaine ou mot-clé)</label>
-      <input type="text" id="filter-f-value" aria-label="Valeur du filtre">
-      <label>Libellé Gmail à appliquer</label>
-      <input type="text" id="filter-f-label" aria-label="Libelle Gmail a appliquer">
-    </div>
-    <div class="modal-foot">
-      <button class="btn" id="filter-cancel">Annuler</button>
-      <button class="btn primary" id="filter-save">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-/* ENTREPRISES — Données de DÉMONSTRATION uniquement.
-   Aucune référence à une entreprise ou une adresse e-mail réelle.
-   Ces exemples servent de modèle : remplacez-les par vos propres cibles. */
-let COMPANIES = [
-  { cat:'grands', name:'[Démo] Conglomérat BTP Alpha', email:'exemple.grands1@exemple.com',
-    context:`Exemple de contexte pour un grand groupe : décrivez ici ce qui vous attire dans cette entreprise (grands projets d'infrastructure, expertise internationale, etc.).` },
-  { cat:'grands', name:'[Démo] Infrastructures Beta SA', email:'exemple.grands2@exemple.com',
-    context:`Exemple de contexte : mentionnez un projet précis de l'entreprise et votre proximité géographique avec son chantier.` },
-  { cat:'grands', name:'[Démo] Groupe Gamma Travaux', email:'exemple.grands3@exemple.com',
-    context:`Exemple de contexte : soulignez la réputation du groupe en matière de formation des jeunes ingénieurs.` },
-  { cat:'grands', name:'[Démo] Routes & Ouvrages Delta', email:'exemple.grands4@exemple.com',
-    context:`Exemple de contexte : référencez le domaine d'activité (routes, ouvrages d'art) qui motive votre candidature.` },
-  { cat:'grands', name:'[Démo] Bàtiment Epsilon', email:'exemple.grands5@exemple.com',
-    context:`Exemple de contexte : exprimez votre intérêt pour les standards techniques du groupe.` },
-  { cat:'grands', name:'[Démo] Holding Zeta Construction', email:'exemple.grands6@exemple.com',
-    context:`Exemple de contexte : montrez que vous suivez l'actualité de l'entreprise.` },
-  { cat:'grands', name:'[Démo] Voiries et Assainissement Eta', email:'exemple.grands7@exemple.com',
-    context:`Exemple de contexte : citez le secteur précis (voiries, assainissement) qui vous intéresse.` },
-  { cat:'grands', name:'[Démo] Ingénierie Thêta', email:'exemple.grands8@exemple.com',
-    context:`Exemple de contexte : dynamisme de l'entreprise dans le BTP régional.` },
-  { cat:'pme', name:'[Démo] PME Construct 1', email:'exemple.pme1@exemple.com',
-    context:`Exemple de contexte pour une PME : création récente, projets locaux, polyvalence attendue d'un stagiaire.` },
-  { cat:'pme', name:'[Démo] PME Travaux 2', email:'exemple.pme2@exemple.com',
-    context:`Exemple de contexte : domaine technique qui vous intéresse (hydraulique, VRD, etc.).` },
-  { cat:'pme', name:'[Démo] PME Ingénierie 3', email:'exemple.pme3@exemple.com',
-    context:`Exemple de contexte : orientation de carrière que l'entreprise peut vous offrir.` },
-  { cat:'pme', name:'[Démo] PME Bàtiment 4', email:'exemple.pme4@exemple.com',
-    context:`Exemple de contexte : réputation de l'entreprise dans le bâtiment local.` },
-  { cat:'pme', name:'[Démo] PME Matériaux 5', email:'exemple.pme5@exemple.com',
-    context:`Exemple de contexte : double activité (génie civil + négoce) qui offre une vision complète du secteur.` },
-  { cat:'pme', name:'[Démo] PME Suivi Chantier 6', email:'exemple.pme6@exemple.com',
-    context:`Exemple de contexte : stage de perfectionnement en direction technique, suivi de chantiers, contrôle qualité.` },
-  { cat:'pme', name:'[Démo] PME Électrotech 7', email:'exemple.pme7@exemple.com',
-    context:`Exemple de contexte : offre de stage correspondant à votre niveau de formation.` },
-  { cat:'pme', name:'[Démo] PME Commerce 8', email:'exemple.pme8@exemple.com',
-    context:`Exemple de contexte : dimension technico-commerciale du BTP que vous souhaitez découvrir.` },
-  { cat:'pme', name:'[Démo] PME Internationale 9', email:'exemple.pme9@exemple.com',
-    context:`Exemple de contexte : structure de taille intermédiaire offrant une formation polyvalente.` },
-  { cat:'pme', name:'[Démo] PME Architecture 10', email:'exemple.pme10@exemple.com',
-    context:`Exemple de contexte : double approche architecture + génie civil.` },
-  { cat:'pme', name:'[Démo] PME Terrains 11', email:'exemple.pme11@exemple.com',
-    context:`Exemple de contexte : capacité à intervenir sur des terrains complexes.` },
-  { cat:'pme', name:'[Démo] PME Nationale 12', email:'exemple.pme12@exemple.com',
-    context:`Exemple de contexte : couverture nationale, expérience du secteur.` },
-  { cat:'pme', name:'[Démo] PME Routière 13', email:'exemple.pme13@exemple.com',
-    context:`Exemple de contexte : projets d'asphaltage et de réhabilitation routière.` },
-  { cat:'pme', name:'[Démo] PME Croissance 14', email:'exemple.pme14@exemple.com',
-    context:`Exemple de contexte : entreprise régionale en pleine croissance.` },
-  { cat:'pme', name:'[Démo] PME Multi-régions 15', email:'exemple.pme15@exemple.com',
-    context:`Exemple de contexte : construction + travaux publics, présence multi-régions.` },
-  { cat:'port', name:'[Démo] Port & Logistique 1', email:'exemple.port1@exemple.com',
-    context:`Exemple de contexte pour un acteur portuaire : importance stratégique du port dans l'économie régionale.` },
-  { cat:'port', name:'[Démo] Port — Direction Stratégie', email:'exemple.port2@exemple.com',
-    context:`Exemple de contexte : prise de contact directe avec un responsable.` },
-  { cat:'port', name:'[Démo] Port — Partenariats PPP', email:'exemple.port3@exemple.com',
-    context:`Exemple de contexte : intérêt pour les partenariats public-privé dans les infrastructures portuaires.` },
-  { cat:'port', name:'[Démo] Entreprise Portuaire 2', email:'exemple.port4@exemple.com',
-    context:`Exemple de contexte : entreprise locale d'une ville portuaire en expansion.` },
-  { cat:'port', name:'[Démo] Groupe Agro-Port 3', email:'exemple.port5@exemple.com',
-    context:`Exemple de contexte : activités à la croisée du BTP et de la gestion industrielle.` },
-  { cat:'port', name:'[Démo] Transport & Logistique 4', email:'exemple.port6@exemple.com',
-    context:`Exemple de contexte : logistique comme prolongement du BTP.` },
-  { cat:'port', name:'[Démo] Laboratoire BTP 5', email:'exemple.port7@exemple.com',
-    context:`Exemple de contexte : contrôle qualité des matériaux et des ouvrages.` },
-  { cat:'port', name:'[Démo] Industrie Port 6', email:'exemple.port8@exemple.com',
-    context:`Exemple de contexte : industrie majeure présente dans la zone portuaire.` },
-];
-
-/* Recharge le back-end (bouton « Actualiser ») — resynchronise toutes les données */
-async function refreshBackend(btn) {
-  const label = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '…';
-  try {
-    const r = await fetch('/api/refresh-backend', { method: 'POST' });
-    const data = await r.json();
-    if (!data.ok) throw new Error(data.error || 'Erreur');
-    toast(`🔄 Back-end rechargé (${data.heure})`, 'ok');
-    // Tout re-synchroniser avec le serveur fraîchement rechargé
-    await Promise.all([loadConfig(), loadTemplates(), loadPieces(),
-                       loadGroupes(), loadIMAPStatus()]);
-    await refreshStatus();
-    await syncCompanies();
-  } catch (e) {
-    console.error(e);
-    toast('❌ Impossible de recharger le back-end', 'err');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = label;
-  }
-}
-
-/* CONFIG */
-async function loadConfig() {
-  try {
-    const r = await fetch('/api/config');
-    const cfg = await r.json();
-    const cand = cfg.candidat || {};
-    const params = cfg.parametres || {};
-    document.getElementById('cfg-nom').value      = cand.nom || '';
-    document.getElementById('cfg-tel').value      = cand.tel || '';
-    document.getElementById('cfg-email').value    = cand.email || '';
-    document.getElementById('cfg-ville').value    = cand.ville || '';
-    document.getElementById('cfg-pays').value    = cand.pays || '';
-    document.getElementById('cfg-diplome').value  = cand.diplome || '';
-    document.getElementById('cfg-spec').value     = cand.spec || '';
-
-    if (!params.delai_aleatoire) {
-      document.getElementById('cfg-delai').value = params.delai_secondes || 40;
-    }
-    document.getElementById('cfg-delai-alea').checked = !!params.delai_aleatoire;
-    document.getElementById('cfg-maxh').value = params.max_par_heure || 100;
-
-    updateHeaderSub();
-    updateSignaturePreview();
-    TEMPLATES_DISPO = cfg.templates_dispo || {};
-    renderComptes(cfg.comptes || []);
-  } catch (e) { console.error(e); }
-}
-
-function updateHeaderSub() {
-  const nom   = document.getElementById('cfg-nom').value.trim()   || 'Candidat';
-  const ville = document.getElementById('cfg-ville').value.trim() || '—';
-  const pays  = document.getElementById('cfg-pays').value.trim();
-  document.getElementById('header-sub').textContent =
-    pays ? `${nom} · ${ville}, ${pays}` : `${nom} · ${ville}`;
-}
-
-/* Aperçu live de la signature : montre l'effet du profil sur les lettres. */
-function updateSignaturePreview() {
-  const el = document.getElementById('cfg-apercu');
-  if (!el) return;
-  const nom   = document.getElementById('cfg-nom').value.trim();
-  const tel   = document.getElementById('cfg-tel').value.trim();
-  const ville = document.getElementById('cfg-ville').value.trim();
-  const pays  = document.getElementById('cfg-pays').value.trim() || 'Côte d\'Ivoire';
-  if (!nom && !ville) { el.textContent = '—'; return; }
-  const lieu = [ville, pays].filter(Boolean).join(', ');
-  el.textContent = [nom, tel, lieu].filter(Boolean).join(' · ');
-}
-
-async function saveCandidatConfig() {
-  const payload = {
-    candidat: {
-      nom:     document.getElementById('cfg-nom').value.trim(),
-      tel:     document.getElementById('cfg-tel').value.trim(),
-      email:   document.getElementById('cfg-email').value.trim(),
-      ville:   document.getElementById('cfg-ville').value.trim(),
-      pays:    document.getElementById('cfg-pays').value.trim(),
-      diplome: document.getElementById('cfg-diplome').value.trim(),
-      spec:    document.getElementById('cfg-spec').value.trim(),
-    },
-    parametres: {
-      template: document.getElementById('cfg-template').value,
-    }
-  };
-  try {
-    const r = await fetch('/api/config', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const data = await r.json();
-    if (data.ok) {
-      toast('Profil enregistré — les lettres utiliseront ces informations', 'ok');
-      updateHeaderSub();
-      updateSignaturePreview();
-      loadConfig();          // réaligne les champs sur la valeur réellement stockée
-    } else {
-      toast(data.error || 'Enregistrement impossible', 'err');
-    }
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-/* Restaure les valeurs d'origine du profil (modifiable ensuite / annulable). */
-function reinitialiserProfil() {
-  const D = {
-    'cfg-nom':     'Candidat Démo',
-    'cfg-tel':     '+000 00 00 00 00',
-    'cfg-email':   'candidat.demo@exemple.com',
-    'cfg-ville':   'Ma Ville',
-    'cfg-pays':    'Côte d\'Ivoire',
-    'cfg-diplome': 'Votre diplôme (personnaliser)',
-    'cfg-spec':    'Votre spécialité',
-  };
-  Object.entries(D).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (el) el.value = val;
-  });
-  updateHeaderSub();
-  updateSignaturePreview();
-  toast('Valeurs d\'origine restaurées — cliquez sur « Enregistrer le profil »', 'ok');
-}
-
-/* COMPTES */
-function renderComptes(comptes) {
-  const el = document.getElementById('comptes-list');
-  const actifs = comptes.filter(c => c.actif).length;
-  document.getElementById('comptes-count').textContent = `${actifs} actif(s)`;
-  if (!comptes.length) {
-    el.innerHTML = `<div class="empty-box">⚠️ Aucun compte Gmail configuré.</div>`;
-    return;
-  }
-  const tplOptions = Object.entries(TEMPLATES_DISPO)
-    .map(([id, t]) => `<option value="${escapeHtml(id)}">${escapeHtml(t.nom || id)}</option>`)
-    .join('');
-  el.innerHTML = comptes.map(c => `
-    <div class="compte-row ${c.actif ? 'active' : 'inactive'}">
-      <span style="font-size:18px">${c.actif ? '✅' : '⏸️'}</span>
-      <div style="flex:1;min-width:180px">
-        <div style="font-weight:700;font-size:13px">${escapeHtml(c.email)}
-          <span style="font-size:10px;font-weight:800;text-transform:uppercase;
-                color:${c.actif ? '#1E7A3C' : 'var(--muted)'}">${c.actif ? '• actif' : '• en pause'}</span>
-        </div>
-        <div style="font-size:11px;color:var(--muted)">
-          ${c.has_password
-            ? (c.devoiler
-              ? `🔑 <span class="compte-mdp" data-index="${c.index}" data-email="${escapeHtml(c.email)}"
-                   title="Cliquer pour afficher/masquer le mot de passe d'application (16 caractères)"
-                   style="cursor:pointer;user-select:all;font-family:Consolas,monospace;
-                          letter-spacing:1px;background:#F2E7CE;border:1px solid var(--border);
-                          padding:1px 6px;border-radius:4px;">••••••••••••••••</span>`
-              : '🔒 mot de passe enregistré (masqué)')
-            : '❌ mot de passe manquant'}
-        </div>
-      </div>
-      <select class="compte-tpl" data-index="${c.index}" title="Message utilisé par ce compte"
-              style="padding:6px 8px;font-size:12px;font-weight:600;border:2px solid var(--border);
-                     background:#fff;max-width:220px">
-        <option value="" ${!c.template ? 'selected' : ''}>📨 Message global</option>
-        ${tplOptions}
-      </select>
-      <button class="btn small" data-action="test-compte" data-email="${escapeHtml(c.email)}">🧪 Tester</button>
-      ${c.devoiler ? `<button class="btn small" data-action="reveal-compte" data-index="${c.index}" title="Révélation autorisée pour ce compte">👁️ Voir</button>` : ''}
-      <button class="btn small" data-action="toggle-compte" data-index="${c.index}">
-        ${c.actif ? '⏸️' : '▶️'}
-      </button>
-      <button class="btn small danger" data-action="delete-compte" data-index="${c.index}">🗑️</button>
-    </div>
-  `).join('');
-
-  Motion.cascade(el, ':scope > div');   // apparition en cascade
-  el.querySelectorAll('.compte-tpl').forEach(sel => {
-    sel.addEventListener('change', async () => {
-      const r = await fetch(`/api/comptes/${sel.dataset.index}/template`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ template: sel.value })
-      });
-      const d = await r.json();
-      if (d.ok) {
-        const label = sel.selectedOptions[0].textContent;
-        toast(`${label} pour ce compte`, 'ok');
-      } else toast(d.error || 'Erreur', 'err');
-    });
-  });
-
-  el.querySelectorAll('[data-action="test-compte"]').forEach(b => {
-    b.addEventListener('click', async () => {
-      const orig = b.textContent; b.textContent = '⏳'; b.disabled = true;
-      try {
-        const r = await fetch('/api/comptes/test', { method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ email: b.dataset.email })
-        });
-        const data = await r.json();
-        toast(data.message || data.error, data.ok ? 'ok' : 'err');
-      } catch (e) { toast('Erreur réseau', 'err'); }
-      b.textContent = orig; b.disabled = false;
-    });
-  });
-  el.querySelectorAll('[data-action="toggle-compte"]').forEach(b => {
-    b.addEventListener('click', async () => {
-      await fetch(`/api/comptes/${b.dataset.index}/toggle`, { method:'POST' });
-      await loadConfig(); await refreshStatus();
-    });
-  });
-  el.querySelectorAll('[data-action="delete-compte"]').forEach(b => {
-    b.addEventListener('click', async () => {
-      if (!confirm('Supprimer ce compte ?')) return;
-      await fetch(`/api/comptes/${b.dataset.index}`, { method:'DELETE' });
-      await loadConfig(); await refreshStatus();
-    });
-  });
-  el.querySelectorAll('[data-action="reveal-compte"]').forEach(b => {
-    b.addEventListener('click', () => afficherIdentifiantsOnglet(b));
-  });
-
-  // ── Mot de passe 16 car. affiché en ligne dans le dashboard (cliquer pour révéler) ──
-  el.querySelectorAll('.compte-mdp').forEach(s => {
-    s.addEventListener('click', async () => {
-      if (s.dataset.mdp) {                       // déjà chargé → basculer masqué/visible
-        s.textContent = s.textContent.startsWith('•') ? s.dataset.mdp : '•'.repeat(16);
-        return;
-      }
-      const old = s.textContent; s.textContent = '⏳';
-      try {
-        const d = await revelerMotDePasse(s.dataset.index);
-        if (!d.ok) { s.textContent = old; toast('❌ ' + (d.error || 'Erreur'), 'err'); return; }
-        s.dataset.mdp = d.password;
-        s.textContent = d.password;
-        s.title = d.longueur === 16
-          ? '✅ 16 caractères — mot de passe d\'application correct'
-          : `⚠️ ${d.longueur} caractères — ce n\'est pas un mot de passe d\'application`;
-        toast(d.longueur === 16 ? '✅ 16 caractères — format correct'
-                                : `⚠️ ${d.longueur} caractères`, d.longueur === 16 ? 'ok' : 'err');
-      } catch (e) { s.textContent = old; toast('❌ Erreur réseau', 'err'); }
-    });
-  });
-}
-
-// ── Révélation d'un mot de passe d'application (double contrôle serveur) ──
-// Le serveur exige (1) un opt-in `devoiler` sur le compte et (2) un nonce
-// anti-CSRF lié à la session. Le nonce n'est jamais renvoyé ailleurs.
-let _nonceCache = null, _nonceExpiry = 0;
-async function getNonce() {
-  const now = Date.now();
-  if (_nonceCache && now < _nonceExpiry) return _nonceCache;
-  const r = await fetch('/api/comptes/nonce', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }
-  });
-  const d = await r.json();
-  if (!d.ok || !d.nonce) return null;
-  _nonceCache = d.nonce;
-  _nonceExpiry = now + 10 * 60 * 1000;   // marge sur les 15 min serveur
-  return _nonceCache;
-}
-
-async function revelerMotDePasse(index) {
-  const nonce = await getNonce();
-  if (!nonce) return { ok: false, error: 'Session expirée — recharge la page' };
-  const r = await fetch(`/api/comptes/${index}/reveal`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nonce })
-  });
-  if (!r.ok) { _nonceCache = null; }        // nonce consommé → on en-demandera un autre
-  const d = await r.json();
-  if (!d.ok) _nonceCache = null;
-  return d;
-}
-
-// ── Ouvre les identifiants dans un NOUVEL ONGLET (vérification visuelle) ──
-async function afficherIdentifiantsOnglet(btn) {
-  const libelle = btn.textContent;
-  btn.disabled = true; btn.textContent = '⏳ Chargement…';
-  try {
-    const d = await revelerMotDePasse(btn.dataset.index);
-    if (!d.ok) { toast('❌ ' + (d.error || 'Erreur'), 'err'); return; }
-
-    const ok16 = d.longueur === 16;
-    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
-<title>Identifiants — ${d.email}</title>
-<style>
- body{font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;
-      justify-content:center;min-height:100vh;margin:0;background:#F2E7CE;}
- .box{background:#fff;border:3px solid #43161C;box-shadow:8px 8px 0 #43161C;
-      padding:30px 28px;width:min(460px,92vw);border-top:8px solid #1E5AA8;}
- h1{margin:0 0 4px;font-size:20px;text-transform:uppercase;}
- p.sub{margin:0 0 20px;font-size:12px;color:#7A6E5B;font-weight:600;}
- label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;margin:14px 0 4px;}
- .val{border:2px solid #43161C;padding:10px 12px;font-size:15px;background:#F2E7CE;
-      user-select:all;word-break:break-all;}
- .mdp{font-family:Consolas,monospace;font-size:18px;letter-spacing:3px;}
- .etat{margin:16px 0 0;font-size:13px;font-weight:700;}
- button{margin-top:18px;width:100%;padding:10px;font-weight:800;cursor:pointer;
-        background:#1E5AA8;color:#fff;border:2px solid #43161C;}
-</style></head><body><div class="box">
- <h1>🔑 Identifiants du compte</h1>
- <p class="sub">Vérification — mot de passe d'application Gmail</p>
- <label>Compte Gmail</label>
- <div class="val">${d.email}</div>
- <label>Mot de passe d'application</label>
- <div class="val mdp">${d.password}</div>
- <p class="etat">${ok16
-   ? '✅ 16 caractères — format correct'
-   : `⚠️ ${d.longueur} caractères — ce n'est pas un mot de passe d'application (il doit faire exactement 16 caractères)`}</p>
- <button onclick="window.close()">Fermer cet onglet</button>
-</div></body></html>`;
-
-    const win = window.open('', '_blank');
-    if (win) {
-      win.document.write(html);
-      win.document.close();
-    } else {
-      // Popup bloqué → repli sur le modal dans la page courante
-      afficherIdentifiants(d.email, d.password, d.longueur);
-    }
-  } catch (e) { toast('❌ Erreur réseau', 'err'); }
-  // Restauration garantie du bouton, même en cas d'erreur
-  btn.disabled = false; btn.textContent = libelle;
-}
-
-// ── Panneau de vérification des identifiants (Gmail + mot de passe 16 car.) ──
-function afficherIdentifiants(email, mdp, longueur) {
-  let ov = document.getElementById('ov-identifiants');
-  if (!ov) {
-    ov = document.createElement('div');
-    ov.id = 'ov-identifiants';
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);'
-      + 'display:flex;align-items:center;justify-content:center;z-index:9999;';
-    document.body.appendChild(ov);
-  }
-  const ok16 = (longueur === 16);
-  ov.innerHTML = `
-    <div style="background:#fff;border:3px solid #43161C;box-shadow:8px 8px 0 #43161C;
-                padding:26px 24px;width:min(420px,92vw);border-top:8px solid #1E5AA8;">
-      <h2 style="margin:0 0 4px;font-size:17px;text-transform:uppercase;">🔑 Identifiants du compte</h2>
-      <p style="margin:0 0 16px;font-size:12px;color:#7A6E5B;font-weight:600;">
-        Vérification — mot de passe d'application Gmail</p>
-      <label style="display:block;font-size:11px;font-weight:800;text-transform:uppercase;">Compte Gmail</label>
-      <div style="border:2px solid #43161C;padding:8px 10px;font-size:14px;margin:4px 0 12px;
-                  user-select:all;background:#F2E7CE;">${escapeHtml(email)}</div>
-      <label style="display:block;font-size:11px;font-weight:800;text-transform:uppercase;">
-        Mot de passe d'application (16 caractères)</label>
-      <div style="border:2px solid #43161C;padding:8px 10px;font-size:16px;letter-spacing:2px;
-                  margin:4px 0 8px;user-select:all;background:#F2E7CE;
-                  font-family:Consolas,monospace;word-break:break-all;">${escapeHtml(mdp)}</div>
-      <p style="margin:0 0 14px;font-size:12px;font-weight:700;">
-        ${ok16 ? '✅ 16 caractères — format correct'
-               : `⚠️ ${longueur} caractères — ce n\u2019est pas un mot de passe d\u2019application\n                     (il doit faire exactement 16 caractères)`.replace(/\n +/, ' ')}
-      </p>
-      <div style="display:flex;gap:8px;">
-        <button id="cop-mdp" style="flex:1;padding:10px;font-weight:800;cursor:pointer;
-                background:#1E5AA8;color:#fff;border:2px solid #43161C;">📋 Copier</button>
-        <button id="ferm-idf" style="flex:1;padding:10px;font-weight:800;cursor:pointer;
-                background:#fff;border:2px solid #43161C;">Fermer</button>
-      </div>
-    </div>`;
-  ov.querySelector('#ferm-idf').onclick = () => ov.remove();
-  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
-  ov.querySelector('#cop-mdp').onclick = async () => {
-    try { await navigator.clipboard.writeText(mdp); toast('📋 Mot de passe copié', 'ok'); }
-    catch (e) { toast('❌ Copie impossible', 'err'); }
-  };
-}
-
-async function addCompte() {
-  const email = document.getElementById('new-email').value.trim();
-  const password = document.getElementById('new-password').value.trim();
-  if (!email || !password) { toast('Email et mot de passe requis', 'err'); return; }
-  const btn = document.getElementById('btn-add-compte');
-  btn.disabled = true; btn.textContent = '⏳';
-  try {
-    const r = await fetch('/api/comptes', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ email, password })
-    });
-    const data = await r.json();
-    if (data.ok) {
-      toast(data.updated ? 'Mis à jour' : 'Ajouté', 'ok');
-      document.getElementById('new-email').value = '';
-      document.getElementById('new-password').value = '';
-      await loadConfig(); await refreshStatus();
-    } else toast(data.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-  btn.disabled = false; btn.textContent = '+ Ajouter';
-}
-
-/* PIÈCES */
-async function loadPieces() {
-  try {
-    const r = await fetch('/api/pieces');
-    const data = await r.json();
-    renderPieces(data.pieces || []);
-  } catch (e) { console.error(e); }
-}
-
-function renderPieces(pieces) {
-  const el = document.getElementById('pieces-list');
-  const actives = pieces.filter(p => p.actif).length;
-  document.getElementById('pieces-count').textContent = `${actives} active(s)`;
-  if (!pieces.length) {
-    el.innerHTML = `<div class="empty-box">⚠️ Aucune pièce jointe.</div>`;
-    return;
-  }
-  el.innerHTML = pieces.map(p => `
-    <div class="piece-item ${p.actif ? '' : 'inactive'}">
-      <input type="checkbox" ${p.actif ? 'checked' : ''}
-             data-action="toggle-piece" data-id="${escapeHtml(p.id)}"
-             style="width:18px;height:18px;accent-color:var(--ok);cursor:pointer">
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:13px">📄 ${escapeHtml(p.nom_original)}</div>
-        <div style="font-size:11px;color:var(--muted)">${p.taille_kb} Ko</div>
-      </div>
-      <button class="btn small danger" data-action="del-piece" data-id="${escapeHtml(p.id)}">🗑️</button>
-    </div>
-  `).join('');
-
-  Motion.cascade(el, ':scope > div');   // apparition en cascade
-  el.querySelectorAll('[data-action="toggle-piece"]').forEach(cb => {
-    cb.addEventListener('change', async () => {
-      await fetch(`/api/pieces/${cb.dataset.id}/toggle`, { method:'POST' });
-      await loadPieces(); await refreshStatus();
-    });
-  });
-  el.querySelectorAll('[data-action="del-piece"]').forEach(b => {
-    b.addEventListener('click', async () => {
-      if (!confirm('Supprimer ce fichier ?')) return;
-      await fetch(`/api/pieces/${b.dataset.id}`, { method:'DELETE' });
-      await loadPieces(); await refreshStatus();
-    });
-  });
-}
-
-async function uploadPieces(files) {
-  let nb = 0;
-  for (const file of files) {
-    if (!file.name.toLowerCase().endsWith('.pdf')) continue;
-    const form = new FormData();
-    form.append('fichier', file);
-    try {
-      const r = await fetch('/api/pieces', { method:'POST', body: form });
-      const data = await r.json();
-      if (data.ok) nb++;
-    } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-  }
-  await loadPieces(); await refreshStatus();
-  if (nb > 0) toast(`${nb} fichier(s) ajouté(s)`, 'ok');
-}
-
-/* TEMPLATES */
-const CAT_ICONS = { candidature:'💼', parents:'👨‍👩‍👧', collegues:'👥', amis:'🎉', autre:'📌' };
-
-async function loadTemplates() {
-  try {
-    const r = await fetch('/api/templates');
-    const data = await r.json();
-    templatesCache = data.templates || [];
-    const r2 = await fetch('/api/config');
-    const cfg = await r2.json();
-    predefinis = {};
-    for (const [k, v] of Object.entries(cfg.templates_dispo || {})) {
-      if (v.predefini) predefinis[k] = v;
-    }
-    renderTemplates();
-    populateTemplateSelects();
-  } catch (e) { console.error(e); }
-}
-
-function renderTemplates() {
-  const el = document.getElementById('tpl-list');
-  const total = templatesCache.length + Object.keys(predefinis).length;
-  document.getElementById('tpl-count').textContent = total;
-
-  if (!templatesCache.length) {
-    el.innerHTML = `<div class="empty-box">
-      Aucun message perso. Les prédéfinis restent disponibles dans les menus.
-    </div>`;
-    return;
-  }
-  el.innerHTML = templatesCache.map(t => `
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
-                background:#FBF6EA;border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
-      <span style="font-size:20px">${CAT_ICONS[t.categorie] || '📝'}</span>
-      <div style="flex:1;min-width:180px">
-        <div style="font-weight:600;font-size:14px">${escapeHtml(t.nom)}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;
-                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-          ${escapeHtml(t.objet)}
-        </div>
-      </div>
-      <button class="btn small" data-action="edit-tpl" data-id="${escapeHtml(t.id)}">✏️</button>
-      <button class="btn small" data-action="dup-tpl" data-id="${escapeHtml(t.id)}">📋</button>
-      <button class="btn small danger" data-action="del-tpl" data-id="${escapeHtml(t.id)}">🗑️</button>
-    </div>
-  `).join('');
-
-  Motion.cascade(el, ':scope > div');   // apparition en cascade
-  el.querySelectorAll('[data-action="edit-tpl"]').forEach(b => {
-    b.addEventListener('click', () => openEditTpl(b.dataset.id));
-  });
-  el.querySelectorAll('[data-action="dup-tpl"]').forEach(b => {
-    b.addEventListener('click', async () => {
-      await fetch(`/api/templates/${b.dataset.id}/duplicate`, { method:'POST' });
-      await loadTemplates();
-      toast('Template dupliqué', 'ok');
-    });
-  });
-  el.querySelectorAll('[data-action="del-tpl"]').forEach(b => {
-    b.addEventListener('click', async () => {
-      const t = templatesCache.find(x => x.id === b.dataset.id);
-      if (!confirm(`Supprimer "${t.nom}" ?`)) return;
-      await fetch(`/api/templates/${b.dataset.id}`, { method:'DELETE' });
-      await loadTemplates();
-      toast('Supprimé', 'ok');
-    });
-  });
-}
-
-function populateTemplateSelects() {
-  const html = [];
-  if (templatesCache.length) {
-    html.push('<optgroup label="✨ Mes messages">');
-    templatesCache.forEach(t => {
-      html.push(`<option value="${escapeHtml(t.id)}">${CAT_ICONS[t.categorie] || '📝'} ${escapeHtml(t.nom)}</option>`);
-    });
-    html.push('</optgroup>');
-  }
-  html.push('<optgroup label="📚 Prédéfinis">');
-  for (const [k, v] of Object.entries(predefinis)) {
-    // Les prédéfinis semés dans « Mes messages » ne doivent pas apparaître deux fois
-    if (templatesCache.some(t => t.id === `tpl_predef_${k}`)) continue;
-    html.push(`<option value="${escapeHtml(k)}">${escapeHtml(v.nom)}</option>`);
-  }
-  html.push('</optgroup>');
-
-  ['cfg-template', 'custom-template', 'grp-send-template'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (id === 'grp-send-template') {
-      el.innerHTML = '<option value="">— Message libre —</option>' + html.join('');
-    } else {
-      el.innerHTML = html.join('');
-    }
-  });
-}
-
-function openNewTpl() {
-  document.getElementById('tpl-id').value = '';
-  document.getElementById('tpl-nom').value = '';
-  document.getElementById('tpl-categorie').value = 'candidature';
-  document.getElementById('tpl-objet').value = '';
-  document.getElementById('tpl-corps').value = '';
-  document.getElementById('tpl-modal-title').textContent = '📝 Nouveau message';
-  document.getElementById('tpl-modal').classList.add('visible');
-}
-
-function openEditTpl(id) {
-  const t = templatesCache.find(x => x.id === id);
-  if (!t) return;
-  document.getElementById('tpl-id').value = t.id;
-  document.getElementById('tpl-nom').value = t.nom;
-  document.getElementById('tpl-categorie').value = t.categorie || 'autre';
-  document.getElementById('tpl-objet').value = t.objet;
-  document.getElementById('tpl-corps').value = t.corps;
-  document.getElementById('tpl-modal-title').textContent = `✏️ Éditer : ${t.nom}`;
-  document.getElementById('tpl-modal').classList.add('visible');
-}
-
-function closeTplModal() {
-  Motion.fermerModale(document.getElementById('tpl-modal'));
-}
-
-async function saveTpl() {
-  const id    = document.getElementById('tpl-id').value;
-  const nom   = document.getElementById('tpl-nom').value.trim();
-  const cat   = document.getElementById('tpl-categorie').value;
-  const objet = document.getElementById('tpl-objet').value.trim();
-  const corps = document.getElementById('tpl-corps').value;
-  if (!nom || !objet || !corps) { toast('Champs requis', 'err'); return; }
-  try {
-    const r = await fetch('/api/templates', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ id, nom, categorie: cat, objet, corps })
-    });
-    const data = await r.json();
-    if (data.ok) {
-      toast(id ? 'Mis à jour' : 'Créé', 'ok');
-      closeTplModal();
-      await loadTemplates();
-    } else toast(data.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-/* GROUPES */
-async function loadGroupes() {
-  try {
-    const r = await fetch('/api/groupes');
-    const data = await r.json();
-    groupesCache = data.groupes || [];
-    renderGroupes();
-  } catch (e) { console.error(e); }
-}
-
-function renderGroupes() {
-  const el = document.getElementById('groupes-list');
-  document.getElementById('groupes-count').textContent = groupesCache.length;
-  if (!groupesCache.length) {
-    el.innerHTML = `<div class="empty-box">
-      Aucun groupe — clique sur <strong>+ Nouveau groupe</strong>
-    </div>`;
-    return;
-  }
-  el.innerHTML = groupesCache.map(g => `
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
-                background:#FBF6EA;border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
-      <span style="font-size:22px">👥</span>
-      <div style="flex:1;min-width:180px">
-        <div style="font-weight:600;font-size:14px">${escapeHtml(g.nom)}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">
-          ${g.emails.length} membre(s)
-          ${g.description ? ` · ${escapeHtml(g.description)}` : ''}
-        </div>
-      </div>
-      <button class="btn primary small" data-action="send-groupe" data-id="${escapeHtml(g.id)}">📤 Envoyer</button>
-      <button class="btn small" data-action="edit-groupe" data-id="${escapeHtml(g.id)}">✏️</button>
-      <button class="btn small danger" data-action="del-groupe" data-id="${escapeHtml(g.id)}">🗑️</button>
-    </div>
-  `).join('');
-
-  el.querySelectorAll('[data-action="send-groupe"]').forEach(b => {
-    b.addEventListener('click', () => openSendGroupe(b.dataset.id));
-  });
-  el.querySelectorAll('[data-action="edit-groupe"]').forEach(b => {
-    b.addEventListener('click', () => openEditGroupe(b.dataset.id));
-  });
-  el.querySelectorAll('[data-action="del-groupe"]').forEach(b => {
-    b.addEventListener('click', async () => {
-      const grp = groupesCache.find(g => g.id === b.dataset.id);
-      if (!confirm(`Supprimer "${grp.nom}" ?`)) return;
-      await fetch(`/api/groupes/${b.dataset.id}`, { method:'DELETE' });
-      await loadGroupes();
-      toast('Supprimé', 'ok');
-    });
-  });
-}
-
-function openNewGroupe() {
-  document.getElementById('grp-id').value = '';
-  document.getElementById('grp-nom').value = '';
-  document.getElementById('grp-desc').value = '';
-  document.getElementById('grp-emails').value = '';
-  document.getElementById('grp-modal-title').textContent = '👥 Nouveau groupe';
-  updateGrpEmailCount();
-  document.getElementById('grp-modal').classList.add('visible');
-}
-
-function openEditGroupe(id) {
-  const g = groupesCache.find(x => x.id === id);
-  if (!g) return;
-  document.getElementById('grp-id').value = g.id;
-  document.getElementById('grp-nom').value = g.nom;
-  document.getElementById('grp-desc').value = g.description || '';
-  document.getElementById('grp-emails').value = g.emails.join('\n');
-  document.getElementById('grp-modal-title').textContent = `✏️ Éditer : ${g.nom}`;
-  updateGrpEmailCount();
-  document.getElementById('grp-modal').classList.add('visible');
-}
-
-function closeGrpModal() {
-  Motion.fermerModale(document.getElementById('grp-modal'));
-}
-
-function updateGrpEmailCount() {
-  const raw = document.getElementById('grp-emails').value;
-  const emails = raw.split(/[,;\n]+/).map(e => e.trim()).filter(e => e.includes('@'));
-  document.getElementById('grp-email-count').textContent =
-    emails.length ? `${emails.length} email(s) valide(s)` : '';
-}
-
-async function saveGroupe() {
-  const id    = document.getElementById('grp-id').value;
-  const nom   = document.getElementById('grp-nom').value.trim();
-  const desc  = document.getElementById('grp-desc').value.trim();
-  const raw   = document.getElementById('grp-emails').value;
-  const emails = raw.split(/[,;\n]+/).map(e => e.trim()).filter(e => e.includes('@'));
-  if (!nom || !emails.length) { toast('Nom et emails requis', 'err'); return; }
-  const payload = { nom, description: desc, emails };
-  if (id) payload.id = id;
-  try {
-    const r = await fetch('/api/groupes', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const data = await r.json();
-    if (data.ok) {
-      toast(data.updated ? 'Mis à jour' : 'Créé', 'ok');
-      closeGrpModal();
-      await loadGroupes();
-    } else toast(data.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-function openSendGroupe(id) {
-  const g = groupesCache.find(x => x.id === id);
-  if (!g) return;
-  document.getElementById('grp-send-id').value = id;
-  document.getElementById('grp-send-title').textContent = `📤 Envoyer à : ${g.nom}`;
-  document.getElementById('grp-send-subject').value = '';
-  document.getElementById('grp-send-body').value = '';
-  document.getElementById('grp-send-pj').checked = false;
-  document.getElementById('grp-send-template').value = '';
-  document.querySelector('input[name="grp-mode"][value="individuel"]').checked = true;
-  document.getElementById('grp-send-status').textContent = '';
-  majGrpSendInfo(g);
-  document.getElementById('grp-send-modal').classList.add('visible');
-}
-
-function closeGrpSendModal() {
-  Motion.fermerModale(document.getElementById('grp-send-modal'));
-}
-
-function majGrpSendInfo(g) {
-  const mode = document.querySelector('input[name="grp-mode"]:checked').value;
-  const joindre = document.getElementById('grp-send-pj').checked;
-  let info = `${g.emails.length} destinataire(s)`;
-  if (mode === 'individuel') {
-    info += ` · 1 email par personne · délai ${parseInt(document.getElementById('cfg-delai').value) || 40}s`;
-  } else {
-    info += ` · 1 email groupé (Cci)`;
-  }
-  if (joindre) info += ` · ${piecesActives} PJ`;
-  document.getElementById('grp-send-info').textContent = info;
-}
-
-/* Applique un template au formulaire groupe */
-function appliquerTemplateGroupe() {
-  const tid = document.getElementById('grp-send-template').value;
-  if (!tid) return;
-  // Cherche le template
-  const t = templatesCache.find(x => x.id === tid);
-  const tpl = t || predefinis[tid] ? (t || { objet:'', corps:'' }) : null;
-
-  if (t) {
-    document.getElementById('grp-send-subject').value = t.objet || '';
-    document.getElementById('grp-send-body').value = t.corps || '';
-  }
-}
-
-async function envoyerGroupe() {
-  const id = document.getElementById('grp-send-id').value;
-  const g = groupesCache.find(x => x.id === id);
-  if (!g) return;
-  const subject = document.getElementById('grp-send-subject').value.trim();
-  const body = document.getElementById('grp-send-body').value.trim();
-  const mode = document.querySelector('input[name="grp-mode"]:checked').value;
-  const joindre = document.getElementById('grp-send-pj').checked;
-  if (!subject) { toast('Objet requis', 'err'); return; }
-  if (!body) { toast('Message requis', 'err'); return; }
-
-  const modeTxt = mode === 'groupe'
-    ? `👥 GROUPÉ (Cci) — 1 email`
-    : `📧 INDIVIDUEL — ${g.emails.length} emails`;
-
-  if (!confirm(`Envoyer à "${g.nom}" ?\n\n${modeTxt}\nDestinataires : ${g.emails.length}\n${joindre ? `${piecesActives} PJ` : 'Sans PJ'}\n\nConfirmer ?`)) return;
-
-  const btn = document.getElementById('grp-send-go');
-  btn.disabled = true; btn.textContent = '⏳ Envoi...';
-  document.getElementById('grp-send-status').textContent = 'Envoi...';
-
-  try {
-    const r = await fetch(`/api/groupes/${id}/send`, { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ subject, body, mode, joindre_pieces: joindre })
-    });
-    const data = await r.json();
-    if (data.ok) {
-      toast(`✅ ${data.envoyes}/${data.total}`, 'ok');
-      document.getElementById('grp-send-status').textContent = `${data.envoyes}/${data.total}`;
-      setTimeout(() => { closeGrpSendModal(); refreshStatus(); }, 1200);
-    } else {
-      toast(data.error || 'Erreur', 'err');
-      btn.disabled = false; btn.textContent = '📤 Envoyer';
-    }
-  } catch (e) {
-    toast('Erreur réseau', 'err');
-    btn.disabled = false; btn.textContent = '📤 Envoyer';
-  }
-}
-
-/* IMAP */
-async function checkIMAP() {
-  const btn = document.getElementById('btn-imap-check');
-  const badge = document.getElementById('imap-status-badge');
-  btn.disabled = true; btn.textContent = '⏳ Analyse...';
-  badge.textContent = 'En cours...';
-  try {
-    const r = await fetch('/api/imap/check', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ jours: 30 })
-    });
-    const data = await r.json();
-    if (data.ok) {
-      toast(`✅ ${data.reponses} rép · ${data.bounces} bounce`, 'ok');
-      badge.textContent = `${data.reponses} rép · ${data.bounces} bnc`;
-      toast(`✅ ${data.reponses} réponse(s) · ${data.bounces} bounce(s)`, 'ok');
-      await refreshStatus();
-      await loadIMAPStatus();
-    } else toast(data.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-  btn.disabled = false; btn.textContent = '🔄 Vérifier maintenant';
-}
-
-async function loadIMAPStatus() {
-  try {
-    const r = await fetch('/api/imap/status');
-    const data = await r.json();
-    const badge = document.getElementById('imap-status-badge');
-    if (data.derniere_verif) {
-      const d = new Date(data.derniere_verif * 1000);
-      const mins = Math.floor((Date.now() - d) / 60000);
-      badge.textContent = `Dernière : ${mins < 1 ? 'instant' : mins < 60 ? `${mins}min` : `${Math.floor(mins/60)}h`}`;
-    } else badge.textContent = 'Jamais';
-  } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-}
-
-/* RÈGLES DE CLASSEMENT */
-let filtresCache = [];
-let apprentissageCache = {};
-
-const FLT_LABELS = { from: 'Expéditeur', sujet: 'Sujet', motcle: 'Mot-clé' };
-const ACT_ICONS = { label: '🏷️', marquer_lu: '👁️', archive: '📦', supprimer: '🗑️', notify: '🔔' };
-
-async function loadFiltres() {
-  try {
-    const r = await fetch('/api/filtres');
-    const data = await r.json();
-    if (data.ok) { filtresCache = data.filtres || []; renderFiltres(); }
-  } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-  try {
-    const r = await fetch('/api/filtres/suggestions');
-    const d = await r.json();
-    if (d.ok) { apprentissageCache = d.apprentissage || {}; renderApprentissage(); }
-  } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-}
-
-function renderFiltres() {
-  const box = document.getElementById('regles-liste');
-  document.getElementById('regles-count').textContent =
-    `${filtresCache.filter(f => f.enabled !== false).length} active(s)`;
-  if (!filtresCache.length) {
-    box.innerHTML = '<span style="color:var(--muted)">Aucune règle pour l\'instant.</span>';
-    return;
-  }
-  const tries = [...filtresCache].sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
-  box.innerHTML = tries.map((f) => {
-    const i = filtresCache.indexOf(f);
-    const off = f.enabled === false;
-    const acts = (f.actions || []).map(a => ACT_ICONS[a] || a).join(' ');
-    const conds = (f.items || []).map(it =>
-      `${FLT_LABELS[it.champ] || it.champ} = <b>${escapeHtml(it.valeur)}</b>`).join(' OU ');
-    const lbl = f.label ? ` → « ${escapeHtml(f.label)} »` : '';
-    const icone = f.icon || '🏷️';
-    const couleur = f.color || 'var(--muted)';
-    return `<div class="regle-row ${off ? 'regle-off' : ''}" draggable="true"
-        data-idx="${i}" style="display:flex;align-items:center;gap:8px;
-        padding:7px 9px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;
-        background:${off ? '#f6f2ea' : '#fff'};cursor:grab;opacity:${off ? '.6' : '1'}">
-      <span style="font-weight:900;color:${couleur};min-width:20px">${f.priority ?? i + 1}</span>
-      <span style="font-size:16px">${icone}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px;color:${couleur}">${escapeHtml(f.name || '')}
-          <span style="color:var(--muted);font-weight:600">${lbl} ${acts}</span>
-          ${f.source === 'apprentissage' ? '<span title="Apprise de tes corrections">🧠</span>' : ''}
-        </div>
-        <div style="font-size:11px;color:var(--muted)">Si ${conds}</div>
-      </div>
-      <button class="btn small" data-action="toggle-regle" data-idx="${i}"
-        title="${off ? 'Réactiver' : 'Mettre en pause'}">${off ? '▶️' : '⏸️'}</button>
-      <button class="btn small" data-action="edit-regle" data-idx="${i}" title="Modifier">✏️</button>
-      <button class="btn small danger" data-action="del-regle" data-idx="${i}" title="Supprimer">🗑️</button>
-    </div>`;
-  }).join('');
-  activerDragDrop();
-  box.querySelectorAll('[data-action="toggle-regle"]').forEach(b =>
-    b.addEventListener('click', async () => {
-      const r = await fetch(`/api/filtres/${b.dataset.idx}/toggle`, { method: 'POST' });
-      const d = await r.json();
-      if (d.ok) { filtresCache = d.filtres; renderFiltres(); }
-    }));
-  box.querySelectorAll('[data-action="edit-regle"]').forEach(b =>
-    b.addEventListener('click', () => editerRegle(+b.dataset.idx)));
-  box.querySelectorAll('[data-action="del-regle"]').forEach(b =>
-    b.addEventListener('click', async () => {
-      if (!confirm('Supprimer cette règle ?')) return;
-      const r = await fetch(`/api/filtres/${b.dataset.idx}`, { method: 'DELETE' });
-      const d = await r.json();
-      if (d.ok) { filtresCache = d.filtres; renderFiltres(); }
-    }));
-}
-
-/* MODALE règle : ajout ou édition */
-let editRegleIdx = null;   // null = ajout, sinon index de la règle à modifier
-
-function openRegleModal(idx) {
-  const f = idx == null ? {} : (filtresCache[idx] || {});
-  editRegleIdx = idx ?? null;
-  document.getElementById('filter-modal-title').textContent = editRegleIdx == null ? '➕ Nouvelle règle' : '✏️ Modifier la règle';
-  document.getElementById('filter-f-name').value = f.name || '';
-  const champ = f.items?.[0]?.champ || 'sender';
-  document.getElementById('filter-f-type').value = champ;
-  document.getElementById('filter-f-value').value = f.items?.map(it => it.valeur).join(', ') || '';
-  document.getElementById('filter-f-label').value = f.label || '';
-  document.getElementById('filter-modal').classList.add('visible');
-}
-
-function closeRegleModal() {
-  editRegleIdx = null;
-  document.getElementById('filter-modal').classList.remove('visible');
-}
-
-function editerRegle(idx) { openRegleModal(idx); }
-
-function soumettreRegle() {
-  const nom  = document.getElementById('filter-f-name').value.trim();
-  const champ = document.getElementById('filter-f-type').value;
-  const brut = document.getElementById('filter-f-value').value.trim();
-  const label = document.getElementById('filter-f-label').value.trim();
-  if (!nom) { toast('Le nom de la règle est requis', 'err'); return; }
-  const items = brut.split(',').map(v => v.trim()).filter(Boolean)
-                     .map(v => ({ champ, valeur: v }));
-  if (!items.length) { toast('Au moins une valeur est requise', 'err'); return; }
-  if (!label) { toast('Le libellé Gmail est requis', 'err'); return; }
-  const body = { name: nom, items, label, actions: ['label'] };
-  const url = editRegleIdx == null ? '/api/filtres' : `/api/filtres/${editRegleIdx}`;
-  const method = editRegleIdx == null ? 'POST' : 'PUT';
-  fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    .then(r => r.json())
-    .then(d => {
-      if (d.ok) {
-        filtresCache = d.filtres;
-        renderFiltres();
-        toast(editRegleIdx == null ? 'Règle ajoutée ✅' : 'Règle modifiée ✅', 'ok');
-        closeRegleModal();
-      } else toast(d.error || 'Erreur', 'err');
-    })
-    .catch(() => toast('Erreur réseau', 'err'));
-}
-
-function activerDragDrop() {
-  const box = document.getElementById('regles-liste');
-  let enCours = null;
-  box.querySelectorAll('.regle-row').forEach(row => {
-    row.addEventListener('dragstart', () => { enCours = row; row.style.opacity = '.4'; });
-    row.addEventListener('dragend', () => { row.style.opacity = ''; enCours = null; });
-    row.addEventListener('dragover', e => { e.preventDefault(); });
-    row.addEventListener('drop', async e => {
-      e.preventDefault();
-      if (!enCours || enCours === row) return;
-      box.insertBefore(enCours, row);
-      const ordre = [...box.querySelectorAll('.regle-row')]
-        .map(r => filtresCache[+r.dataset.idx].id);
-      const resp = await fetch('/api/filtres/reorder', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ordre }) });
-      const d = await resp.json();
-      if (d.ok) { filtresCache = d.filtres; renderFiltres(); toast('Priorité mise à jour', 'ok'); }
-    });
-  });
-}
-
-async function addFiltre() {
-  const actions = [];
-  if (document.getElementById('act-label').checked) actions.push('label');
-  if (document.getElementById('act-lu').checked) actions.push('marquer_lu');
-  if (document.getElementById('act-notif').checked) actions.push('notify');
-  if (document.getElementById('act-archive').checked) actions.push('archive');
-  if (document.getElementById('act-supprimer').checked) actions.push('supprimer');
-  const body = {
-    name: document.getElementById('flt-nom').value.trim(),
-    champ: document.getElementById('flt-champ').value,
-    valeur: document.getElementById('flt-valeur').value.trim(),
-    label: document.getElementById('flt-label').value.trim(),
-    actions,
-  };
-  if (!body.valeur) { toast('Valeur manquante', 'err'); return; }
-  if (!actions.length) { toast('Coche au moins une action', 'err'); return; }
-  const r = await fetch('/api/filtres', { method: 'POST',
-    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  const data = await r.json();
-  if (data.ok) {
-    filtresCache = data.filtres; renderFiltres();
-    document.getElementById('flt-valeur').value = '';
-    toast('Règle ajoutée ✅', 'ok');
-  } else toast(data.error || 'Erreur', 'err');
-}
-
-async function creerLibelles() {
-  const btn = document.getElementById('btn-flt-libelles');
-  btn.disabled = true; btn.textContent = '⏳ Création...';
-  try {
-    const r = await fetch('/api/filtres/creer-libelles', { method: 'POST' });
-    const d = await r.json();
-    if (d.ok) {
-      const ok = d.resultats.filter(x => x.ok);
-      const nb = ok.reduce((s, x) => s + (x.crees || []).length, 0);
-      toast(`🏷️ ${d.libelles.length} libellé(s) vérifié(s) sur ${ok.length} compte(s) — ${nb} créé(s)`, 'ok');
-    } else toast(d.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-  btn.disabled = false; btn.textContent = '🏷️ Créer les libellés dans Gmail';
-}
-
-async function appliquerFiltres() {
-  const btn = document.getElementById('btn-flt-appliquer');
-  btn.disabled = true; btn.textContent = '⏳ Application...';
-  try {
-    const r = await fetch('/api/filtres/appliquer', { method: 'POST' });
-    const data = await r.json();
-    if (data.ok) {
-      const total = (data.resultats || []).reduce((s, x) => s + (x.trouves || 0), 0);
-      const errs = (data.resultats || []).filter(x => !x.ok).length;
-      toast(`✅ ${total} mail(s) classé(s)${errs ? `, ${errs} erreur(s)` : ''}`, errs ? 'warn' : 'ok');
-      await chargerNotifs();
-    } else toast(data.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-  btn.disabled = false; btn.textContent = '⚡ Appliquer maintenant';
-}
-
-/* APPRENTISSAGE */
-async function apprendre() {
-  const email = document.getElementById('app-email').value.trim();
-  const label = document.getElementById('app-label').value.trim();
-  if (!email || !label) { toast('Email et libellé requis', 'err'); return; }
-  const r = await fetch('/api/filtres/corriger', { method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, label }) });
-  const d = await r.json();
-  if (d.ok) {
-    filtresCache = d.filtres; apprentissageCache = d.apprentissage || {};
-    renderFiltres(); renderApprentissage();
-    document.getElementById('app-email').value = '';
-    document.getElementById('app-label').value = '';
-    toast(`🧠 Appris : ${email} → ${label}`, 'ok');
-  } else toast(d.error || 'Erreur', 'err');
-}
-
-function renderApprentissage() {
-  const box = document.getElementById('app-liste');
-  const entrees = Object.entries(apprentissageCache || {});
-  if (!entrees.length) { box.textContent = 'Aucune correction apprise pour l\'instant.'; return; }
-  box.innerHTML = entrees.map(([email, e]) =>
-    `<div>🧠 ${escapeHtml(email)} → <b>${escapeHtml(e.label || '')}</b>
-      (${e.corrections || 0} correction(s))</div>`).join('');
-}
-
-/* NOTIFICATIONS (Web Notification API + panneau) */
-async function chargerNotifs() {
-  try {
-    const r = await fetch('/api/notifications');
-    const d = await r.json();
-    if (!d.ok) return;
-    const box = document.getElementById('notifs-liste');
-    const badge = document.getElementById('notifs-badge');
-    badge.textContent = `${d.non_vues} non vue(s)`;
-    const list = d.notifications || [];
-    box.innerHTML = list.length ? list.map(n =>
-      `<div style="padding:5px 8px;border-bottom:1px solid #eee">
-        🔔 <b>${escapeHtml(n.regle || '')}</b> — ${n.nombre} mail(s) sur ${escapeHtml(n.email || '')}
-        <span style="color:var(--muted)">${new Date((n.date || 0) * 1000).toLocaleString('fr-FR')}</span>
-      </div>`).join('')
-      : '<span style="color:var(--muted)">Aucune notification.</span>';
-    // Notification desktop pour les nouvelles non vues
-    if (d.non_vues > 0 && 'Notification' in window
-        && Notification.permission === 'granted' && list.length) {
-      const n = list[0];
-      new Notification(`🔔 ${n.regle}`, {
-        body: `${n.nombre} mail(s) classé(s) — ${n.label || n.regle}` });
-    }
-    if (d.non_vues > 0) await fetch('/api/notifications/vue', { method: 'POST' });
-  } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-}
-
-function activerNotifs() {
-  if (!('Notification' in window)) { toast('Notifications non supportées', 'err'); return; }
-  Notification.requestPermission().then(p => {
-    toast(p === 'granted' ? '✅ Notifications activées'
-                          : '❌ Notifications refusées', p === 'granted' ? 'ok' : 'err');
-  });
-}
-
-/* DÉLAI */
-function bindDelaiUI() {
-  const cb = document.getElementById('cfg-delai-alea');
-  const input = document.getElementById('cfg-delai');
-  const info = document.getElementById('delai-info');
-  function maj() {
-    if (cb.checked) { input.disabled = true; info.textContent = '🎲 35-55s'; }
-    else { input.disabled = false; info.textContent = ''; }
-  }
-  cb.addEventListener('change', async () => {
-    maj();
-    await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ parametres: { delai_aleatoire: cb.checked } })
-    });
-  });
-  input.addEventListener('change', async () => {
-    const d = parseInt(input.value) || 40;
-    await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ parametres: { delai_secondes: d } })
-    });
-    toast(`Délai : ${d}s`, 'ok');
-  });
-  maj();
-}
-
-/* RESET / IMPORT */
-async function resetLog() {
-  if (!confirm('Effacer tout l\'historique ?')) return;
-  try {
-    const r = await fetch('/api/reset-log', { method:'POST' });
-    const data = await r.json();
-    if (data.ok) { toast('Log réinitialisé', 'ok'); refreshStatus(); }
-    else toast(data.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-async function importJSON(file) {
-  const form = new FormData();
-  form.append('file', file);
-  try {
-    const r = await fetch('/api/import-json', { method:'POST', body: form });
-    const data = await r.json();
-    if (data.ok) { toast(`${data.importees} importées`, 'ok'); refreshStatus(); }
-    else toast(data.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-/* MODAL APERÇU */
-function openModal(company) {
-  currentSendCompany = company;
-  const template = document.getElementById('cfg-template').value || 'standard';
-  fetch('/api/preview', { method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ company: company.name, context: company.context, template })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (!data.ok) { toast(data.error, 'err'); return; }
-    document.getElementById('modal-dest').value = company.email;
-    document.getElementById('modal-subject').value = data.subject;
-    document.getElementById('modal-body').value = data.body;
-    const pj = piecesActives === 0 ? '⚠️ Aucune PJ' : `${piecesActives} PJ`;
-    document.getElementById('modal-info').textContent = `${pj}`;
-    document.getElementById('modal').classList.add('visible');
-  })
-  .catch(() => toast('Erreur aperçu', 'err'));
-}
-
-function closeModal() {
-  Motion.fermerModale(document.getElementById('modal'));
-  currentSendCompany = null;
-  // Réinitialise le bouton d'envoi pour la prochaine ouverture
-  const btn = document.getElementById('modal-send');
-  if (btn) { btn.disabled = false; btn.textContent = '📤 Envoyer'; }
-}
-
-async function sendFromModal() {
-  if (!currentSendCompany) return;
-  const subject = document.getElementById('modal-subject').value.trim();
-  const body = document.getElementById('modal-body').value.trim();
-  if (!subject || !body) { toast('Objet et corps requis', 'err'); return; }
-  if (piecesActives === 0) {
-    if (!confirm('⚠️ AUCUNE PJ\n\nContinuer ?')) return;
-  }
-  const btn = document.getElementById('modal-send');
-  btn.disabled = true; btn.textContent = '⏳';
-  try {
-    const r = await fetch('/api/send', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        email: currentSendCompany.email,
-        company: currentSendCompany.name,
-        subject, body
-      })
-    });
-    const data = await r.json();
-    if (data.ok) {
-      toast(`✅ Envoyé`, 'ok');
-      closeModal(); await refreshStatus();
-    } else {
-      toast(data.error || 'Erreur', 'err');
-    }
-  } catch (e) {
-    toast('Erreur réseau', 'err');
-  } finally {
-    // Toujours réinitialiser le bouton, même si closeModal a échoué
-    btn.disabled = false; btn.textContent = '📤 Envoyer';
-  }
-}
-
-/* ENVOI PERSONNALISÉ */
-async function previewCustom() {
-  const emailsRaw = document.getElementById('custom-email').value.trim();
-  const company   = document.getElementById('custom-company').value.trim();
-  const context   = document.getElementById('custom-context').value.trim();
-  const template  = document.getElementById('custom-template').value;
-  const emails = emailsRaw.split(/[,;\n]+/).map(e => e.trim()).filter(e => e.includes('@'));
-  if (!emails.length || !company) { toast('Email valide + nom requis', 'err'); return; }
-  const ctx = context || `Je me permets de vous contacter car je suis très intéressé
-par les activités de ${company} et par les opportunités de stage.`;
-  try {
-    const r = await fetch('/api/preview', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ company, context: ctx, template })
-    });
-    const data = await r.json();
-    if (!data.ok) { toast(data.error, 'err'); return; }
-    document.getElementById('custom-preview-body').value = data.body;
-    document.getElementById('custom-preview-zone').style.display = 'block';
-    document.getElementById('custom-info').textContent = `${emails.length} dest · ${piecesActives} PJ`;
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-async function sendCustom() {
-  const emailsRaw = document.getElementById('custom-email').value.trim();
-  const company   = document.getElementById('custom-company').value.trim();
-  const context   = document.getElementById('custom-context').value.trim();
-  const template  = document.getElementById('custom-template').value;
-  const emails = emailsRaw.split(/[,;\n]+/).map(e => e.trim()).filter(e => e.includes('@'));
-  if (!emails.length) { toast('Au moins un email valide requis', 'err'); return; }
-  if (!company) { toast('Nom requis', 'err'); return; }
-  if (!rateLimit.ok) { toast('Rate limit — attends 1h', 'err'); return; }
-  const nbComptes = parseInt(document.getElementById('comptes-badge').textContent.replace(/\D/g, '')) || 0;
-  if (nbComptes === 0) { toast('Ajoute un compte Gmail', 'err'); return; }
-
-  let avertissementPJ = '';
-  if (piecesActives === 0) avertissementPJ = '\n\n⚠️ AUCUNE PJ — emails sans CV';
-
-  const destPreview = emails.slice(0, 3).join('\n');
-  const plus = emails.length > 3 ? `\n... +${emails.length - 3}` : '';
-  if (!confirm(`📧 ${emails.length} email(s) INDIVIDUEL(S)\n\nDestinataires :\n${destPreview}${plus}\n\nEntreprise : ${company}\nPièces : ${piecesActives}${avertissementPJ}\n\nConfirmer ?`)) return;
-
-  const btn = document.getElementById('btn-custom-send');
-  btn.disabled = true; btn.textContent = '⏳ Envoi...';
-
-  const ctx = context || `Je me permets de vous contacter car je suis très intéressé
-par les activités de ${company} et par les opportunités de stage.`;
-
-  try {
-    const r1 = await fetch('/api/preview', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ company, context: ctx, template })
-    });
-    const preview = await r1.json();
-    if (!preview.ok) { toast(preview.error, 'err'); return; }
-
-    const r2 = await fetch('/api/send', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        email: emails.join(', '),
-        company, subject: preview.subject, body: preview.body,
-        mode_groupe: false,
-      })
-    });
-    const data = await r2.json();
-    if (data.ok) {
-      toast(`✅ ${emails.length} envoi(s)`, piecesActives === 0 ? 'warn' : 'ok');
-      document.getElementById('custom-email').value = '';
-      document.getElementById('custom-company').value = '';
-      document.getElementById('custom-context').value = '';
-      document.getElementById('custom-preview-zone').style.display = 'none';
-      document.getElementById('custom-info').textContent = '';
-      await refreshStatus();
-    } else {
-      toast(data.error || 'Erreur', 'err');
-    }
-  } catch (e) {
-    toast('Erreur réseau', 'err');
-  } finally {
-    // Toujours réinitialiser le bouton, quoi qu'il arrive
-    btn.disabled = false; btn.textContent = '📤 Envoyer maintenant';
-  }
-}
-
-/* BULK */
-function getPendingCompanies() {
-  return COMPANIES.filter(c => !serverLog[c.name]?.envoye);
-}
-
-const selectedCompanies = new Set();
-
-function updateSelectionUI() {
-  const n = selectedCompanies.size;
-  const countEl = document.getElementById('sel-count');
-  if (countEl) countEl.textContent = `${n} sélectionnée(s)`;
-  const sendBtn = document.getElementById('sel-send');
-  if (sendBtn) sendBtn.disabled = n === 0;
-  const delBtn = document.getElementById('sel-del');
-  if (delBtn) delBtn.disabled = n === 0;
-}
-
-function toggleSelect(name, checked, cardEl) {
-  if (checked) selectedCompanies.add(name); else selectedCompanies.delete(name);
-  if (cardEl) cardEl.classList.toggle('selected', checked);
-  updateSelectionUI();
-}
-
-function selectAllFiltered() {
-  getFiltered().forEach(c => selectedCompanies.add(c.name));
-  render();
-}
-
-function clearSelection() {
-  selectedCompanies.clear();
-  render();
-}
-
-async function sendSelected() {
-  const target = COMPANIES.filter(c => selectedCompanies.has(c.name));
-  if (!target.length) { toast('Aucune entreprise cochée', 'warn'); return; }
-  await startBulk(target);
-  selectedCompanies.clear();
-  render();
-}
-
-/* ---------------------------------------------------------
-   SUPPRESSION D'ENTREPRISES
-   Toute suppression est inscrite dans l'historique : le
-   toast propose un « Annuler » immédiat, et l'action reste
-   annulable depuis la fenêtre /historique.
-   --------------------------------------------------------- */
-async function supprimerEntreprise(name) {
-  const cible = COMPANIES.find(c => c.name === name);
-  const envoye = !!serverLog[name];
-  const info = [
-    `Entreprise : ${name}`,
-    cible?.email ? `Email : ${cible.email}` : null,
-    envoye ? '⚠️ Un e-mail a déjà été envoyé à cette entreprise' : null,
-  ].filter(Boolean).join('\n');
-  if (!confirm(`🗑️ SUPPRIMER\n\n${info}\n\nCette action est annulable depuis 🕓 Historique.\nConfirmer ?`)) return;
-
-  try {
-    const r = await fetch(`/api/companies/${encodeURIComponent(name)}`,
-                          { method:'DELETE' });
-    const d = await r.json();
-    if (!r.ok || !d.ok) { toast(d.error || 'Suppression impossible', 'err'); return; }
-    selectedCompanies.delete(name);
-    await syncCompanies();
-    toastUndo(`« ${name} » supprimée`, async () => {
-      const b = await fetch(`/api/companies/${encodeURIComponent(name)}`,
-                            { method:'PUT',
-                              headers:{'Content-Type':'application/json'},
-                              body: JSON.stringify(cible || { name, email:'' }) });
-      const bb = await b.json();
-      if (bb.ok) { await syncCompanies(); toast('Entreprise restaurée', 'ok'); }
-      else toast('Restauration impossible — utilisez 🕓 Historique', 'err');
-    });
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-async function supprimerSelection() {
-  const noms = [...selectedCompanies];
-  if (!noms.length) { toast('Aucune entreprise sélectionnée', 'warn'); return; }
-  const preview = noms.slice(0, 10).map(n => `  • ${n}`).join('\n');
-  const suite = noms.length > 10 ? `\n  … et ${noms.length - 10} autre(s)` : '';
-  if (!confirm(
-    `🗑️ SUPPRIMER ${noms.length} ENTREPRISE(S)\n\n${preview}${suite}\n\n` +
-    `Cette action est annulable depuis 🕓 Historique.\nConfirmer ?`)) return;
-
-  try {
-    const r = await fetch('/api/companies', {
-      method:'DELETE',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ names: noms })
-    });
-    const d = await r.json();
-    if (!r.ok || !d.ok) { toast(d.error || 'Suppression impossible', 'err'); return; }
-    selectedCompanies.clear();
-    await syncCompanies();
-    toastUndo(`${d.supprimees} entreprise(s) supprimée(s)`, null,
-              'Ouvrez 🕓 Historique pour tout rétablir');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-/* Toast avec action cliquable (défaut 6 s au lieu de 3,5 s). */
-function toastUndo(msg, action, hint) {
-  const t = document.getElementById('toast');
-  t.textContent = '';
-  t.className = 'toast show ok';
-  t.appendChild(document.createTextNode(msg + ' '));
-  if (action) {
-    const b = document.createElement('button');
-    b.className = 'toast-action';
-    b.textContent = '↩︎ Annuler';
-    b.addEventListener('click', async () => {
-      clearTimeout(t._timer);
-      t.classList.add('hiding');
-      setTimeout(() => t.classList.remove('show', 'hiding'), 260);
-      await action();
-    });
-    t.appendChild(b);
-  }
-  if (hint) {
-    const h = document.createElement('span');
-    h.className = 'toast-hint';
-    h.textContent = hint;
-    t.appendChild(h);
-  }
-  Motion.rebondir(t);
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => {
-    t.classList.add('hiding');
-    setTimeout(() => t.classList.remove('show', 'hiding'), 260);
-  }, action ? 6000 : 4000);
-}
-
-async function startBulk(target) {
-  if (!rateLimit.ok) { toast('Rate limit atteint', 'err'); return; }
-  const nbComptes = parseInt(document.getElementById('comptes-badge').textContent.replace(/\D/g, '')) || 0;
-  if (nbComptes === 0) { toast('Ajoute un compte Gmail', 'err'); return; }
-  const pending = target && target.length ? target : getPendingCompanies();
-  if (!pending.length) { toast('Tout est déjà envoyé', 'warn'); return; }
-  const delay = parseInt(document.getElementById('cfg-delai').value) || 40;
-  const alea = document.getElementById('cfg-delai-alea').checked;
-  const template = document.getElementById('cfg-template').value || 'standard';
-  const minutes = Math.ceil((pending.length * (alea ? 45 : delay)) / 60);
-  const delaiTxt = alea ? '35-55s' : `${delay}s`;
-  let avertissementPJ = '';
-  if (piecesActives === 0) avertissementPJ = '\n\n⚠️ AUCUNE PJ — emails sans CV';
-  if (!confirm(`Envoyer ${pending.length} emails ?\n\nTemplate : ${template}\nDélai : ${delaiTxt}\nPièces : ${piecesActives}\n~${minutes} min${avertissementPJ}\n\nConfirmer ?`)) return;
-  try {
-    const r = await fetch('/api/send-bulk', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ companies: pending, template })
-    });
-    const data = await r.json();
-    if (!data.ok) { toast(data.error, 'err'); return; }
-    setBulkUIRunning(true); startBulkPolling();
-    toast(`📤 Envoi de masse lancé (${pending.length} e-mails)`, 'ok');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-async function stopBulk() {
-  try {
-    await fetch('/api/send-bulk-stop', { method:'POST' });
-    toast('Arrêt demandé', 'warn');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-}
-
-function setBulkUIRunning(running) {
-  document.getElementById('bulk-panel').classList.toggle('running', running);
-  document.getElementById('bulk-start').style.display = running ? 'none' : '';
-  document.getElementById('bulk-stop').style.display  = running ? '' : 'none';
-}
-
-function startBulkPolling() {
-  if (bulkPollTimer) clearInterval(bulkPollTimer);
-  bulkPollTimer = setInterval(async () => {
-    try {
-      const r = await fetch('/api/send-bulk-status');
-      const s = await r.json();
-      updateBulkUI(s);
-      if (!s.en_cours) {
-        clearInterval(bulkPollTimer);
-        bulkPollTimer = null;
-        setBulkUIRunning(false);
-        await refreshStatus();
-        toast(`Terminé : ${s.envoyes} ✅ / ${s.erreurs} ❌`, s.erreurs ? 'warn' : 'ok');
-      }
-    } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-  }, 2000);
-}
-
-function updateBulkUI(s) {
-  document.getElementById('bulk-title').textContent =
-    s.en_cours ? `⏳ ${s.index}/${s.total}` : '🚀 Envoi en masse';
-  document.getElementById('bulk-desc').textContent = s.en_cours
-    ? `${s.derniere} — ✅ ${s.envoyes} · ❌ ${s.erreurs}`
-    : 'Envoie aux entreprises non contactées';
-  const pct = s.total ? Math.round(100 * s.index / s.total) : 0;
-  document.getElementById('bulk-bar').style.width = pct + '%';
-}
-
-/* RENDU LISTE */
-function getFiltered() {
-  const q = searchQuery.toLowerCase().trim();
-  return COMPANIES.filter(c => {
-    if (activeFilter !== 'all' && c.cat !== activeFilter) return false;
-    if (!q) return true;
-    return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
-  });
-}
-
-function render() {
-  const list = document.getElementById('list');
-  const filtered = getFiltered();
-  if (!filtered.length) {
-    list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">Aucun résultat</div>';
-    return;
-  }
-  const groups = {};
-  filtered.forEach(c => {
-    if (!groups[c.cat]) groups[c.cat] = [];
-    groups[c.cat].push(c);
-  });
-  list.innerHTML = Object.entries(groups).map(([cat, items]) => `
-    <section class="category">
-      <div class="category-head">
-        <h3>${CATEGORIES[cat] || cat}</h3>
-        <span class="count">${items.length}</span>
-        <hr>
-      </div>
-      ${items.map(renderCard).join('')}
-    </section>
-  `).join('');
-  bindEvents();
-  updateSelectionUI();
-}
-
-function renderCard(c) {
-  const entry = serverLog[c.name];
-  const isSent = !!entry?.envoye;
-  const isError = entry && !entry.envoye;
-  const isReplied = !!entry?.repondu;
-  const isBounce = !!entry?.bounce;
-  const sansPJ = !!entry?.sans_pj;
-  const badgeClass = c.cat === 'port' ? 'port' : (c.cat === 'grands' ? 'grand' : '');
-  const catLabel = c.cat === 'port' ? 'Port' : (c.cat === 'grands' ? 'Grand' : 'PME');
-
-  let cardCls = '';
-  if (isBounce) cardCls = 'bounce';
-  else if (isReplied) cardCls = 'responded';
-  else if (isSent) cardCls = 'sent';
-  else if (isError) cardCls = 'error';
-
-  let badgeStatus = '';
-  if (isReplied) badgeStatus = '<span class="badge response">✨ Réponse</span>';
-  else if (isBounce) badgeStatus = '<span class="badge bounce">⚠️ Bounce</span>';
-  else if (sansPJ && isSent) badgeStatus = '<span class="badge nopj">⚠️ Sans PJ</span>';
-
-  return `
-    <div class="card ${cardCls}" data-name="${escapeHtml(c.name)}">
-      <div class="card-head" role="button" tabindex="0" aria-expanded="false"
-           onclick="this.parentElement.classList.toggle('open');this.setAttribute('aria-expanded',this.parentElement.classList.contains('open'))">
-        <input type="checkbox" class="sel-ck" data-action="toggle-select"
-               data-name="${escapeHtml(c.name)}" title="Cocher pour envoi ciblé"
-               ${selectedCompanies.has(c.name) ? 'checked' : ''}>
-        <div class="title">
-          <div class="name">${escapeHtml(c.name)}</div>
-          <div class="email">${escapeHtml(c.email)}</div>
-        </div>
-        ${badgeStatus}
-        ${entry?.date ? `<span class="date">${escapeHtml(entry.date)}</span>` : ''}
-        <span class="badge ${badgeClass}">${catLabel}</span>
-        <span class="toggle">▶</span>
-      </div>
-      <div class="card-body">
-        <div style="font-size:12px;color:var(--muted);line-height:1.6">
-          ${escapeHtml(c.context)}
-        </div>
-        ${entry?.compte ? `<div class="via-compte" title="Compte Gmail utilisé">📨 envoyé via ${escapeHtml(entry.compte)}</div>` : ''}
-        <div class="actions">
-          <button class="btn primary" data-action="preview"
-                  data-name="${escapeHtml(c.name)}" ${isSent ? 'disabled' : ''}>
-            ${isSent ? '✅ Envoyé' : (isError ? '🔄 Réessayer' : '✏️ Aperçu & envoyer')}
-          </button>
-          <button class="btn small" data-action="edit-company"
-                  data-name="${escapeHtml(c.name)}" title="Modifier">✏️</button>
-          <button class="btn small danger" data-action="delete-company"
-                  data-name="${escapeHtml(c.name)}" title="Supprimer">🗑️</button>
-          ${isSent ? `
-            <button class="btn small ${isReplied ? 'ok' : ''}"
-                    data-action="toggle-reply" data-name="${escapeHtml(c.name)}">
-              ${isReplied ? '✓ Répondu' : 'Marquer réponse'}
-            </button>
-          ` : ''}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function bindEvents() {
-  document.querySelectorAll('[data-action="preview"]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const c = COMPANIES.find(x => x.name === btn.dataset.name);
-      if (c) openModal(c);
-    });
-  });
-  document.querySelectorAll('[data-action="edit-company"]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const c = COMPANIES.find(x => x.name === btn.dataset.name);
-      if (c) openCompanyModal(c);
-    });
-  });
-  document.querySelectorAll('[data-action="delete-company"]').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.stopPropagation();
-      const name = btn.dataset.name;
-      supprimerEntreprise(name);
-    });
-  });
-  document.querySelectorAll('[data-action="toggle-select"]').forEach(cb => {
-    cb.addEventListener('click', e => e.stopPropagation());
-    cb.addEventListener('change', e => {
-      e.stopPropagation();
-      toggleSelect(cb.dataset.name, cb.checked, cb.closest('.card'));
-    });
-  });
-  document.querySelectorAll('[data-action="toggle-reply"]').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.stopPropagation();
-      const name = btn.dataset.name;
-      const current = !!serverLog[name]?.repondu;
-      try {
-        const r = await fetch('/api/mark-response', { method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ company: name, repondu: !current })
-        });
-        if (r.status === 401) { toast('❌ Session expirée', 'err'); return; }
-        const data = await r.json();
-        if (data.ok) { toast('OK', 'ok'); refreshStatus(); }
-        else toast(data.error || 'Erreur', 'err');
-      } catch (err) { toast('Erreur réseau', 'err'); }
-    });
-  });
-}
-
-/* MODALE ENTREPRISE : ajout / édition */
-let companyEditName = null; // null = ajout
-
-function openCompanyModal(c) {
-  companyEditName = c ? c.name : null;
-  document.getElementById('company-modal-title').textContent =
-    c ? `✏️ Modifier : ${c.name}` : '➕ Nouvelle entreprise';
-  document.getElementById('company-f-name').value    = c ? c.name : '';
-  document.getElementById('company-f-email').value   = c ? c.email : '';
-  document.getElementById('company-f-cat').value     = c ? c.cat : 'pme';
-  document.getElementById('company-f-context').value = c ? c.context : '';
-  document.getElementById('company-modal').classList.add('visible');
-  setTimeout(() => document.getElementById('company-f-name').focus(), 50);
-}
-
-function closeCompanyModal() {
-  Motion.fermerModale(document.getElementById('company-modal'));
-}
-
-async function saveCompany() {
-  const name    = document.getElementById('company-f-name').value.trim();
-  const email   = document.getElementById('company-f-email').value.trim();
-  const cat     = document.getElementById('company-f-cat').value;
-  const context = document.getElementById('company-f-context').value.trim();
-  if (!name || !email || !email.includes('@')) {
-    toast('Nom et email valides requis', 'err'); return;
-  }
-  const btn = document.getElementById('company-save');
-  btn.disabled = true;
-  try {
-    const url = companyEditName
-      ? `/api/companies/${encodeURIComponent(companyEditName)}`
-      : '/api/companies';
-    const method = companyEditName ? 'PUT' : 'POST';
-    const r = await fetch(url, {
-      method, headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ name, email, cat, context })
-    });
-    const d = await r.json();
-    if (d.ok) {
-      toast(companyEditName ? 'Entreprise modifiée' : 'Entreprise ajoutée', 'ok');
-      closeCompanyModal();
-      await syncCompanies();
-    } else toast(d.error || 'Erreur', 'err');
-  } catch (e) { toast('Erreur réseau', 'err'); }
-  btn.disabled = false;
-}
-
-/* Synchronise la liste avec la base : seed au 1er lancement, puis lecture */
-async function syncCompanies() {
-  try {
-    await fetch('/api/companies/seed', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ companies: COMPANIES })
-    });
-    const r = await fetch('/api/companies');
-    const d = await r.json();
-    if (d.ok && Array.isArray(d.companies) && d.companies.length) {
-      COMPANIES = d.companies;
-    }
-  } catch (e) { console.error('syncCompanies', e); }
-  try { render(); updateStats(); }
-  catch (e) { console.error('syncCompanies render:', e); }
-}
-
-function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s).replace(/[&<>"']/g, m => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[m]));
-}
-
-function updateStats() {
-  const total = COMPANIES.length;
-  const sent = COMPANIES.filter(c => serverLog[c.name]?.envoye).length;
-  const responded = COMPANIES.filter(c => serverLog[c.name]?.repondu).length;
-  animateCount('stat-total', total);
-  animateCount('stat-sent', sent);
-  animateCount('stat-pending', total - sent);
-  animateCount('stat-responded', responded);
-}
-
-/* Compteur animé : glisse vers la nouvelle valeur */
-const _countAnims = {};
-function animateCount(id, target) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const from = parseInt(el.textContent) || 0;
-  if (from === target) { el.textContent = target; return; }
-  if (_countAnims[id]) cancelAnimationFrame(_countAnims[id]);
-  const t0 = performance.now(), dur = 450;
-  const step = now => {
-    const p = Math.min(1, (now - t0) / dur);
-    const eased = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(from + (target - from) * eased);
-    if (p < 1) _countAnims[id] = requestAnimationFrame(step);
-  };
-  _countAnims[id] = requestAnimationFrame(step);
-}
-
-function renderFilters() {
-  const f = document.getElementById('filters');
-  const counts = { all: COMPANIES.length };
-  COMPANIES.forEach(c => { counts[c.cat] = (counts[c.cat] || 0) + 1; });
-  f.innerHTML = `
-    <button class="chip active" data-cat="all">Tout (${counts.all})</button>
-    ${Object.entries(CATEGORIES).map(([cat, label]) =>
-      `<button class="chip" data-cat="${cat}">${label} (${counts[cat] || 0})</button>`
-    ).join('')}
-  `;
-  f.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      f.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
-      chip.classList.add('active');
-      activeFilter = chip.dataset.cat;
-      render();
-    });
-  });
-}
-
-function bindSearch() {
-  const input = document.getElementById('search');
-  let t;
-  input.addEventListener('input', () => {
-    clearTimeout(t);
-    t = setTimeout(() => { searchQuery = input.value; render(); }, 120);
-  });
-}
-
-/* ============================================================
-   MICRO-INTERACTIONS — module d'animation (motion.css)
-   ============================================================ */
-const Motion = {
-  /** Respecte la préférence système « motions réduites ». */
-  get reduit() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  },
-
-  /** Active l'état de chargement sur un bouton (spinner inline). */
-  loading(btn, actif = true) {
-    if (!btn) return;
-    btn.classList.toggle('is-loading', actif);
-    btn.disabled = actif;
-  },
-
-  /** Ferme une modale avec une animation de sortie (~110 ms). */
-  fermerModale(el) {
-    if (!el) return;
-    if (Motion.reduit) { el.classList.remove('visible'); return; }
-    el.classList.add('closing');
-    setTimeout(() => {
-      el.classList.remove('closing', 'visible');
-    }, 120);
-  },
-
-  /** Fait vibrer un élément (erreur / action refusée). */
-  secouer(el) {
-    if (!el || Motion.reduit) return;
-    el.animate(
-      [{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' },
-       { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' },
-       { transform: 'translateX(0)' }],
-      { duration: 280, easing: 'ease-in-out' }
-    );
-  },
-
-  /** Petit rebond de confirmation sur un élément. */
-  rebondir(el) {
-    if (!el || Motion.reduit) return;
-    el.animate(
-      [{ transform: 'scale(1)' }, { transform: 'scale(1.06)' },
-       { transform: 'scale(1)' }],
-      { duration: 220, easing: 'cubic-bezier(.34,1.56,.64,1)' }
-    );
-  },
-
-  /** Applique une cascade d'apparition aux enfants d'un conteneur. */
-  cascade(parent, selecteur = ':scope > *', pas = 35) {
-    if (!parent || Motion.reduit) return;
-    [...parent.querySelectorAll(selecteur)].forEach((el, i) => {
-      el.style.animation = 'none';
-      void el.offsetWidth;                       // force le reflow
-      el.style.animation = `riseIn 260ms cubic-bezier(.22,1,.36,1) ${i * pas}ms both`;
-    });
-  },
-
-  /** Empêche le double-clic sur une action asynchrone. */
-  async once(btn, fn) {
-    if (!btn || btn.disabled) return;
-    Motion.loading(btn, true);
-    try {
-      await fn();
-    } finally {
-      Motion.loading(btn, false);
-    }
-  },
-};
-
-/* Fermeture au clavier (Escape) sur toutes les modales */
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    const ouverte = document.querySelector('.modal-overlay.visible');
-    if (ouverte) Motion.fermerModale(ouverte);
-  }
-});
-
-/* Carte entreprise : le .card-head est un bouton (deplie/replie).
-   Il etait declenche au clic uniquement -> inatteignable au clavier.
-   Delegation : les cartes sont recreees a chaque rendu, on attache
-   donc l'ecouteur une seule fois sur le document. */
-document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-  const tete = e.target.closest?.('.card-head[role="button"]');
-  // On n'agit que si le .card-head lui-meme est focus (il porte le
-  // tabindex) : pas si un enfant (case a cocher) a le focus.
-  if (!tete || e.target !== tete) return;
-  e.preventDefault();          // Espace ne doit pas faire scroller
-  const carte = tete.parentElement;
-  carte.classList.toggle('open');
-  tete.setAttribute('aria-expanded', carte.classList.contains('open'));
-});
-
-function toast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
-  // Retour haptique visuel : secousse sur erreur, rebond sur succès
-  if (type === 'err') Motion.secouer(t);
-  else if (type === 'ok') Motion.rebondir(t);
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => {
-    t.classList.add('hiding');
-    setTimeout(() => t.classList.remove('show', 'hiding'), 260);
-  }, 3500);
-}
-
-/* ---------------------------------------------------------------
-   SPLASH — animation de démarrage + préchargement des paramètres
-   ---------------------------------------------------------------
-   Deux problemes corriges ici :
-
-   1. L'animation etait un clignotement. Les 6 appels de préchargement
-      répondent en ~25 ms sur localhost : la barre sautait de 10 % à
-      100 % en quelques images et le splash disparaissait en 375 ms,
-      donc rien n'était visible. On impose maintenant une durée
-      MINIMALE d'affichage, et la barre se REMPLIT en douceur
-      (requestAnimationFrame + easeOutCubic) au lieu de sauter.
-
-   2. Le splash pouvait rester bloqué POUR TOUJOURS. La fermeture
-      n'était atteignable que si les 6 awaited aboutissaient, et
-      bindSearch/renderFilters/bindDelaiUI n'étaient pas protégés.
-      Un seul throw => splash figé, fenêtre inutilisable, sans issue.
-      On corrige par : try/finally, chien de garde (watchdog),
-      progression monotone, et dismissal sur erreur globale.
-   --------------------------------------------------------------- */
-const SPLASH_MIN_MS = 900;    // durée minimale d'affichage
-const SPLASH_MAX_MS = 8000;   // chien de garde : au-delà, on force
-
-let splashT0 = performance.now();
-let splashPct = 0;
-let splashFerme = false;
-let splashWatchdog = null;
-
-/** Avance la barre. La progression est monotone et bornée [0,100]. */
-function splashAvancer(pct, etat) {
-  const cible = Math.max(0, Math.min(100, Number(pct) || 0));
-  // Monotone : une étape plus lente ne fait jamais reculer la barre.
-  if (cible > splashPct) splashPct = cible;
-  const p = document.getElementById('splash-prog');
-  const e = document.getElementById('splash-etat');
-  if (p) p.style.width = splashPct + '%';
-  if (e && etat) e.textContent = etat;
-}
-
-/** Remplit la barre jusqu'à 100 % en douceur sur `duree` ms. */
-function splashRemplir(duree) {
-  const p = document.getElementById('splash-prog');
-  if (!p) return Promise.resolve();
-  if (duree <= 0 || Motion.reduit) { p.style.width = '100%'; return Promise.resolve(); }
-  return new Promise(resolve => {
-    const depart = performance.now();
-    const largeur = p.parentElement ? p.parentElement.clientWidth : 220;
-    const actuel = Math.min(100, (parseFloat(getComputedStyle(p).width) /
-                                  (largeur || 220)) * 100);
-    (function tick(now) {
-      const t = Math.min(1, (now - depart) / duree);
-      const ease = 1 - Math.pow(1 - t, 3);      // easeOutCubic
-      p.style.width = (actuel + (100 - actuel) * ease) + '%';
-      if (t < 1) requestAnimationFrame(tick); else resolve();
-    })(performance.now());
-  });
-}
-
-/** Ferme le splash. Idempotent : appelable depuis l'init ET le watchdog. */
-async function splashFermer(message) {
-  if (splashFerme) return;
-  splashFerme = true;
-  if (splashWatchdog) { clearTimeout(splashWatchdog); splashWatchdog = null; }
-  // Le minuteur de secours du <head> n'a plus lieu d'être : on
-  // l'annule pour qu'il ne réapparaisse pas après la fermeture.
-  if (window.__candimailSauvetage) {
-    clearTimeout(window.__candimailSauvetage);
-    window.__candimailSauvetage = null;
-  }
-  splashAvancer(100, message || 'Prêt !');
-  // On respecte la durée minimale AVANT de masquer, sinon le
-  // splash disparaîtrait dès la fin réelle du chargement (~25 ms).
-  const restant = Math.max(0, SPLASH_MIN_MS - (performance.now() - splashT0));
-  await splashRemplir(Math.max(restant, Motion.reduit ? 0 : 220));
-  const s = document.getElementById('splash');
-  if (!s) return;
-  s.classList.add('hidden');
-  setTimeout(() => s.remove(), 600);
-}
-
-/** Filet de sécurité : si l'init se bloque, on libère quand même. */
-function splashWatchdogArmer() {
-  splashWatchdog = setTimeout(() => {
-    if (!splashFerme) splashFermer('Chargement prolongé — ouverture…');
-  }, SPLASH_MAX_MS);
-}
-
-/**
- * Exécute une étape de préchargement.
- * Un échec isolé N'INTERROMPT PAS les étapes suivantes : on journalise
- * et on continue, exactement comme le faisait le code d'origine
- * (try/catch par étape). Le splash est fermé quoi qu'il arrive.
- */
-async function splashEtape(pct, etat, fn) {
-  splashAvancer(pct, etat);
-  try {
-    await fn();
-  } catch (e) {
-    console.error(`[candimail] ${etat}`, e);
-  }
-}
-
-/* INIT */
-document.addEventListener('DOMContentLoaded', async () => {
-  splashWatchdogArmer();
-  try {
-    await splashEtape(10, 'Chargement du profil…', loadConfig);
-    await splashEtape(30, 'Chargement des messages…', loadTemplates);
-    await splashEtape(48, 'Chargement des pièces jointes…', loadPieces);
-    await splashEtape(62, 'Chargement des groupes…', loadGroupes);
-    await splashEtape(76, 'Vérification IMAP…', loadIMAPStatus);
-    await splashEtape(90, 'Chargement des entreprises…', syncCompanies);
-    // Ces 3 liaisons ne sont pas critiques : si l'une échoue,
-    // l'utilisateur doit quand même obtenir l'application.
-    for (const [nom, fn] of [
-      ['bindSearch', bindSearch],
-      ['renderFilters', renderFilters],
-      ['bindDelaiUI', bindDelaiUI],
-    ]) {
-      try { fn(); }
-      catch (e) { console.error(`[candimail] ${nom}()`, e); }
-    }
-  } catch (e) {
-    console.error('[candimail] init incomplet :', e);
-  } finally {
-    await splashFermer();
-  }
-
-  // Back-end : bouton d'actualisation (ralentissement / bug)
-  const btnRB = document.getElementById('btn-refresh-backend');
-  if (btnRB) btnRB.addEventListener('click', () => refreshBackend(btnRB));
-  // 2e bouton identique dans le panneau Paramètres (id suffixé -2 :
-  // deux éléments ne peuvent pas partager le même id).
-  const btnRB2 = document.getElementById('btn-refresh-backend-2');
-  if (btnRB2) btnRB2.addEventListener('click', () => refreshBackend(btnRB2));
-
-  // Entreprises : ajout / édition / suppression
-  document.getElementById('btn-add-company').addEventListener('click', () => openCompanyModal(null));
-  document.getElementById('company-modal-close').addEventListener('click', closeCompanyModal);
-  document.getElementById('company-cancel').addEventListener('click', closeCompanyModal);
-  document.getElementById('company-save').addEventListener('click', saveCompany);
-  document.getElementById('company-modal').addEventListener('click', e => {
-    if (e.target.id === 'company-modal') closeCompanyModal();
-  });
-
-  // Max par heure
-  document.getElementById('cfg-maxh').addEventListener('change', async () => {
-    const mx = Math.max(1, Math.min(500, parseInt(document.getElementById('cfg-maxh').value) || 100));
-    document.getElementById('cfg-maxh').value = mx;
-    await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ parametres: { max_par_heure: mx } })
-    });
-    toast(`Max / heure : ${mx}`, 'ok');
-    refreshStatus();
-  });
-
-  // Sélection individuelle
-  document.getElementById('sel-all').addEventListener('click', selectAllFiltered);
-  document.getElementById('sel-none').addEventListener('click', clearSelection);
-  document.getElementById('sel-send').addEventListener('click', sendSelected);
-document.getElementById('sel-del').addEventListener('click', supprimerSelection);
-  updateSelectionUI();
-
-  // Config
-  document.getElementById('btn-save-config').addEventListener('click', saveCandidatConfig);
-document.getElementById('btn-reinit-profil').addEventListener('click', reinitialiserProfil);
-
-/* Aperçu + en-tête réactifs pendant la saisie du profil */
-['cfg-nom', 'cfg-tel', 'cfg-ville', 'cfg-pays'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('input', () => {
-    updateHeaderSub();
-    updateSignaturePreview();
-  });
-});
-  document.getElementById('cfg-template').addEventListener('change', saveCandidatConfig);
-
-  // Comptes
-  document.getElementById('btn-add-compte').addEventListener('click', addCompte);
-  document.getElementById('btn-help-password').addEventListener('click', () => {
-    document.getElementById('help-modal').classList.add('visible');
-  });
-  document.getElementById('help-close').addEventListener('click', () => {
-    Motion.fermerModale(document.getElementById('help-modal'));
-  });
-  document.getElementById('help-close-btn').addEventListener('click', () => {
-    Motion.fermerModale(document.getElementById('help-modal'));
-  });
-  document.getElementById('help-modal').addEventListener('click', e => {
-    if (e.target.id === 'help-modal') Motion.fermerModale(document.getElementById('help-modal'));
-  });
-  document.getElementById('new-password').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addCompte();
-  });
-
-  // Templates
-  document.getElementById('btn-new-tpl').addEventListener('click', openNewTpl);
-  document.getElementById('tpl-modal-close').addEventListener('click', closeTplModal);
-  document.getElementById('tpl-modal-cancel').addEventListener('click', closeTplModal);
-  document.getElementById('tpl-modal-save').addEventListener('click', saveTpl);
-  document.getElementById('tpl-modal').addEventListener('click', e => {
-    if (e.target.id === 'tpl-modal') closeTplModal();
-  });
-
-  // Envoi personnalisé
-  document.getElementById('btn-custom-preview').addEventListener('click', previewCustom);
-  document.getElementById('btn-custom-send').addEventListener('click', sendCustom);
-
-  // Groupes
-  document.getElementById('btn-new-groupe').addEventListener('click', openNewGroupe);
-  document.getElementById('grp-modal-close').addEventListener('click', closeGrpModal);
-  document.getElementById('grp-modal-cancel').addEventListener('click', closeGrpModal);
-  document.getElementById('grp-modal-save').addEventListener('click', saveGroupe);
-  document.getElementById('grp-emails').addEventListener('input', updateGrpEmailCount);
-  document.getElementById('grp-modal').addEventListener('click', e => {
-    if (e.target.id === 'grp-modal') closeGrpModal();
-  });
-  document.getElementById('grp-send-close').addEventListener('click', closeGrpSendModal);
-  document.getElementById('grp-send-cancel').addEventListener('click', closeGrpSendModal);
-  document.getElementById('grp-send-go').addEventListener('click', envoyerGroupe);
-  document.getElementById('grp-send-modal').addEventListener('click', e => {
-    if (e.target.id === 'grp-send-modal') closeGrpSendModal();
-  });
-  document.querySelectorAll('input[name="grp-mode"]').forEach(r => {
-    r.addEventListener('change', () => {
-      const id = document.getElementById('grp-send-id').value;
-      const g = groupesCache.find(x => x.id === id);
-      if (g) majGrpSendInfo(g);
-    });
-  });
-  document.getElementById('grp-send-pj').addEventListener('change', () => {
-    const id = document.getElementById('grp-send-id').value;
-    const g = groupesCache.find(x => x.id === id);
-    if (g) majGrpSendInfo(g);
-  });
-  document.getElementById('grp-send-template').addEventListener('change', appliquerTemplateGroupe);
-
-  // Pièces
-  document.getElementById('pj-input').addEventListener('change', e => {
-    if (e.target.files.length) uploadPieces(e.target.files);
-    e.target.value = '';
-  });
-
-  // IMAP
-  document.getElementById('btn-imap-check').addEventListener('click', checkIMAP);
-
-  // Navigation par PAGES (routing #hash, transition fluide)
-  const PAGES = {
-    overview: { id: 'page-dash', titre: "Vue d'ensemble" },
-    dash:     { id: 'page-dash',     titre: 'Cibles' },
-    envoi: { id: 'page-envoi', titre: 'Nouvel envoi' },
-    suivi: { id: 'page-suivi', titre: 'Suivi des envois' },
-    imap: { id: 'page-imap', titre: 'Réponses & filtres' },
-    comptes: { id: 'page-comptes', titre: 'Gmail & CV' },
-    messages: { id: 'page-messages', titre: 'Mes messages' },
-    groupes: { id: 'page-groupes', titre: 'Mes groupes' },
-    profil: { id: 'page-profil', titre: 'Profil' },
-    params: { id: 'page-params', titre: 'Paramètres & maintenance' },
-    historique: { id: 'page-historique', titre: 'Historique' },
-  },
-    envoi:    { id: 'page-envoi',    titre: 'Envoi express' },
-    imap:     { id: 'page-imap',     titre: 'Réponses & filtres' },
-    comptes:  { id: 'page-comptes',  titre: 'Comptes Gmail & CV' },
-    messages: { id: 'page-messages', titre: 'Mes messages' },
-    groupes:  { id: 'page-groupes',  titre: 'Mes groupes' },
-    profil:   { id: 'page-profil',   titre: 'Profil' },
-    params:   { id: 'page-params',   titre: "Paramètres & maintenance" },
-  };
-  function montrerPage(nav, sansHash) {
-    const page = PAGES[nav] || PAGES.dash;
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const el = document.getElementById(page.id);
-    if (el) el.classList.add('active');
-    document.querySelectorAll('.sidebar .nav-item[data-nav]')
-      .forEach(x => x.classList.toggle('active', x.dataset.nav === nav));
-    document.getElementById('bc-page').textContent = page.titre;
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    if (!sansHash) history.replaceState(null, '', '#' + nav);
-    try { sessionStorage.setItem('candimail.page', nav); } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-  }
-  window.montrerPage = montrerPage;
-  window.PAGES_CANDIMAIL = PAGES;
-  document.querySelectorAll('.sidebar .nav-item[data-nav]').forEach(a => {
-    a.addEventListener('click', () => montrerPage(a.dataset.nav));
-  });
-  // Raccourcis clavier Alt+1..8
-  const ORDRE_NAV = Object.keys(PAGES);
-  document.addEventListener('keydown', e => {
-    if (e.altKey && e.key >= '1' && e.key <= '8') {
-      e.preventDefault();
-      montrerPage(ORDRE_NAV[parseInt(e.key, 10) - 1]);
-    }
-  });
-  // Restaure la page au chargement + bouton retour navigateur
-  window.addEventListener('hashchange', () => {
-    montrerPage((location.hash || '#dash').slice(1), true);
-  });
-  const pageInit = (location.hash || '').slice(1)
-    || (() => { try { return sessionStorage.getItem('candimail.page'); } catch (e) { return null; } })()
-    || 'dash';
-  montrerPage(PAGES[pageInit] ? pageInit : 'dash', true);
-
-  // Recherche sidebar synchronisée + raccourci clavier « / »
-  const sMain = document.getElementById('search'), sSide = document.getElementById('search-side');
-  sSide.addEventListener('input', () => {
-    // La liste est sur le tableau de bord : on y bascule automatiquement
-    if ((sSide.value || '').trim()) montrerPage('dash');
-    sMain.value = sSide.value; sMain.dispatchEvent(new Event('input'));
-  });
-  sMain.addEventListener('input', () => { if ((sMain.value||'').trim()) montrerPage('dash'); sSide.value = sMain.value; });
-  document.addEventListener('keydown', e => {
-    if (e.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
-      e.preventDefault(); sSide.focus();
-    }
-  });
-
-  // Règles de classement
-  document.getElementById('btn-flt-add').addEventListener('click', addFiltre);
-  // Modal de règle (ajout / édition) : les 3 boutons n'étaient câblés
-  // à rien, le modal ne pouvait donc jamais être validé ni fermé.
-  document.getElementById('filter-save').addEventListener('click', soumettreRegle);
-  document.getElementById('filter-cancel').addEventListener('click', closeRegleModal);
-  document.getElementById('filter-modal-close').addEventListener('click', closeRegleModal);
-  document.getElementById('filter-modal').addEventListener('click', (ev) => {
-    if (ev.target === ev.currentTarget) closeRegleModal();
-  });
-  document.getElementById('btn-flt-appliquer').addEventListener('click', appliquerFiltres);
-  document.getElementById('btn-flt-libelles').addEventListener('click', creerLibelles);
-  document.getElementById('btn-app-corriger').addEventListener('click', apprendre);
-  document.getElementById('btn-notifs-activer').addEventListener('click', activerNotifs);
-  await loadFiltres();
-  await chargerNotifs();
-  setInterval(chargerNotifs, 60000);   // poll toutes les minutes
-
-  // Import/reset
-  document.getElementById('btn-reset-log').addEventListener('click', resetLog);
-  document.getElementById('btn-import-json').addEventListener('click',
-    () => document.getElementById('import-json-input').click());
-  document.getElementById('import-json-input').addEventListener('change', e => {
-    if (e.target.files[0]) importJSON(e.target.files[0]);
-    e.target.value = '';
-  });
-
-  // Bulk
-  document.getElementById('bulk-start').addEventListener('click', startBulk);
-  document.getElementById('bulk-stop').addEventListener('click', stopBulk);
-
-  // Modal aperçu
-  document.getElementById('modal-close').addEventListener('click', closeModal);
-  document.getElementById('modal-cancel').addEventListener('click', closeModal);
-  document.getElementById('modal-send').addEventListener('click', sendFromModal);
-  document.getElementById('modal').addEventListener('click', e => {
-    if (e.target.id === 'modal') closeModal();
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      closeModal();
-      Motion.fermerModale(document.getElementById('help-modal'));
-      closeGrpModal();
-      closeGrpSendModal();
-      closeTplModal();
-    }
-  });
-
-  await refreshStatus();
-
-  try {
-    const r = await fetch('/api/send-bulk-status');
-    const s = await r.json();
-    if (s.en_cours) {
-      setBulkUIRunning(true);
-      updateBulkUI(s);
-      startBulkPolling();
-    }
-  } catch (e) {
-        console.error('[candimail] erreur silencieuse:', e);
-      }
-});
-</script>
+<script src="/static/app.js"></script>
 </body>
 </html>

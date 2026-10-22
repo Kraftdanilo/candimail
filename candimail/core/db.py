@@ -46,6 +46,11 @@ CREATE TABLE IF NOT EXISTS meta (
     cle    TEXT PRIMARY KEY,
     valeur TEXT
 );
+CREATE TABLE IF NOT EXISTS profils (
+    uid        INTEGER PRIMARY KEY,
+    nom        TEXT NOT NULL,
+    date_creation TEXT
+);
 CREATE TABLE IF NOT EXISTS users (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     email     TEXT UNIQUE NOT NULL,
@@ -440,6 +445,55 @@ def uids_actifs():
         if r["cle"].startswith("u") and r["cle"][1:].isdigit():
             uids.append(int(r["cle"][1:]))
     return uids
+
+
+# --------------------------------
+# PROFILS UTILISATEURS
+# --------------------------------
+def profils_lister():
+    """Liste tous les profils avec leur uid et nom."""
+    with _lock:
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                "SELECT uid, nom, date_creation FROM profils ORDER BY uid"
+            ).fetchall()
+        finally:
+            conn.close()
+    return [dict(r) for r in rows]
+
+
+def profil_creer(uid, nom):
+    """Crée un nouveau profil. Retourne True si créé, False si déjà existant."""
+    with _lock:
+        conn = _connect()
+        try:
+            exists = conn.execute(
+                "SELECT 1 FROM profils WHERE uid=?", (uid,)
+            ).fetchone()
+            if exists:
+                return False
+            conn.execute(
+                "INSERT INTO profils(uid, nom, date_creation) VALUES(?, ?, ?)",
+                (uid, nom, datetime_now_str()),
+            )
+            conn.commit()
+            return True
+        finally:
+            conn.close()
+
+
+def profil_existe(uid):
+    """Vérifie si un profil existe."""
+    with _lock:
+        conn = _connect()
+        try:
+            r = conn.execute(
+                "SELECT 1 FROM profils WHERE uid=?", (uid,)
+            ).fetchone()
+        finally:
+            conn.close()
+    return r is not None
 
 
 def datetime_now_str():
