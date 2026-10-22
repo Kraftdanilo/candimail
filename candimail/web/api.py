@@ -42,6 +42,7 @@ from candimail.core.purge import purger_orphelins
 from candimail.services.ia_agent import (
     GROQ_MODELS, GOOGLE_MODELS, MISTRAL_MODELS, IA_TASKS,
     openrouter_models as _openrouter_models, agent_par_defaut as _ia_agent,
+    IAConfig as IAAgentConfig, IAAgent as IAAgentClasse, IAAgentError as IAAgentErreur,
 )
 
 # ============================================================
@@ -1666,11 +1667,15 @@ async def api_ia_catalogue():
         "ok": True,
         "tasks": IA_TASKS,
         "providers": {
-            "groq":       {"label": "Groq (gratuit)",       "models": list(GROQ_MODELS.keys())},
-            "google":     {"label": "Google AI (gratuit)",  "models": list(GOOGLE_MODELS.keys())},
-            "mistral":    {"label": "Mistral (gratuit)",    "models": list(MISTRAL_MODELS.keys())},
+            "groq":       {"label": "Groq (gratuit)",       "models": list(GROQ_MODELS.keys()),
+                           "key_url": "https://console.groq.com/keys"},
+            "google":     {"label": "Google AI (gratuit)",  "models": list(GOOGLE_MODELS.keys()),
+                           "key_url": "https://aistudio.google.com/app/apikey"},
+            "mistral":    {"label": "Mistral (gratuit)",    "models": list(MISTRAL_MODELS.keys()),
+                           "key_url": "https://console.mistral.ai/api-keys"},
             "openrouter": {"label": "OpenRouter (tous les modèles gratuits)",
-                           "models": list(_openrouter_models().keys())},
+                           "models": list(_openrouter_models().keys()),
+                           "key_url": "https://openrouter.ai/settings/keys"},
         },
     }
 
@@ -1684,10 +1689,60 @@ async def api_ia_config_save(request: Request):
         return JSONResponse({"ok": False, "error": "JSON invalide"}, status_code=400)
     try:
         IA_CONFIG_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        # CRUCIAL : l'agent en mémoire (singleton au démarrage) doit relire
+        # le fichier, sinon le chat continue d'utiliser l'ancienne config
+        # (fournisseur/modèle figés) jusqu'au redémarrage du serveur.
+        _ia_agent._load_all()
     except Exception as e:
         log_erreur("api_ia_config_save", e, "sauvegarde config IA")
         return JSONResponse({"ok": False, "error": "Impossible de sauvegarder"}, status_code=500)
     return {"ok": True}
+
+
+@app.post("/api/ia/test")
+async def api_ia_test(request: Request):
+    """Teste la clé API d'un fournisseur IA en envoyant un mini-message.
+    Body : {provider, apiKey, model} — valeurs par défaut : config 'rediger'.
+    Renvoie {ok, reponse?, modele?, duree_ms?, error?} sans jamais stocker la clé."""
+    try:
+        data = await request.json()
+    except Exception:
+        return JSONResponse({"ok": False, "error": "JSON invalide"}, status_code=400)
+
+    base = _charger_config_ia_fichier().get("rediger", {})
+    provider = data.get("provider") or base.get("provider") or "groq"
+    api_key = data.get("apiKey") or base.get("apiKey") or ""
+    model = data.get("model") or base.get("model") or ""
+    if not api_key:
+        return {"ok": False, "error": "Aucune clé API saisie pour ce fournisseur"}
+    if not model:
+        return {"ok": False, "error": "Aucun modèle sélectionné"}
+
+    cfg = IAAgentConfig(provider=provider, api_key=api_key, model=model, temperature=0.0, max_tokens=64)
+    messages = [
+        {"role": "system", "content": "Tu es un test de connectivité. Réponds très brièvement."},
+        {"role": "user", "content": "Réponds uniquement : OK"},
+    ]
+    try:
+        agent = IAAgentClasse()
+        try:
+            agent._configs["_test"] = cfg
+            resp = await agent.chat("_test", messages)
+            return {
+                "ok": True,
+                "reponse": (resp.text or "").strip()[:200],
+                "modele": resp.model,
+                "fournisseur": resp.provider,
+                "duree_ms": resp.duration_ms,
+                "tokens_out": resp.tokens_out,
+            }
+        finally:
+            await agent.close()
+    except IAAgentErreur as e:
+        return {"ok": False, "error": str(e)}
+    except Exception as e:
+        log_erreur("api_ia_test", e, "test clé IA")
+        return {"ok": False, "error": f"Erreur inattendue : {type(e).__name__}"}
 
 
 # ============================================================
@@ -1859,12 +1914,16 @@ def _lire_emails_recents(uid: int, limite: int = 15) -> list[dict]:
     return emails[:limite]
 
 
-async def _ia_chat_repondre(message: str, uid: int) -> str:
+async def _ia_chat_repondre(message: str, uid: int):
     """Cerveau du chat : détecte l'intention, exécute l'action réelle
-    correspondante, puis formule la réponse avec le LLM."""
-    from candimail.services.ia_agent import IAAgentError
+    correspondante, puis formule la réponse avec le LLM.
+    Retourne (reponse, meta) — meta indique quel agent IA a servi, pour
+    affichage dans l'interface."""
+    from candimail.services.ia_agent import IAAgentError, IA_TASKS
     msg = (message or "").strip()
     bas = msg.lower()
+
+    meta = {"tache": None, "fournisseur": None, "modele": None, "action": None}
 
     # ---- Actions réelles détectées par mots-clés -------------------------
     contexte = ""
@@ -1876,21 +1935,25 @@ async def _ia_chat_repondre(message: str, uid: int) -> str:
         intention = "resumer_emails"
         emails = _lire_emails_recents(uid)
         if not emails:
-            return "Aucun compte Gmail actif ou boîte vide — ajoute un compte dans la page Comptes & pièces."
+            meta["action"] = "résumé impossible — aucun compte Gmail actif"
+            return ("Aucun compte Gmail actif ou boîte vide — ajoute un compte dans la page "
+                    "Comptes & pièces."), meta
         liste = "\n".join(f"- [{e['date']}] {e['de']} : {e['sujet']}" for e in emails)
         contexte = f"Voici les derniers emails reçus ({len(emails)}) :\n{liste}\n\n"
         intention = "resumer_emails"
 
     elif "classe" in bas or "ranger" in bas or "classer" in bas or "courrier" in bas:
         intention = "classer"
+        meta["action"] = "classement local (sans IA)"
         cfg = charger_config(uid)
         filtres = cfg.get("filtres_gmail", [])
         comptes = get_comptes_actifs()
         if not filtres:
             return ("Il n'y a encore aucune règle de classement. Crée des règles dans la page "
-                    "« Réponses & filtres » puis je pourrai les appliquer sur ta boîte.")
+                    "« Réponses & filtres » puis je pourrai les appliquer sur ta boîte."), meta
         if not comptes:
-            return "Aucun compte Gmail actif — ajoute un compte d'abord."
+            meta["action"] = "classement impossible — aucun compte Gmail actif"
+            return "Aucun compte Gmail actif — ajoute un compte d'abord.", meta
         resultats = []
         for c in comptes:
             resultats.extend(appliquer_filtres_compte(c, filtres, uid=uid))
@@ -1898,7 +1961,7 @@ async def _ia_chat_repondre(message: str, uid: int) -> str:
         regles_ok = [r.get("regle") for r in resultats if r.get("ok") and r.get("trouves")]
         return (f"Classement terminé : {n} email(s) traité(s).\n" +
                 ("Règles actives : " + ", ".join(regles_ok) if regles_ok
-                 else "Aucune règle n'a trouvé de mail à classer."))
+                 else "Aucune règle n'a trouvé de mail à classer.")), meta
 
     elif bas.startswith("écris") or bas.startswith("ecris") or "rédige" in bas or "redige" in bas \
             or ("mail" in bas and ("à " in bas or "a " in bas or "pour " in bas)):
@@ -1909,15 +1972,25 @@ async def _ia_chat_repondre(message: str, uid: int) -> str:
                     f"ville={cand.get('ville')}, diplome={cand.get('diplome')}, spécialité={cand.get('spec')}.\n")
 
     # ---- Appel du LLM avec le contexte collecté --------------------------
-    cfg_ia = _ia_agent.get_config("rediger")
+    # Chaque intention utilise SA PROPRE tâche (et donc son propre couple
+    # fournisseur + modèle configuré dans la page Agent IA) :
+    #   résumé d'emails  -> tâche "resumer"
+    #   rédaction / chat -> tâche "rediger"
+    #   (le classement est exécuté localement, sans LLM)
+    tache_ia = "resumer" if intention == "resumer_emails" else "rediger"
+    cfg_ia = _ia_agent.get_config(tache_ia)
+    meta["tache"] = IA_TASKS.get(tache_ia, {}).get("label", tache_ia)
+    meta["fournisseur"] = cfg_ia.provider
+    meta["modele"] = cfg_ia.model
     if not cfg_ia.api_key:
         # Pas de clé : l'agent ne peut pas répondre par IA.
         # On donne quand même une réponse utile selon l'intention.
         if intention == "resumer_emails":
-            return ("Clé API IA manquante (page Agent IA) — je ne peux pas rédiger un résumé "
-                    "intelligent, mais voici les derniers emails bruts :\n" + contexte)
+            return ("Clé API IA manquante (page Agent IA, tâche « Résumer un fil ») — "
+                    "je ne peux pas rédiger un résumé intelligent, mais voici les "
+                    "derniers emails bruts :\n" + contexte), meta
         return ("Pour me faire parler, configure une clé API dans la page 🤖 Agent IA "
-                "(Groq, Google, Mistral ou OpenRouter — gratuits).")
+                "(Groq, Google, Mistral ou OpenRouter — gratuits)."), meta
 
     system = (
         "Tu es l'assistant intégré de Candimail, une application de suivi de candidatures "
@@ -1928,13 +2001,13 @@ async def _ia_chat_repondre(message: str, uid: int) -> str:
     if contexte:
         system += "\n\n" + contexte
     try:
-        resp = await _ia_agent.chat("rediger", [
+        resp = await _ia_agent.chat(tache_ia, [
             {"role": "system", "content": system},
             {"role": "user", "content": msg},
         ])
-        return resp.text
+        return resp.text, meta
     except IAAgentError as e:
-        return f"Erreur IA : {e}"
+        return f"Erreur IA : {e}", meta
 
 
 @app.post("/api/ia/chat")
@@ -1952,8 +2025,8 @@ async def api_ia_chat(request: Request):
     message = (data.get("message") or "").strip()
     if not message:
         return JSONResponse({"ok": False, "error": "Message vide"}, status_code=400)
-    reponse = await _ia_chat_repondre(message, uid)
-    return {"ok": True, "reponse": reponse}
+    reponse, meta = await _ia_chat_repondre(message, uid)
+    return {"ok": True, "reponse": reponse, "agent": meta}
 
 
 def lancer_serveur(app_instance, port, host=None):

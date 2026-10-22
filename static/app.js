@@ -913,11 +913,14 @@ async function histVider() {
 
 /* ------------------------------------------------------------
    IA — GET /api/ia/catalogue, GET/POST /api/ia/config
-   Clé API + modèle + température + max_tokens, par tâche.
-   (Backend : candimail/services/ia_agent.py — IAConfig)
+   Organisation CLAIRE :
+   - 1 bloc par FOURNISSEUR (clé API saisie une seule fois)
+   - par tâche : fournisseur choisi + modèle parmi SES modèles
+   (Backend : candimail/services/ia_agent.py — IAConfig par tâche)
    ------------------------------------------------------------ */
 let IA_CATALOGUE = null;   // {tasks: {...}, providers: {...}}
 let IA_CONFIG = {};        // {task: {provider, apiKey, model, temperature, max_tokens}}
+let IA_CLES = {};          // {provider: clé} — saisie une fois par fournisseur
 
 async function loadIa() {
   const cat = await api('/api/ia/catalogue');
@@ -928,63 +931,114 @@ async function loadIa() {
   IA_CATALOGUE = cat;
   IA_CONFIG = cfg || {};
 
-  /* cat.tasks : le backend renvoie IA_TASKS, un dict {id: {label, default_model}}
-     (jamais une liste — voir candimail/services/ia_agent.py). */
+  /* déduit les clés déjà saisies (stockées par tâche) pour les regrouper */
+  IA_CLES = {};
+  for (const t of Object.values(IA_CONFIG)) {
+    if (t.provider && t.apiKey && !IA_CLES[t.provider]) IA_CLES[t.provider] = t.apiKey;
+  }
+
+  /* cat.tasks : dict {id: {label, default_model}} — jamais une liste */
   const tasks = cat.tasks && typeof cat.tasks === 'object' && !Array.isArray(cat.tasks)
     ? Object.entries(cat.tasks).map(([id, t]) => ({ id, ...(t || {}) }))
     : [];
 
-  el.innerHTML = tasks.map(t => {
+  /* --- 1) blocs fournisseurs (clé API une seule fois) --- */
+  const blocsFournisseurs = Object.entries(cat.providers).map(([pid, p]) => `
+    <div class="list-item">
+      <span class="tag"><a href="${esc(p.key_url || '')}" target="_blank" rel="noopener noreferrer"
+         title="Obtenir une clé API ${esc(p.label)}">${esc(p.label)} ↗</a></span>
+      <span class="grow">${p.models.length} modèle(s) gratuit(s)<br>
+        <span class="help">${p.models.slice(0, 3).join(' · ')}${p.models.length > 3 ? ' …' : ''}
+          ${p.key_url ? `· <a href="${esc(p.key_url)}" target="_blank" rel="noopener noreferrer">obtenir une clé API ↗</a>` : ''}</span></span>
+      <input type="password" data-ia-cle="${pid}" placeholder="Clé API ${esc(p.label)}"
+             value="${esc(IA_CLES[pid] || '')}" style="width:240px" title="Une seule clé pour toutes les tâches">
+      <button class="btn small" data-ia-test="${pid}" title="Envoyer un mini-message pour vérifier la clé">🧪 Tester</button>
+      <span class="help" data-ia-test-res="${pid}" style="max-width:260px"></span>
+    </div>`).join('');
+
+  /* --- 2) une ligne par tâche : fournisseur + SES modèles --- */
+  const lignesTaches = tasks.map(t => {
     const cur = IA_CONFIG[t.id] || {};
     const provider = cur.provider || 'groq';
     const models = cat.providers[provider] ? cat.providers[provider].models : [];
-    const model = cur.model || t.default_model || (models[0] || '');
+    const model = (cur.model && models.includes(cur.model)) ? cur.model
+                  : (t.default_model && models.includes(t.default_model) ? t.default_model : (models[0] || ''));
     const providerOpts = Object.entries(cat.providers).map(([pid, p]) =>
       `<option value="${pid}" ${provider === pid ? 'selected' : ''}>${esc(p.label)}</option>`).join('');
     const modelOpts = models.map(m =>
       `<option value="${esc(m)}" ${model === m ? 'selected' : ''}>${esc(m)}</option>`).join('');
     return `
     <div class="list-item" data-task="${esc(t.id)}">
-      <span class="grow"><b>${esc(t.label || t.id)}</b><br>
-        <span class="help">modèle par défaut : ${esc(t.default_model || '—')}</span></span>
-      <div>
-        <label>Fournisseur</label>
-        <select data-ia-provider style="width:auto;min-width:130px">${providerOpts}</select>
-        <label>Modèle</label>
-        <select data-ia-model style="width:auto;min-width:190px">${modelOpts}</select>
-        <label>Clé API</label>
-        <input type="password" data-ia-key placeholder="Clé API ${esc((cat.providers[provider] || {}).label || provider)}"
-               value="${esc(cur.apiKey || '')}" style="width:220px">
-        <div class="row" style="margin-top:6px">
-          <div><label>Température</label>
-            <input type="number" data-ia-temp min="0" max="2" step="0.1"
-                   value="${cur.temperature ?? 0.7}" style="width:80px"></div>
-          <div><label>Max tokens</label>
-            <input type="number" data-ia-max min="128" max="8192" step="64"
-                   value="${cur.max_tokens ?? 2048}" style="width:100px"></div>
-        </div>
-      </div>
+      <span class="grow"><b>${esc(t.label || t.id)}</b></span>
+      <select data-ia-provider style="width:auto;min-width:170px">${providerOpts}</select>
+      <select data-ia-model style="width:auto;min-width:220px" title="Modèles du fournisseur choisi uniquement">${modelOpts}</select>
+      <span class="help">défaut : ${esc(t.default_model || '—')}</span>
     </div>`;
-  }).join('') || '<p class="help">Aucune tâche IA exposée par le backend.</p>';
+  }).join('');
 
-  el.querySelectorAll('.list-item').forEach(item => {
+  el.innerHTML = `
+    <h3 style="font-size:12px;text-transform:uppercase;border-bottom:var(--border);padding-bottom:6px;margin-bottom:10px">1 · Fournisseurs — clé API (une seule fois)</h3>
+    ${blocsFournisseurs}
+    <h3 style="font-size:12px;text-transform:uppercase;border-bottom:var(--border);padding-bottom:6px;margin:14px 0 10px">2 · Modèle par tâche — parmi les modèles du fournisseur choisi</h3>
+    ${lignesTaches || '<p class="help">Aucune tâche IA exposée par le backend.</p>'}
+    <div class="row" style="margin-top:10px">
+      <div><label>Température (toutes tâches)</label>
+        <input type="number" id="ia-temp-globale" min="0" max="2" step="0.1"
+               value="${IA_CONFIG.rediger?.temperature ?? 0.7}" style="width:80px"></div>
+      <div><label>Max tokens (toutes tâches)</label>
+        <input type="number" id="ia-max-globale" min="128" max="8192" step="64"
+               value="${IA_CONFIG.rediger?.max_tokens ?? 2048}" style="width:110px"></div>
+    </div>`;
+
+  /* --- events --- */
+  el.querySelectorAll('[data-ia-cle]').forEach(inp => {
+    inp.addEventListener('change', async () => {
+      const pid = inp.dataset.iaCle;
+      IA_CLES[pid] = inp.value;
+      /* applique la clé à TOUTES les tâches qui utilisent ce fournisseur */
+      for (const [tid, t] of Object.entries(IA_CONFIG)) {
+        if (t.provider === pid) t.apiKey = inp.value;
+      }
+      /* et aux tâches sans config qui pointent déjà vers ce fournisseur */
+      for (const t of tasks) {
+        const cur = IA_CONFIG[t.id] || {};
+        if ((cur.provider || 'groq') === pid && !cur.apiKey) {
+          IA_CONFIG[t.id] = { provider: pid, model: t.default_model || '', apiKey: inp.value,
+                              temperature: 0.7, max_tokens: 2048, ...cur, apiKey: inp.value };
+        }
+      }
+      await saveIaConfig();
+    });
+  });
+  el.querySelectorAll('.list-item[data-task]').forEach(item => {
     const task = item.dataset.task;
     item.querySelector('[data-ia-provider]').addEventListener('change', e => {
-      /* changer de fournisseur recharge la liste de modèles pour cette tâche */
-      IA_CONFIG[task] = { ...(IA_CONFIG[task] || {}), provider: e.target.value, model: '' };
-      loadIa();
+      /* fournisseur changé : modèle réinitialisé dans SA liste + clé du fournisseur */
+      const pid = e.target.value;
+      IA_CONFIG[task] = { ...(IA_CONFIG[task] || {}), provider: pid, model: '', apiKey: IA_CLES[pid] || '' };
+      saveIaConfig().then(loadIa);
     });
-    item.querySelector('[data-ia-model]').addEventListener('change', e => saveIaTask(task, { model: e.target.value }));
-    item.querySelector('[data-ia-key]').addEventListener('change', e => saveIaTask(task, { apiKey: e.target.value }));
-    item.querySelector('[data-ia-temp]').addEventListener('change', e => saveIaTask(task, { temperature: parseFloat(e.target.value) || 0.7 }));
-    item.querySelector('[data-ia-max]').addEventListener('change', e => saveIaTask(task, { max_tokens: parseInt(e.target.value, 10) || 2048 }));
+    item.querySelector('[data-ia-model]').addEventListener('change', e => {
+      IA_CONFIG[task] = { ...(IA_CONFIG[task] || {}), model: e.target.value };
+      saveIaConfig();
+    });
   });
+  el.querySelectorAll('[data-ia-test]').forEach(btn => {
+    btn.addEventListener('click', () => testerApiIa('agent', btn.dataset.iaTest));
+  });
+  $('ia-temp-globale').addEventListener('change', e => majParamsGlobaux(parseFloat(e.target.value) || 0.7, null));
+  $('ia-max-globale').addEventListener('change', e => majParamsGlobaux(null, parseInt(e.target.value, 10) || 2048));
 }
 
-/* Fusionne les champs modifiés dans la config de la tâche puis POST complet
-   (le backend écrit data/ia_config.json tel quel). */
-async function saveIaTask(task, patch) {
-  IA_CONFIG[task] = { ...(IA_CONFIG[task] || {}), ...patch };
+function majParamsGlobaux(temp, maxTokens) {
+  for (const t of Object.values(IA_CONFIG)) {
+    if (temp !== null) t.temperature = temp;
+    if (maxTokens !== null) t.max_tokens = maxTokens;
+  }
+  saveIaConfig();
+}
+
+async function saveIaConfig() {
   const d = await api('/api/ia/config', { method: 'POST', body: IA_CONFIG });
   d.ok ? toast('Config IA sauvegardée', 'ok') : toast(d.error || 'Erreur', 'err');
 }
@@ -1041,6 +1095,19 @@ function goto(page) {
   if (page === 'profil') loadConfig();
   if (page === 'historique') loadHistorique();
   if (page === 'ia') loadIa();
+  if (page === 'chat') { majAgentInfo(); initChatModelSelector(); }
+}
+
+/* Affiche en permanence quel agent IA l'assistant va utiliser */
+async function majAgentInfo() {
+  const el = $('chat-agent-info');
+  if (!el) return;
+  const cfg = await api('/api/ia/config');
+  const red = cfg.rediger || {};
+  const res = cfg.resumer || {};
+  const cle = p => (p && p.apiKey) ? '🔑' : '⚠ sans clé';
+  el.textContent = `Rédaction / conversation : ${red.provider || '—'} · ${red.model || '—'} ${cle(red)}   |   `
+    + `Résumé : ${res.provider || '—'} · ${res.model || '—'} ${cle(res)}`;
 }
 
 /* ------------------------------------------------------------
@@ -1236,7 +1303,136 @@ async function envoyerChat() {
   const log = $('chat-log');
   /* remplace la bulle « … » par la vraie réponse */
   if (log && log.lastChild) log.removeChild(log.lastChild);
-  chatAjouter(d.ok ? (d.reponse || 'Réponse vide') : (d.error || 'Erreur'), 'ia');
+  if (d.ok) {
+    chatAjouter(d.reponse || 'Réponse vide', 'ia');
+    /* mention explicite de l'agent utilisé (tâche / fournisseur / modèle) */
+    const a = d.agent || {};
+    const agentTxt = a.action || (a.fournisseur
+      ? `tâche « ${a.tache || '?'} » · ${a.fournisseur} · ${a.modele || '?'}`
+      : 'aucun modèle configuré');
+    const log2 = $('chat-log');
+    if (log2) {
+      const note = document.createElement('div');
+      note.className = 'help';
+      note.style.cssText = 'font-size:10px;opacity:.7;margin-top:-6px;text-align:right';
+      note.textContent = `🤖 ${agentTxt}`;
+      log2.appendChild(note);
+      log2.scrollTop = log2.scrollHeight;
+    }
+  } else {
+    chatAjouter(d.error || 'Erreur', 'ia');
+  }
+}
+
+/* Sélecteur de modèle DANS l'Assistant IA — modifie la tâche « rediger »
+   (celle utilisée pour la conversation) sans quitter le chat. */
+async function initChatModelSelector() {
+  const selP = $('chat-provider');
+  const selM = $('chat-model');
+  const info = $('chat-cle-info');
+  if (!selP || !selM) return;
+
+  if (!IA_CATALOGUE) {
+    const cat = await api('/api/ia/catalogue');
+    if (!cat.ok) { info.textContent = 'Catalogue IA indisponible.'; return; }
+    IA_CATALOGUE = cat;
+  }
+  const cfg = await api('/api/ia/config');
+  if (cfg && typeof cfg === 'object') IA_CONFIG = { ...IA_CONFIG, ...cfg };
+
+  /* déduit les clés déjà saisies (comme la page Agent IA) */
+  if (!Object.keys(IA_CLES).length) {
+    for (const t of Object.values(IA_CONFIG)) {
+      if (t.provider && t.apiKey && !IA_CLES[t.provider]) IA_CLES[t.provider] = t.apiKey;
+    }
+  }
+
+  const cat = IA_CATALOGUE;
+  const cur = IA_CONFIG.rediger || {};
+  const provider = cur.provider || 'groq';
+
+  selP.innerHTML = Object.entries(cat.providers).map(([pid, p]) =>
+    `<option value="${pid}" ${provider === pid ? 'selected' : ''}>${esc(p.label)}</option>`).join('');
+  majChatModeles();
+  majChatCleInfo();
+
+  selP.addEventListener('change', () => {
+    const pid = selP.value;
+    IA_CONFIG.rediger = { ...(IA_CONFIG.rediger || {}), provider: pid, model: '', apiKey: IA_CLES[pid] || '' };
+    majChatModeles();
+    majChatCleInfo();
+    saveIaConfig().then(majAgentInfo);
+  });
+  selM.addEventListener('change', () => {
+    IA_CONFIG.rediger = { ...(IA_CONFIG.rediger || {}), model: selM.value };
+    saveIaConfig().then(majAgentInfo);
+  });
+}
+
+function majChatModeles() {
+  const selP = $('chat-provider');
+  const selM = $('chat-model');
+  if (!selP || !selM || !IA_CATALOGUE) return;
+  const p = IA_CATALOGUE.providers[selP.value];
+  const models = p ? p.models : [];
+  const cur = IA_CONFIG.rediger || {};
+  const model = (cur.model && models.includes(cur.model)) ? cur.model : (models[0] || '');
+  selM.innerHTML = models.map(m =>
+    `<option value="${esc(m)}" ${model === m ? 'selected' : ''}>${esc(m)}</option>`).join('');
+}
+
+function majChatCleInfo() {
+  const info = $('chat-cle-info');
+  if (!info) return;
+  const pid = $('chat-provider')?.value;
+  const p = IA_CATALOGUE?.providers?.[pid];
+  const ok = !!(IA_CLES[pid] || IA_CONFIG.rediger?.apiKey);
+  if (ok) {
+    info.textContent = '🔑 clé OK';
+  } else {
+    const url = p?.key_url;
+    info.innerHTML = `⚠ clé API manquante — `
+      + (url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">obtenir une clé ${esc(p.label)} ↗</a>`
+             : '(onglet Agent IA)');
+  }
+}
+
+/* Test d'une clé API fournisseur — POST /api/ia/test.
+   ou = 'chat' (sélecteur de l'Assistant IA) ou 'agent' (page Agent IA, data-ia-test). */
+async function testerApiIa(ou, provider) {
+  let selP, selM, resEl;
+  if (ou === 'chat') {
+    selP = $('chat-provider'); selM = $('chat-model'); resEl = $('chat-cle-info');
+  } else {
+    resEl = document.querySelector(`[data-ia-test-res="${provider}"]`);
+  }
+  if (resEl) resEl.textContent = '⏳ test en cours…';
+
+  let providerId = provider, apiKey = '', model = '';
+  if (ou === 'chat') {
+    providerId = selP?.value;
+    model = selM?.value || '';
+    apiKey = IA_CLES[providerId] || IA_CONFIG.rediger?.apiKey || '';
+  } else {
+    /* clé éventuellement modifiée juste avant le test (non encore sauvegardée) */
+    const inp = document.querySelector(`input[data-ia-cle="${providerId}"]`);
+    const cur = IA_CONFIG.rediger || {};
+    if (inp && inp.value) apiKey = inp.value;
+    /* modèle : le premier du fournisseur, ou celui de la config si cohérent */
+    const models = IA_CATALOGUE?.providers?.[providerId]?.models || [];
+    model = (cur.provider === providerId && cur.model && models.includes(cur.model)) ? cur.model : (models[0] || '');
+  }
+
+  const d = await api('/api/ia/test', { method: 'POST', body: { provider: providerId, apiKey, model } });
+  if (!resEl) return d;
+  if (d.ok) {
+    resEl.textContent = `✅ ${d.fournisseur} · ${d.modele} · ${d.duree_ms} ms${d.reponse ? ` → « ${d.reponse} »` : ''}`;
+    toast('Clé API validée', 'ok');
+  } else {
+    resEl.textContent = `❌ ${d.error || 'Test échoué'}`;
+    toast(d.error || 'Test échoué', 'err');
+  }
+  return d;
 }
 
 /* Garde-fou anti-splash figé */
@@ -1246,8 +1442,18 @@ setTimeout(hideSplash, 10000);
    Wiring de la page (une fois le DOM prêt)
    ------------------------------------------------------------ */
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => goto(n.dataset.nav)));
+  document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => {
+    goto(n.dataset.nav);
+    /* referme le menu mobile après une navigation */
+    $('sidebar')?.classList.remove('ouvert');
+  }));
   goto('dash');
+
+  /* menu mobile */
+  $('btn-menu') && $('btn-menu').addEventListener('click', () => {
+    const sb = document.querySelector('.sidebar');
+    if (sb) sb.classList.toggle('ouvert');
+  });
 
   const search = $('search');
   if (search) search.addEventListener('input', () => { searchQuery = search.value.trim(); renderCompanies(); });

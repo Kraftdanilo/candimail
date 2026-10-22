@@ -77,6 +77,7 @@ window.__cmSauvetage = setTimeout(function () {
 <div class="content">
 
 <header class="topbar">
+  <button class="btn-menu" id="btn-menu" title="Menu">☰ Menu</button>
   <h1>Candimail <small id="header-sub" class="help" style="display:block">Candidat · Ma ville</small></h1>
   <div class="badges">
     <span class="badge" id="cv-badge">📎 0 pièce(s)</span>
@@ -318,6 +319,19 @@ window.__cmSauvetage = setTimeout(function () {
       <h2>💬 Assistant IA</h2>
       <p class="help">Demande ce que tu veux faire : résumer tes derniers emails, classer le courrier,
         rédiger un mail à quelqu'un, conseiller sur une candidature…</p>
+      <div id="chat-agent-info" class="help" style="margin-top:6px"></div>
+      <div class="row" style="margin-top:8px;align-items:flex-end">
+        <div>
+          <label>Fournisseur</label>
+          <select id="chat-provider" style="min-width:170px"></select>
+        </div>
+        <div>
+          <label>Modèle</label>
+          <select id="chat-model" style="min-width:240px" title="Modèle utilisé par l'Assistant IA"></select>
+        </div>
+        <span id="chat-cle-info" class="help"></span>
+        <button class="btn small" id="btn-chat-tester" onclick="testerApiIa('chat')">🧪 Tester</button>
+      </div>
       <div id="chat-log" style="border:var(--border);padding:12px;min-height:280px;max-height:420px;
            overflow-y:auto;margin:12px 0;display:flex;flex-direction:column;gap:10px">
         <div class="help">Exemples : « Résume mes derniers emails » · « Classe mon courrier » ·

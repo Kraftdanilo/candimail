@@ -4,7 +4,8 @@
    ombres dures décalées. Aucune dépendance externe.
    ============================================================ */
 :root{
-  --blanc:#FFFFFF;
+  --blanc:#FAF7F0;         /* blanc papier (au lieu de #FFFFFF pur) */
+  --blanc-pur:#FFFFFF;     /* réservé aux champs de saisie */
   --jaune:#FFD300;
   --noir:#111111;
   --muted:#555555;
@@ -30,7 +31,7 @@ a{color:var(--noir);text-decoration:underline}
 input,textarea,select,button{font-family:inherit;font-size:13px;color:var(--noir)}
 input[type=text],input[type=email],input[type=password],input[type=search],
 input[type=number],textarea,select{
-  width:100%;padding:9px 10px;background:var(--blanc);
+  width:100%;padding:9px 10px;background:var(--blanc-pur);
   border:var(--border);border-radius:0;outline:none;
 }
 input:focus,textarea:focus,select:focus{box-shadow:var(--shadow-sm);transform:translate(-1px,-1px)}
@@ -205,9 +206,19 @@ table.tbl th{background:var(--jaune);text-transform:uppercase;font-size:11px}
 
 /* ---- responsive ---- */
 @media(max-width:900px){
-  .sidebar{display:none}
   main{padding:16px}
+  /* la sidebar se replie : bouton menu affiché en haut */
+  .sidebar{display:none;position:fixed;z-index:150;left:0;top:0;bottom:0;
+    box-shadow:8px 0 0 var(--noir)}
+  .sidebar.ouvert{display:flex}
+  .btn-menu{display:inline-flex}
 }
+@media(min-width:901px){
+  .btn-menu{display:none}
+}
+.btn-menu{padding:9px 16px;background:var(--jaune);border:var(--border);
+  font-weight:700;cursor:pointer;box-shadow:var(--shadow-sm);font-family:inherit;
+  font-size:12px;text-transform:uppercase}
 @media(prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
 }

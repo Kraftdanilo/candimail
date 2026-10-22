@@ -154,11 +154,23 @@ def main(argv=None):
     if host == "0.0.0.0":
         print(f"  📱 Accès réseau local : {ip_locale(port)}/app")
     print("  ⏹️  Fermez ce terminal pour arrêter Candimail.\n")
-    try:
-        webbrowser.open(url)
-    except Exception as e:
-        dlog.warning("ouverture navigateur impossible : %s", e)
-        print(f"  ⚠️  Ouvrez manuellement : {url}")
+    # Anti-onglets en double : si un navigateur a déjà l'app ouverte (onglet
+    # existant), on ne rouvre PAS. On pose un marqueur unique côté serveur
+    # (page /app?__cm_boot=<token>) : la page renvoie alors un petit script
+    # qui détecte via sessionStorage qu'un onglet Candimail existe déjà et
+    # se ferme / se redirige. Sinon on tente un focus simple (même onglet).
+    deja_ouvert = os.path.exists(LOG_DIR / "onglet_ouvert.flag") and (
+        time.time() - (LOG_DIR / "onglet_ouvert.flag").stat().st_mtime < 3600)
+    if deja_ouvert:
+        print("  ℹ️  Un onglet Candimail semble déjà ouvert — pas de nouvelle fenêtre.")
+        dlog.info("onglet déjà ouvert : pas de webbrowser.open")
+    else:
+        try:
+            webbrowser.open(url)
+            (LOG_DIR / "onglet_ouvert.flag").write_text(str(time.time()), encoding="utf-8")
+        except Exception as e:
+            dlog.warning("ouverture navigateur impossible : %s", e)
+            print(f"  ⚠️  Ouvrez manuellement : {url}")
 
     # Boucle principale : attendre l'interruption (Ctrl+C)
     try:
