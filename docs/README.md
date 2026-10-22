@@ -140,8 +140,11 @@ python candimail.py --debug         # logs détaillés + console navigateur
 ## 6. Licence
 
 Candimail est un logiciel **propriétaire** sous licence « Tous droits
-réservés ». La redistribution, la modification et l'usage commercial sont
-interdits sans autorisation écrite du titulaire.
+réservés », à usage personnel et non commercial. L'exécution sur tes propres
+postes (Windows/Linux/mac), la modification privée à des fins
+d'apprentissage, et l'accès réseau local (`--lan`) sont autorisés. La
+revente, l'usage commercial et la redistribution publique sous un autre nom
+sont interdits.
 
 Voir [`LICENSE`](../LICENSE) pour le texte intégral (13 articles + 2 annexes).
 

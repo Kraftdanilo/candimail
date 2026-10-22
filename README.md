@@ -1,8 +1,10 @@
 # Candimail r0.0.1 — automatisation Gmail libre (serveur web local + FastAPI)
 
 > **Copyright © 2026 — Dane hk \Manifest. Tous droits réservés.**
-> Créateur de l'application. Logiciel propriétaire : redistribution,
-> modification et usage commercial interdits sans autorisation écrite.
+> Créateur de l'application. Logiciel propriétaire, usage personnel :
+> exécution libre sur tes propres postes (Windows/Linux/mac), modification
+> privée autorisée (projet d'entraînement), mais pas de revente, d'usage
+> commercial, ni de redistribution publique sous un autre nom.
 > Voir [`LICENSE`](LICENSE).
 
 **Candimail** est un projet de compétences et d'entraînement : il facilite

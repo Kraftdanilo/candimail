@@ -8,9 +8,9 @@ LICENCE CANDIMAIL
 
 Titulaire       : Dane hk \Manifest
 Œuvre           : Candimail (ci-après « l'Application »)
-Version         : 7 (bureau / desktop)
-Nature          : Application de bureau d'automatisation de candidatures
-                  par courrier électronique (Gmail / SMTP / IMAP)
+Version         : r0.0.1 et suivantes
+Nature          : Application web locale d'automatisation de messagerie
+                  Gmail (SMTP / IMAP), hors ligne et sans abonnement
 Usage           : PERSONNEL, PRIVÉ ET NON COMMERCIAL — mono-utilisateur
 Date            : 2026
 Territoire      : Mondial
@@ -20,66 +20,68 @@ Langue          : Français (langue de référence contractuelle)
  2. DÉFINITIONS
 ===============================================================================
 
-« Application »  : le code source, le code compilé, les exécutables, les
-                   interfaces graphiques, les feuilles de style, les
-                   ressources visuelles, la documentation et tout élément
-                   accessoire de Candimail.
+« Application »  : le code source, les exécutables, l'interface web, les
+                   feuilles de style, les ressources visuelles, la
+                   documentation et tout élément accessoire de Candimail.
 
 « Licence »     : les présentes conditions générales.
 
-« Utilisateur » : la personne physique ou morale qui installe et utilise
-                   l'Application.
+« Utilisateur » : la personne physique qui installe et utilise
+                   l'Application pour son propre compte.
+
+« Réseau local » : l'ensemble des appareils (ordinateur, téléphone,
+                   tablette) connectés au même réseau domestique ou
+                   d'atelier que l'ordinateur exécutant l'Application.
 
 « Logiciels Tiers » : bibliothèques open source listées à l'annexe A,
                    régies par leurs propres licences.
 
 ===============================================================================
- 3. LICENCE ATTRIBUÉE — DROIT DE PERSONNEL, NON TRANSFÉRABLE
+ 3. LICENCE ATTRIBUÉE
 ===============================================================================
 
 3.1  OCTROI
 
 Sous réserve du respect intégral de la présente Licence, le Titulaire
 accorde à l'Utilisateur une licence personnelle, non exclusive, non
-transférable et non sous-licenciable d'utilisation de l'Application, pour
-une durée illimitée, sur le(s) système(s) d'exploitation de l'Utilisateur.
+sous-licenciable, d'exécution de l'Application, pour une durée illimitée,
+sur tout poste lui appartenant ou dont il a l'usage.
 
-3.2  PORTÉE DE LA LICENCE — USAGE PERSONNEL EXCLUSIF
+3.2  PORTÉE — USAGE PERSONNEL EXCLUSIF
 
-Candimail est une application de BUREAU à **USAGE PERSONNEL** : elle sert
-uniquement à la gestion personnelle de ses propres candidatures et
-prospections par e-mail.
+Candimail sert à l'automatisation de la messagerie Gmail **personnelle** de
+l'Utilisateur (envois, suivi, filtres, modèles, agent IA) : candidatures,
+correspondances, groupes, notifications, tout usage privé de sa propre
+boîte e-mail.
 
-La Licence autorise UNIQUEMENT :
-  a) l'installation de l'Application sur le poste de l'Utilisateur ;
-  b) l'utilisation **personnelle et privée** de ses fonctionnalités ;
-  c) la conservation d'une copie de sauvegarde à des fins de restauration.
+La Licence autorise :
+  a) l'installation et l'exécution de l'Application sur autant de postes
+     que l'Utilisateur en possède (personnel) — Windows, Linux et macOS ;
+  b) l'installation sur un second PC d'un autre utilisateur FAMILLE ou
+     PROCHE EXÉCUTANT L'APPLICATION POUR SON PROPRE COMPTE, avec sa propre
+     base de données locale et ses propres comptes Gmail ;
+  c) l'ouverture au Réseau local (option --lan) pour accéder à l'Application
+     depuis les appareils de l'Utilisateur sur ce même réseau ;
+  d) la consultation et la modification du code source À DES FINS
+     PERSONNELLES D'APPRENTISSAGE, DE COMPÉTENCES ET D'ENTRAÎNEMENT ;
+  e) la conservation d'une copie de sauvegarde.
 
 La Licence n'autorise PAS, en aucun cas :
-  d) l'installation sur plus d'un poste sans autorisation écrite ;
-  e) tout usage commercial, professionnel, en entreprise, en cabinet ou
-     pour le compte d'un tiers, quelle qu'en soit la nature ;
-  f) la mise à disposition de l'Application ou de ses résultats à des
-     tiers, y compris au sein d'une organisation ;
-  g) toute modification du code source ;
-  h) la redistribution, la copie, la location, la sous-location, la vente
-     ou la mise à disposition de l'Application, totale ou partielle ;
-  i) l'hébergement, la mise en ligne ou l'exploitation de l'Application
-     comme service destiné à des tiers.
+  f) tout usage commercial, professionnel, en entreprise ou pour le compte
+     d'un tiers, quelle qu'en soit la nature ;
+  g) la revente, la location, la sous-location ou la monétisation de
+     l'Application, totale ou partielle ;
+  h) l'hébergement public de l'Application comme service en ligne
+     (SaaS) accessible depuis Internet ;
+  i) la redistribution publique du code modifié ou non (présentation du
+     travail d'autrui comme sien, ou publication sous un autre nom).
 
-3.3  ABSENCE DE CARACTÈRE MULTI-UTILISATEUR
+3.3  MONO-UTILISATEUR
 
-L'Application est conçue pour un **utilisateur unique** sur son poste
-personnel. Elle n'emploie ni authentification ni gestion de comptes
-d'utilisateurs. Toute tentative d'usage partagé, simultané ou en réseau est
-strictement interdite.
-
-3.3  ABSENCE DE GARANTIE DE REDISTRIBUTION
-
-L'Application ne peut être ni diffusée, ni partagée, ni mise en ligne, ni
-mise en vente, y compris sur un dépôt public de code source, un service
-d'hébergement ou une plateforme de partage, sans accord écrit préalable du
-Titulaire.
+L'Application est conçue pour un **utilisateur unique** par installation :
+elle n'emploie ni authentification ni gestion de comptes multiples. Le
+Réseau local (option --lan) sert à accéder à la MÊME instance depuis les
+appareils de l'Utilisateur, pas à partager l'usage avec des tiers.
 
 ===============================================================================
  4. PROPRIÉTÉ INTELLECTUELLE
@@ -90,8 +92,7 @@ Titulaire.
      textes, des documents et des documentations, appartient exclusivement
      au Titulaire.
 
-4.2  Aucun droit de propriété intellectuelle n'est cédé. Le paiement éventuel
-     d'une licence d'utilisation ne constitue pas une cession de droits.
+4.2  Aucun droit de propriété intellectuelle n'est cédé.
 
 4.3  Le droit moral de l'auteur demeure perpétuellement attaché à
      l'Application.
@@ -112,14 +113,14 @@ Titulaire.
      b) les contrôles d'accès, les quotas d'envoi et les délais imposés ;
      c) les en-têtes HTTP de sécurité ni les restrictions d'interface.
 
-5.2  L'Utilisateur s'interdit d'exposer l'Application sur un réseau, local
-     ou distant, et de la rendre accessible à des tiers. Candimail est une
-     application de bureau : son serveur interne reste sur 127.0.0.1 et sert
-     exclusivement à alimenter la fenêtre de l'application.
+5.2  L'Utilisateur s'interdit d'exposer l'Application à Internet (port
+     ouvert, reverse proxy public, tunnel) de sorte qu'elle soit accessible
+     depuis l'extérieur du Réseau local. L'option --lan est limitée au
+     réseau domestique ou d'atelier de l'Utilisateur.
 
-5.3  L'Utilisateur s'interdit d'insérer du code malveillant, d'effectuer du
-     reverse engineering à des fins d'extraction de la logique métier, ou de
-     réaliser une analyse automatisée de vulnérabilités de l'Application.
+5.3  L'Utilisateur s'interdit d'insérer du code malveillant ou de réaliser
+     une analyse automatisée de vulnérabilités destinée à nuire à
+     l'Application ou à ses utilisateurs.
 
 5.4  Les identifiants de connexion, les mots de passe d'application Gmail et
      les clés de chiffrement sont des éléments sensibles : l'Utilisateur en
@@ -130,13 +131,17 @@ Titulaire.
 ===============================================================================
 
 6.1  L'Application traite localement les données de l'Utilisateur (CV,
-     entreprises, comptes, journal d'envois). Aucune donnée n'est transmise à
+     cibles, comptes, journal d'envois). Aucune donnée n'est transmise à
      un serveur tiers par l'Application elle-même.
 
 6.2  Les envois d'e-mails transitent par les serveurs SMTP/IMAP de Google,
      soumis à la politique de confidentialité de ce dernier.
 
-6.3  L'Utilisateur demeure seul responsable de la licéité du traitement des
+6.3  L'agent IA optionnel peut transmettre des extraits de messages aux
+     fournisseurs configurés par l'Utilisateur (Groq, Google AI, Mistral),
+     soumis aux politiques de confidentialité de ces fournisseurs.
+
+6.4  L'Utilisateur demeure seul responsable de la licéité du traitement des
      données qu'il saisit et de leur conformité avec le RGPD et la
      réglementation ivoirienne applicable (voir la page /rgpd).
 
@@ -168,14 +173,11 @@ Titulaire.
  8. LIMITATION DE RESPONSABILITÉ
 ===============================================================================
 
-Dans toute hypothèse, quelle qu'en soit la nature et le fondement juridique
-(contractuel, délictuel ou autre), la responsabilité totale et cumulée du
-Titulaire ne pourra excéder le montant effectivement payé par l'Utilisateur
-pour l'acquisition de la Licence au cours des douze (12) derniers mois
-précédant l'événement ayant donné lieu à réclamation, étant précisé que,
-dans le cas d'un logiciel fourni gratuitement, cette responsabilité est limitée
-à zéro (0) et que le Titulaire ne pourra être tenu responsable d'aucun
-préjudice en cas de perte ou de corruption de données.
+L'Application étant fournie gratuitement, la responsabilité totale et
+cumulée du Titulaire est limitée à zéro (0) ; le Titulaire ne pourra être
+tenu responsable d'aucun préjudice, y compris en cas de perte ou de
+corruption de données, de suspension d'un compte e-mail, ou de non-envoi
+d'un message.
 
 ===============================================================================
  9. RÉVOCATION ET RÉSILIATION
@@ -188,16 +190,13 @@ préjudice en cas de perte ou de corruption de données.
      utilisation de l'Application et supprimer toutes les copies dont il
      dispose, y compris les fichiers de sauvegarde.
 
-9.3  La révocation n'entraîne aucune obligation de remboursement.
-
 ===============================================================================
  10. CONFIDENTIALITÉ
 ===============================================================================
 
-L'Utilisateur s'engage à ne pas divulguer le code source, les algorithmes,
-les clés de déchiffrement, les secrets techniques ou toute information
-relative au fonctionnement interne de l'Application, y compris à des tiers
-non autorisés par écrit par le Titulaire.
+L'Utilisateur s'engage à ne pas divulguer les clés de déchiffrement, les
+secrets techniques ou toute information sensible relative au fonctionnement
+interne de l'Application.
 
 ===============================================================================
  11. MODIFICATION DE LA LICENCE
@@ -241,13 +240,15 @@ licences :
 
   Bibliothèque        Licence           Usage
   -----------------   ---------------   ------------------------------
-  Flask               BSD-3-Clause      Framework web
-  Werkzeug            BSD-3-Clause      Utilitaires WSGI (via Flask)
+  FastAPI             MIT               Framework web (ASGI)
+  Uvicorn             BSD-3-Clause      Serveur ASGI
+  Starlette           BSD-3-Clause      Cœur HTTP (via FastAPI)
+  Pydantic            MIT               Validation des données
   Jinja2              BSD-3-Clause      Moteur de templates
   cryptography        Apache-2.0 / BSD  Chiffrement Fernet
   openpyxl            MIT               Export Excel
-  pywebview           BSD-3-Clause      Fenêtre desktop (WebView2)
-  waitress             ZPL-2.0           Serveur WSGI de production
+  httpx               BSD-3-Clause      Agent IA (appels HTTP)
+  python-multipart    Apache-2.0        Uploads de fichiers
   Python              PSF License 2.0   Langage
 
 Ces bibliothèques restent la propriété de leurs auteurs respectifs et ne sont
@@ -258,7 +259,8 @@ pas couvertes par la présente Licence.
 ===============================================================================
 
 Conception et développement :  Dane hk \Manifest
-Technologies :  Flask, SQLite, pywebview, WebView2, SMTP/IMAP Gmail
+Technologies :  FastAPI, Uvicorn, SQLite, SMTP/IMAP Gmail, Agent IA
+                (Groq / Google AI / Mistral)
 
 ===============================================================================
 
