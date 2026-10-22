@@ -7,8 +7,8 @@
 ## 1. Modèle de menace
 
 Candimail est une application **de bureau à usage personnel**, mono-utilisateur.
-Elle n'a pas d'authentification et son serveur Flask interne n'écoute que sur
-`127.0.0.1`.
+Elle n'a pas d'authentification et son serveur interne écoute sur
+`127.0.0.1` (option `--lan` = ouverture explicite au réseau local).
 
 | Attaquant | Capacité | Impact |
 |---|---|---|

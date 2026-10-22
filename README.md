@@ -1,4 +1,4 @@
-# Candimail v7 — automatisation Gmail (desktop pywebview + Flask)
+# Candimail v8 — messagerie & suivi (desktop pywebview + FastAPI)
 
 > **Copyright © 2026 — Dane hk \Manifest. Tous droits réservés.**
 > Créateur de l'application. Logiciel propriétaire : redistribution,
@@ -23,14 +23,14 @@ Documentation complète dans [`docs/`](docs/) :
 
 ```text
 autogmail/
-  candimail.py            Point d'entrée UNIQUE (fenêtre pywebview + Flask en thread)
+  candimail.py            Point d'entrée UNIQUE (uvicorn + FastAPI en thread, --lan pour le réseau local)
   LICENSE                 Licence propriétaire — usage personnel (14 articles)
-  candimail/              Package applicatif (v7.1.0)
-    core/                 config.py, crypto.py, db.py, noyau.py
-    services/             smtp.py (envoi), imap.py (reponses/bounces)
-    web/                  app.py (fabrique Flask) + routes/*.py (4 blueprints)
+  candimail/              Package applicatif (v8)
+    core/                 config.py, crypto.py, db.py, noyau.py, purge.py, regles.py
+    services/             smtp.py (envoi), imap.py (reponses/bounces), ia_agent.py (agent IA)
+    web/                  api.py (app FastAPI, 79 routes)
   docs/                   Documentation complete (7 documents)
-  static/  templates/     Assets Flask (servis via RESS_DIR)
+  static/  templates/     Assets statiques + templates Jinja2 (servis via RESS_DIR)
   scripts/                admin_comptes
   uploads/  app.db        Donnees locales (jamais versionnees)
   .webview/               Logs + profil WebView2
@@ -38,9 +38,10 @@ autogmail/
 
 > **Application de bureau** : Candimail n'est **pas** un site web. Il n'y a
 > ni déploiement, ni reverse proxy, ni vitrine publique, ni SEO. Le serveur
-> Flask est un support **interne** à la fenêtre pywebview, sur `127.0.0.1`.
+> FastAPI/uvicorn est un support **interne** (`127.0.0.1` par défaut ;
+> option `--lan` pour l'ouvrir au réseau local).
 
-Blueprints de `candimail/web/routes/` :
+Routes définies dans `candimail/web/api.py` (app FastAPI unique, 79 routes) :
 
 | Fichier | Responsabilite |
 | --- | --- |
@@ -73,18 +74,17 @@ Blueprints de `candimail/web/routes/` :
 | `/cv` `/suivi` `/cgu` `/rgpd` | Pages secondaires |
 
 > **Usage personnel, mono-utilisateur, sans authentification.** L'utilisateur
-> est considéré comme connecté sur chaque requête. L'application n'est jamais
-> exposée sur un réseau : son serveur Flask reste sur `127.0.0.1`, au sein de
-> la fenêtre de bureau.
+> est considéré comme connecté sur chaque requête. Le serveur reste sur
+> `127.0.0.1` par défaut (option `--lan` = ouverture explicite au réseau local).
 
 ## Lancement
 
 ```powershell
 pip install -r requirements.txt
-python candimail.py              # fenêtre desktop, port 9999
-python candimail.py --debug      # + badge debug + console WebView2
+python candimail.py              # serveur local, port 9999 (ou 1er libre)
 python candimail.py --port 9000  # port imposé
-python candimail.py --plein-ecran
+python candimail.py --lan        # accessible depuis le réseau local (0.0.0.0)
+python candimail.py --debug      # + logs détaillés
 ```
 
 Env : `CANDIMAIL_PORT=9999`, `CANDIMAIL_DEBUG=1`.

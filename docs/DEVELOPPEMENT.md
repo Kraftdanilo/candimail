@@ -28,7 +28,7 @@ $env:CANDIMAIL_DEBUG = "1"             # active /api/debug/info
 > ⚠️ `/api/debug/info` n'est accessible qu'avec `CANDIMAIL_DEBUG=1` et
 > expose l'état interne. Ne l'utilisez jamais sur un poste exposé.
 
-> ⚠️ Si Pylance affiche « Impossible de résoudre l'importation "waitress" /
+> ⚠️ Si Pylance affiche « Impossible de résoudre l'importation "uvicorn" /
 > "webview" », c'est que VS Code utilise un autre interpréteur que le venv.
 > `Ctrl+Shift+P` → **Python: Select Interpreter** → `.venv\Scripts\python.exe`
 > → **Developer: Reload Window**.
@@ -80,18 +80,18 @@ Toute exception passée au front doit passer par le helper :
 
 ```python
 # ❌ JAMAIS
-return jsonify({"ok": False, "error": str(e)}), 500
+return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
 # ✅
 log_erreur("ma_route", e, contexte)
-return jsonify({"ok": False, "error": erreur_publique(type_erreur="db")[0]}), 500
+return JSONResponse({"ok": False, "error": erreur_publique(type_erreur="db")[0]}, status_code=500)
 ```
 
 ---
 
 ## 5. Ajouter une route
 
-1. Choisir le bon blueprint (`pages`, `donnees`, `envoi`, `divers`)
+1. Ajouter la route dans `candimail/web/api.py` (section thématique correspondante)
 2. Suivre le nommage `api_<ressource>_<action>`
 3. **Toujours** valider les entrées
 4. **Jamais** renvoyer d'exception brute
@@ -103,8 +103,8 @@ def api_ma_ressource():
     data = request.get_json(silent=True) or {}
     valeur = _txt(data.get("valeur")).strip()
     if not valeur:
-        return jsonify({"ok": False, "error": "Valeur requise"}), 400
-    return jsonify({"ok": True, "valeur": valeur})
+        return JSONResponse({"ok": False, "error": "Valeur requise"}, status_code=400)
+    return {"ok": True, "valeur": valeur}
 ```
 
 ### Adding validation
@@ -136,7 +136,7 @@ def api_ma_ressource():
 | **Cache config** | Après `db.config_set()` direct : appeler `invalider_cache_config()` |
 | **Nettoyage** | Ne jamais importer depuis la racine (`from candimail.core…`) |
 | **Chemins** | Utiliser `BASE_DIR` / `RESS_DIR`, jamais `__file__` en dur |
-| **Encodage** | UTF-8 partout ; les chemins Flask forcent le charset |
+| **Encodage** | UTF-8 partout |
 | **Logs** | `print()` pour le serveur, `log`/`logging` pour les exceptions |
 
 ### Pièges connus

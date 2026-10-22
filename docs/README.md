@@ -29,7 +29,7 @@ respect des quotas, et suit les réponses reçues par IMAP.
 
 - **Version** : 7 (bureau / desktop)
 - **Auteur** : Dane hk \Manifest
-- **Stack** : Python 3.11 · Flask 3.0 · SQLite · pywebview · WebView2
+- **Stack** : Python 3.11 · FastAPI + uvicorn · SQLite · pywebview · WebView2
 - **Plateforme** : Windows 10/11 (le code est portable macOS/Linux)
 - **Usage** : **personnel, privé, mono-utilisateur**
 
@@ -55,7 +55,7 @@ respect des quotas, et suit les réponses reçues par IMAP.
 
 ```
 autogmail/
-├── candimail.py              Point d'entrée UNIQUE (pywebview + Flask en thread)
+├── candimail.py              Point d'entrée UNIQUE (uvicorn + FastAPI en thread)
 ├── LICENSE                   Licence propriétaire — usage personnel
 │
 ├── candimail/                Package applicatif
@@ -68,8 +68,7 @@ autogmail/
 │   │   ├── smtp.py           Envoi d'e-mails, retries, pièces jointes
 │   │   └── imap.py           Réponses, bounces, filtres Gmail
 │   └── web/
-│       ├── app.py            Fabrique Flask, blueprints, gestion d'erreurs
-│       └── routes/           4 blueprints (pages, donnees, envoi, divers)
+│       └── api.py            App FastAPI unique (79 routes)
 │
 ├── templates/                5 pages HTML + 404
 ├── static/                   CSS partagé, favicon
@@ -81,7 +80,8 @@ autogmail/
 
 **Candimail est une application de bureau, pas un site web.** Aucun
 déploiement, aucun reverse proxy, aucune vitrine publique, aucun SEO. Le
-serveur Flask est un support **interne** à la fenêtre pywebview (`127.0.0.1`).
+serveur FastAPI/uvicorn est un support **interne** (`127.0.0.1` par défaut ;
+option `--lan` pour l'ouvrir au réseau local).
 
 **Principes de conception**
 - **Mono-utilisateur personnel** : aucune authentification, aucune gestion de comptes

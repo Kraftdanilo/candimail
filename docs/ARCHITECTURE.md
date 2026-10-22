@@ -13,13 +13,14 @@ Architecture en couches, du business vers le rendu :
 │  PRÉSENTATION                                           │
 │  templates/*.html  +  static/brutalist.css               │
 ├─────────────────────────────────────────────────────────┤
-│  WEB ( Flask )                        web/app.py         │
-│  4 blueprints : pages · donnees · envoi · divers         │
+│  WEB ( FastAPI + uvicorn )           web/api.py          │
+│  app FastAPI unique : 79 routes (~68 endpoints API)      │
 │  Auth : vide (mono-utilisateur local)                    │
 ├─────────────────────────────────────────────────────────┤
 │  SERVICES                                  services/      │
 │  smtp.py  — envoi, retries, rotation, pièces jointes     │
 │  imap.py  — réponses, bounces, filtres Gmail             │
+│  ia_agent.py — agent IA (Groq/Google/Mistral)            │
 ├─────────────────────────────────────────────────────────┤
 │  BUSINESS ( STATE )                        core/noyau.py │
 │  verrous · config · quotas · validation · anti-fuite     │
@@ -109,21 +110,14 @@ groupe (tous en Cci, `To` = expéditeur).
 - `appliquer_filtres_compte()` — règles par **priorité**, un mail = une règle
 - `_utf7()` — encodage IMAP UTF-7 modifié pour les libellés accentués
 
-### `web/app.py` (343 l.)
-Fabrique Flask : blueprints, en-têtes de sécurité, cookies de session,
-gestionnaire d'erreurs **anti-fuite**, boucle IMAP automatique (daemon,
-boucle 60 s). Aucun serveur autonome : le lancement est assuré par
-`candimail.py` (racine), seul point d'entrée.
+### `web/api.py` (~1 640 l.)
+App FastAPI unique : templates Jinja2, fichiers statiques, en-têtes de
+sécurité, boucle IMAP automatique (daemon, boucle 60 s), endpoints API
+(companies, config, comptes, pièces, templates, filtres, IA, historique…).
+Aucun serveur autonome : le lancement est assuré par `candimail.py`
+(racine), seul point d'entrée — uvicorn sur `127.0.0.1` (ou `0.0.0.0` avec `--lan`).
 
-### `web/routes/`
-| Blueprint | Routes | Responsabilité |
-|---|---|---|
-| `pages.py` | 7 | pages (racine, app, suivi, CV, CGU, RGPD, 404) |
-| `donnees.py` | 21 | CV, entreprises, config, comptes, pièces jointes |
-| `envoi.py` | 11 | statut, aperçu, envoi unitaire, masse, groupes |
-| `divers.py` | 26 | modèles, IMAP, filtres, notifications, exports |
-
-**Total : 65 endpoints** (application de bureau, aucune route web publique).
+**Total : 79 routes FastAPI** (application de bureau, aucune route web publique).
 
 ---
 
@@ -148,7 +142,7 @@ POST /api/send
   │      └─ (erreur → log_erreur() + message public)
   ├─ 6. _send_timestamps.append()  → quota
   ├─ 7. Journal : log[company] = {envoye, date, compte…}
-  └─ 8. jsonify({ok, message, sans_pj, nb_destinataires})
+  └─ 8. JSON {ok, message, sans_pj, nb_destinataires}
 ```
 
 ---
@@ -174,7 +168,7 @@ Le journal est **écrit en entier** à chaque sauvegarde
 
 | Mécanisme | Détail |
 |---|---|
-| Threads Flask | `threaded=True` |
+| uvicorn (ASGI) | event-loop async + threads pour les blocants |
 | SQLite WAL | lectures concurrentes, 1 écrivain |
 | Verrous Python | sérialisent envois, config, journal |
 | Thread daemon | boucle IMAP auto + serveur desktop |
@@ -191,7 +185,7 @@ délai, ce qui garantit la conformité des quotas Gmail.
   `invalider_cache_config()`
 - **Index SQLite** sur les clés primaires
 - **Rate limit** en liste Python, purgée à chaque appel
-- **Waistress** en production desktop (plus stable que le serveur Flask)
+- **uvicorn** en serveur ASGI (FastAPI)
 - **Statique** : un seul CSS partagé, aucune dépendance CDN
 
 Limite : le rendu de l'interface est dominé par la taille de
@@ -203,11 +197,12 @@ Limite : le rendu de l'interface est dominé par la taille de
 
 | Bibliothèque | Version | Rôle |
 |---|---|---|
-| Flask | 3.0.0 | Framework web |
+| fastapi | 0.115.0 | Framework web (ASGI) |
+| uvicorn | 0.30.6 | Serveur ASGI |
 | cryptography | 46.0.7 | Fernet |
 | openpyxl | 3.1.2 | Export Excel |
-| pywebview | 6.2.1 | Fenêtre desktop |
-| waitress | 3.0.2 | Serveur WSGI |
+| httpx | 0.27.0 | Agent IA (appels Groq/Google/Mistral) |
+| python-multipart | 0.0.9 | Uploads (pièces jointes) |
 
 Python **3.11+** testé. SQLite inclus dans la bibliothèque standard.
 

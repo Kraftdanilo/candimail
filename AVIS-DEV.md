@@ -15,14 +15,14 @@ ce sont des recommandations pour les prochaines itérations.
 `candimail/web/routes/divers.py` fait ~35 Ko : c'est le signal classique d'une
 couche HTTP qui a avalé la logique métier. Règle que j'applique depuis 20 ans :
 **une route doit valider, déléguer, répondre** — jamais décider. Déplacer les
-règles métier vers `core/` (ex. `core/regles.py`) rend le code testable sans Flask
+règles métier vers `core/` (ex. `core/regles.py`) rend le code testable sans FastAPI
 et réduit ce fichier de moitié.
 
 ### P2 — Suite de tests minimale
 Aucun test visible. Pour une app qui envoie des e-mails en masse, le minimum vital :
 - `tests/test_crypto.py` (chiffrement des secrets — régression = fuite de données)
 - `tests/test_noyau.py` (logique d'envoi, avec SMTP/IMAP mockés)
-- `tests/test_routes.py` (pytest + client Flask, DB temporaire)
+- `tests/test_routes.py` (pytest + client httpx/TestClient, DB temporaire)
 Une heure de setup, des mois de tranquillité.
 
 ### P3 — Purger `uploads/` automatiquement
@@ -41,7 +41,7 @@ d'environnement `WEBVIEW2_USER_DATA_FOLDER` (ex. vers `%LOCALAPPDATA%\Candimail`
 : le dossier du projet reste mince et un `git clean` ne casse plus la session.
 
 ## 3. Hygiène
-- `requirements.txt` sans versions épinglées : épingler (`Flask==x.y.z`, ...)
+- `requirements.txt` sans versions épinglées : épingler (`fastapi==x.y.z`, ...)
   sinon une mise à jour cassera l'app sans que vous sachiez pourquoi.
 - Ajouter `__pycache__/`, `.webview/`, `uploads/`, `app.db` au `.gitignore`
   s'ils n'y sont pas déjà (données personnelles = jamais dans git).
@@ -49,5 +49,5 @@ d'environnement `WEBVIEW2_USER_DATA_FOLDER` (ex. vers `%LOCALAPPDATA%\Candimail`
 
 ## 4. Ce que je ne ferais PAS
 - Pas de migration vers Postgres/serveur : inutile pour du mono-utilisateur desktop.
-- Pas de réécriture async : Flask + threads suffisent largement à cette échelle.
+- Pas de réécriture async partout : FastAPI + threads synchrones suffisent à cette échelle.
 - Pas d'ajout de dépendances "par principe" — chaque dépendance est une dette.

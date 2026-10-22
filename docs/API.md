@@ -20,7 +20,7 @@
 
 ---
 
-## Pages — blueprint `pages` (7)
+## Pages (7)
 
 | Méthode | Route | Rôle |
 |---|---|---|
@@ -46,7 +46,7 @@
 
 ---
 
-## Données — blueprint `donnees` (21)
+## Données (21)
 
 ### CV
 | Méthode | Route | Corps / réponse |
@@ -94,7 +94,7 @@
 
 ---
 
-## Envoi — blueprint `envoi` (11)
+## Envoi (11)
 
 | Méthode | Route | Rôle |
 |---|---|---|
@@ -140,7 +140,7 @@ horaire atteint ou délai non écoulé (renvoie `attente` en secondes) ·
 
 ---
 
-## Divers — blueprint `divers` (26)
+## Divers (26)
 
 ### Modèles de lettres
 | Méthode | Route | Rôle |

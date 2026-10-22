@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 > ⚠️ **VS Code / Pylance** : `.vscode/settings.json` pointe sur
 > `.venv\Scripts\python.exe`. Sans ce venv, Pylance signale
-> « Impossible de résoudre l'importation "waitress" / "webview" » car ces
+> « Impossible de résoudre l'importation "uvicorn" / "webview" » car ces
 > paquets ne sont pas installés dans le Python système.
 >
 > Si les avertissements persistent : `Ctrl+Shift+P` → **Python: Select
@@ -43,11 +43,12 @@ pip install -r requirements.txt
 
 | Paquet | Version |
 |---|---|
-| Flask | 3.0.0 |
+| fastapi | 0.115.0 |
+| uvicorn | 0.30.6 |
 | cryptography | 46.0.7 |
 | openpyxl | 3.1.2 |
-| pywebview | 6.2.1 |
-| waitress | 3.0.2 |
+| httpx | 0.27.0 |
+| python-multipart | 0.0.9 |
 
 ---
 
