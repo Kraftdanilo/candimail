@@ -16,7 +16,7 @@
 
 > **Anti-fuite** : aucun traceback, aucun nom d'exception, aucun chemin
 > absolu, aucun message SMTP/IMAP brut n'est renvoyé. Le détail technique
-> est dans `.webview/candimail.log`.
+> est dans `.serveur web local/candimail.log`.
 
 ---
 

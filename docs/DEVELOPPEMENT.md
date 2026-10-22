@@ -29,7 +29,7 @@ $env:CANDIMAIL_DEBUG = "1"             # active /api/debug/info
 > expose l'état interne. Ne l'utilisez jamais sur un poste exposé.
 
 > ⚠️ Si Pylance affiche « Impossible de résoudre l'importation "uvicorn" /
-> "webview" », c'est que VS Code utilise un autre interpréteur que le venv.
+> "serveur web local" », c'est que VS Code utilise un autre interpréteur que le venv.
 > `Ctrl+Shift+P` → **Python: Select Interpreter** → `.venv\Scripts\python.exe`
 > → **Developer: Reload Window**.
 
@@ -174,9 +174,9 @@ Ce n'est **pas** l'authentification de l'interface (qui n'existe pas).
 | `Attends Ns` | Délai inter-envois | Normal — attendre |
 | `Aucun compte Gmail actif` | Aucun compte ou tous en pause | Ajouter / réactiver un compte |
 | Le port 9999 échoue | Service Windows sur le port | `--port 9000` |
-| Fenêtre blanche | WebView2 absent | Installer le runtime WebView2 |
+| Fenêtre blanche | navigateur absent | Installer le runtime navigateur |
 | SMTP échoue | Réseau / pare-feu | Vérifier `smtp.gmail.com:465` |
-| Erreur sans détail | Anti-fuite active | Consulter `.webview/candimail.log` |
+| Erreur sans détail | Anti-fuite active | Consulter `.serveur web local/candimail.log` |
 
 ---
 

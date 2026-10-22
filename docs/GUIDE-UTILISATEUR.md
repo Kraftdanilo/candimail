@@ -9,7 +9,7 @@ Guide fonctionnel complet, du premier lancement à l'envoi de masse.
 ## Sommaire
 
 1. [Premiers pas](#1-premiers-pas) · 2. [Comptes Gmail](#2-comptes-gmail) ·
-3. [Profil candidat](#3-profil-candidat) · 4. [CV](#4-cv) ·
+3. [Profil](#3-profil) · 4. [CV](#4-cv) ·
 5. [Modèles de lettres](#5-modèles-de-lettres) ·
 6. [Entreprises](#6-entreprises) · 7. [Envoyer un e-mail](#7-envoyer-un-e-mail) ·
 8. [Envoi de masse](#8-envoi-de-masse) · 9. [Groupes](#9-groupes) ·
@@ -21,9 +21,8 @@ Guide fonctionnel complet, du premier lancement à l'envoi de masse.
 
 ## 1. Premiers pas
 
-Au lancement, la fenêtre s'ouvre sur l'application. La barre supérieure donne
-accès aux sections : **Comptes**, **Entreprises**, **Templates**, **Filtres**,
-**CV**.
+Au lancement, la le navigateur s'ouvre sur l'application. La barre supérieure donne
+accès aux sections : **Messagerie**, **Cibles**, **Envois**, **Réponses & filtres**, **Réglages**.
 
 **Ordre de configuration recommandé**
 

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Candimail — application FastAPI (remplace Flask).
 
-Routes HTTP de l'application de bureau desktop (pywebview + FastAPI en thread).
-Le serveur n'est jamais exposé sur un réseau : il tourne en thread local
-(127.0.0.1) pour alimenter la fenêtre pywebview.
+Routes HTTP de l'application web locale (FastAPI + uvicorn).
+Le serveur écoute sur 127.0.0.1 par défaut (option --lan = réseau local).
 
 Dépendances Flask retirées : noyau.py utilise désormais un stockage de session
 propre (thread-local) au lieu de flask.session.
@@ -205,7 +204,7 @@ async def api_debug_info(request: Request):
         "python": platform.python_version(),
         "platform": platform.platform(),
         "fastapi": v_fastapi,
-        "version": "v8-fastapi",
+        "version": "r0.0.1",
         "port": "",
         "heure": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "debug": DEBUG_ACTIF,
@@ -311,7 +310,7 @@ def demarrer_imap():
 def afficher_banniere(cfg, port):
     print()
     print("=" * 64)
-    print("  📧 CANDIMAIL — v8 — application de bureau (usage personnel)")
+    print("  📧 CANDIMAIL — r0.0.1 — messagerie automatisée (usage personnel)")
     print(f"  Créateur : {_AUTEUR}   |   © 2026 — Tous droits réservés")
     print("=" * 64)
     comptes = get_comptes_actifs()
@@ -321,7 +320,7 @@ def afficher_banniere(cfg, port):
     print(f"  Templates     : {len(cfg.get('templates_perso', []))} perso + 3 prédéfinis")
     print(f"  Délai         : {get_delai()}s"
           + (" (aléatoire)" if cfg['parametres'].get('delai_aleatoire') else ""))
-    print(f"  Serveur local : http://127.0.0.1:{port} (interne à la fenêtre)")
+    print(f"  Serveur local : http://127.0.0.1:{port}")
     print("=" * 64)
     print()
 

@@ -10,12 +10,11 @@
 |---|---|
 | Système | Windows 10 / 11 (le code fonctionne aussi sur macOS/Linux) |
 | Python | **3.11 ou supérieur** |
-| Navigateur | Edge ou Chrome (**WebView2** obligatoire sous Windows) |
+| Navigateur | Edge ou Chrome (**navigateur** obligatoire sous Windows) |
 | Compte Gmail | Validation en deux étapes **activée** |
 | Espace disque | ~100 Mo + vos pièces jointes |
 
-> WebView2 est préinstallé sur Windows 10/11. S'il manque :
-> https://developer.microsoft.com/microsoft-edge/webview2/
+> navigateur est préinstallé sur Windows 10/11. S'il manque :
 
 ---
 
@@ -32,7 +31,7 @@ pip install -r requirements.txt
 
 > ⚠️ **VS Code / Pylance** : `.vscode/settings.json` pointe sur
 > `.venv\Scripts\python.exe`. Sans ce venv, Pylance signale
-> « Impossible de résoudre l'importation "uvicorn" / "webview" » car ces
+> « Impossible de résoudre l'importation "uvicorn" / "serveur web local" » car ces
 > paquets ne sont pas installés dans le Python système.
 >
 > Si les avertissements persistent : `Ctrl+Shift+P` → **Python: Select
@@ -69,8 +68,7 @@ l'afficher.
 | Option | Effet |
 |---|---|
 | `--port 9000` | Impose le port (prioritaire sur `CANDIMAIL_PORT`) |
-| `--debug` | Logs détaillés + console de développement WebView2 |
-| `--plein-ecran` | Démarre en plein écran |
+| `--debug` | Logs détaillés + console de développement navigateur |
 | `--help` | Affiche l'aide |
 
 ### Variables d'environnement
@@ -81,7 +79,6 @@ $env:CANDIMAIL_DEBUG = "1"            # logs détaillés + /api/debug/info
 ```
 
 > Il n'existe **pas** de mode serveur ni de mode navigateur : l'application
-> fonctionne exclusivement dans sa fenêtre pywebview.
 
 ---
 
@@ -118,13 +115,13 @@ Au premier démarrage, l'application :
 2. **Migre** les anciens fichiers `config.json` et `envois.json` s'ils existent
 3. **Génère** `secret.key` (clé de chiffrement Fernet)
 4. **Chiffre** les mots de passe Gmail qui seraient encore en clair
-5. **Crée** `uploads/` et `.webview/`
+5. **Crée** `uploads/` et `.serveur web local/`
 
 ### Bannière de démarrage
 
 ```
 ================================================================
-  📧 CANDIMAIL — v7 — application de bureau (usage personnel)
+  📧 CANDIMAIL — r0.0.1 — application de bureau (usage personnel)
   Créateur : Dane hk \Manifest   |   © 2026 — Tous droits réservés
 ================================================================
   Comptes Gmail : 1 actif(s)

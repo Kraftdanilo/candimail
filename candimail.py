@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Candimail — application Web (FastAPI + uvicorn en thread local).
+Candimail — application web locale (FastAPI + uvicorn).
+
+Serveur HTTP accessible depuis le navigateur : 127.0.0.1 par défaut,
+ou tout le réseau local avec l'option --lan (CANDIMAIL_HOST=0.0.0.0).
 
 Usage :
     python candimail.py                 # navigateur par défaut, port 9999
@@ -13,8 +16,8 @@ Env :
     CANDIMAIL_DEBUG=1     debug avancé (logs détaillés .webview/candimail.log)
 
 Notes :
-  - Candimail tourne en local (127.0.0.1 uniquement), jamais exposée sur un réseau.
-  - Le navigateur s'ouvre automatiquement sur http://127.0.0.1:9999/app
+  - Le navigateur s'ouvre automatiquement sur http://127.0.0.1:<port>/app
+  - Option --lan : accessible depuis un téléphone ou un autre PC du réseau local.
   - Fermer le terminal arrête proprement le programme.
 """
 import argparse

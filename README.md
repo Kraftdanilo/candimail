@@ -1,9 +1,37 @@
-# Candimail v8 — messagerie & suivi (desktop pywebview + FastAPI)
+# Candimail r0.0.1 — automatisation Gmail libre (serveur web local + FastAPI)
 
 > **Copyright © 2026 — Dane hk \Manifest. Tous droits réservés.**
 > Créateur de l'application. Logiciel propriétaire : redistribution,
 > modification et usage commercial interdits sans autorisation écrite.
 > Voir [`LICENSE`](LICENSE).
+
+**Candimail** est un projet de compétences et d'entraînement : il facilite
+l'automatisation de sa messagerie Gmail **librement et sans abonnement coûteux** —
+envois personnalisés à grande échelle, suivi des réponses, filtres, agent IA,
+sur son propre compte, sans plateforme tierce ni quota payant.
+Il n'est **pas limité aux candidatures** : messages, groupes, parents d'élèves,
+collègues, notifications… tout ce qui s'envoie par e-mail peut être automatisé.
+
+## Portabilité (autre PC, autre utilisateur)
+
+L'application fonctionne sur **n'importe quel PC** avec Python 3.11+ :
+
+```powershell
+# Sur la nouvelle machine
+git clone https://github.com/Kraftdanilo/candimail.git
+cd candimail
+python -m venv .venv
+.\.venv\Scripts\pip install -r requirements.txt
+.\.venv\Scripts\python candimail.py
+```
+
+- **Port** : jamais un problème — `9999` par défaut, sinon le 1er port libre,
+sinon un port éphémère garanti par l'OS.
+- **Données** : tout est dans `data/`, `uploads/`, `.webview/` (créés au
+premier démarrage, jamais versionnés). Copier ces dossiers d'un PC à un
+autre transfère la configuration complète.
+- **Réseau** : `127.0.0.1` par défaut ; `--lan` pour y accéder depuis un
+téléphone ou un autre appareil du même réseau.
 
 ## Documentation
 
@@ -15,7 +43,7 @@ Documentation complète dans [`docs/`](docs/) :
 | [docs/INSTALLATION.md](docs/INSTALLATION.md) | Prérequis, installation |
 | [docs/GUIDE-UTILISATEUR.md](docs/GUIDE-UTILISATEUR.md) | Guide fonctionnel complet |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture technique, flux, données |
-| [docs/API.md](docs/API.md) | Référence des 68 endpoints |
+| [docs/API.md](docs/API.md) | Référence des endpoints |
 | [docs/SECURITE.md](docs/SECURITE.md) | Chiffrement, anti-fuite, mesures |
 | [docs/DEVELOPPEMENT.md](docs/DEVELOPPEMENT.md) | Conventions, build, dépannage |
 
@@ -25,7 +53,7 @@ Documentation complète dans [`docs/`](docs/) :
 autogmail/
   candimail.py            Point d'entrée UNIQUE (uvicorn + FastAPI en thread, --lan pour le réseau local)
   LICENSE                 Licence propriétaire — usage personnel (14 articles)
-  candimail/              Package applicatif (v8)
+  candimail/              Package applicatif (r0.0.1)
     core/                 config.py, crypto.py, db.py, noyau.py, purge.py, regles.py
     services/             smtp.py (envoi), imap.py (reponses/bounces), ia_agent.py (agent IA)
     web/                  api.py (app FastAPI, 79 routes)
@@ -33,7 +61,7 @@ autogmail/
   static/  templates/     Assets statiques + templates Jinja2 (servis via RESS_DIR)
   scripts/                admin_comptes
   uploads/  app.db        Donnees locales (jamais versionnees)
-  .webview/               Logs + profil WebView2
+  .serveur web local/               Logs + profil navigateur
 ```
 
 > **Application de bureau** : Candimail n'est **pas** un site web. Il n'y a
@@ -51,7 +79,7 @@ Routes définies dans `candimail/web/api.py` (app FastAPI unique, 79 routes) :
 | `divers.py` | Templates, IMAP/filtres, exports/imports |
 
 > **Données non versionnées** : `app.db`, `config.json`, `envois.json`,
-> `uploads/`, `secret.key`, `admin.key`, `.webview/` et les logs sont
+> `uploads/`, `secret.key`, `admin.key`, `.serveur web local/` et les logs sont
 > exclus via `.gitignore` (ils contiennent des données personnelles
 > et/ou des secrets). Ne jamais les commiter.
 
@@ -94,13 +122,13 @@ Env : `CANDIMAIL_PORT=9999`, `CANDIMAIL_DEBUG=1`.
 - `GET /api/health` : sonde (port, version, taille DB)
 - `GET /api/debug/info` : état interne — **fermé par défaut**,
   disponible uniquement si `CANDIMAIL_DEBUG=1`.
-- Logs : `.webview/candimail.log`, `.webview/desktop.log`
+- Logs : `.serveur web local/candimail.log`, `.serveur web local/desktop.log`
 
 ## Sécurité — aucune fuite vers le front
 
 Règle appliquée : **le front ne reçoit jamais le détail technique d'une
 erreur ni un secret en clair.** Le détail part uniquement dans
-`.webview/candimail.log`.
+`.serveur web local/candimail.log`.
 
 | Protection | Où |
 | --- | --- |

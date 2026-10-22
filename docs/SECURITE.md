@@ -153,7 +153,7 @@ Tous appliqués via `after_request` :
 
 **Cookies de session** : `HttpOnly` + `SameSite=Lax`. Application de bureau
 servie en HTTP local : le cookie `Secure` n'est jamais positionné (il serait
-rejeté par WebView2 sur `http://127.0.0.1`).
+rejeté par navigateur sur `http://127.0.0.1`).
 
 ---
 

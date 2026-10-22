@@ -1,4 +1,4 @@
-# Documentation complète — Candimail v7
+# Documentation complète — Candimail r0.0.1
 
 > **Copyright © 2026 — Dane hk \Manifest. Tous droits réservés.**
 > Créateur de l'application. Voir [`LICENSE`](../LICENSE) (licence propriétaire)
@@ -22,14 +22,20 @@
 
 ## 1. Présentation
 
-**Candimail** est une application de bureau qui automatise l'envoi de
-candidatures par e-mail via Gmail. Elle gère une liste d'entreprises, génère
-des lettres personnalisées à partir de modèles, envoie en séquence avec
-respect des quotas, et suit les réponses reçues par IMAP.
+**Candimail** est une application web locale qui automatise l'usage de sa
+messagerie Gmail, **librement et sans abonnement coûteux**. Elle gère des
+cibles (entreprises, groupes, contacts), génère des messages personnalisés
+à partir de modèles, envoie en séquence avec respect des quotas, et suit
+les réponses reçues par IMAP. Un agent IA (Groq/Google/Mistral) peut
+rédiger, classer ou résumer les messages.
 
-- **Version** : 7 (bureau / desktop)
+C'est aussi un **projet de compétences et d'entraînement** : il n'est
+**pas limité aux candidatures** — messages, groupes, notifications, tout
+ce qui s'envoie par e-mail peut être automatisé.
+
+- **Version** : r0.0.1
 - **Auteur** : Dane hk \Manifest
-- **Stack** : Python 3.11 · FastAPI + uvicorn · SQLite · pywebview · WebView2
+- **Stack** : Python 3.11 · FastAPI + uvicorn · SQLite · serveur web local · navigateur
 - **Plateforme** : Windows 10/11 (le code est portable macOS/Linux)
 - **Usage** : **personnel, privé, mono-utilisateur**
 
@@ -103,8 +109,7 @@ python candimail.py
 
 # Variantes
 python candimail.py --port 9000     # port imposé
-python candimail.py --debug         # logs détaillés + console WebView2
-python candimail.py --plein-ecran   # plein écran
+python candimail.py --debug         # logs détaillés + console navigateur
 ```
 
 **Variables d'environnement**
@@ -114,8 +119,6 @@ python candimail.py --plein-ecran   # plein écran
 | `CANDIMAIL_PORT` | `9999` | Port du serveur **local interne** |
 | `CANDIMAIL_DEBUG` | — | `1` active les logs détaillés et `/api/debug/info` |
 
-> Il n'existe **pas** de mode serveur autonome ni de mode navigateur :
-> l'application fonctionne exclusivement dans sa fenêtre pywebview.
 
 ➡️ Voir [INSTALLATION.md](INSTALLATION.md) pour le détail.
 

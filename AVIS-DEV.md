@@ -1,6 +1,6 @@
 # Avis Dev Full Stack Senior (20 ans d'expérience)
 
-Avis technique non intrusif sur Candimail v7 — rien de ceci n'a modifié le code,
+Avis technique non intrusif sur Candimail r0.0.1 — rien de ceci n'a modifié le code,
 ce sont des recommandations pour les prochaines itérations.
 
 ## 1. Architecture — les bons points
@@ -31,11 +31,11 @@ rétention : à la suppression d'un contact, supprimer aussi son fichier upload�
 + un balayage au démarrage qui efface les orphelins (fichiers sans contact lié).
 
 ### P4 — Rotation des logs
-`.webview/candimail.log` et `desktop.log` grossissent sans limite. Utiliser
+`.serveur web local/candimail.log` et `desktop.log` grossissent sans limite. Utiliser
 `RotatingFileHandler` (max 1 Mo × 3) — deux lignes de config, problème réglé à vie.
 
-### P5 — `.webview/EBWebView` re-gonfle à chaque lancement
-C'est le cache Chromium de pywebview (~40 Mo ici). On ne peut pas le supprimer
+### P5 — `.serveur web local/EBWebView` re-gonfle à chaque lancement
+C'est le cache Chromium de serveur web local (~40 Mo ici). On ne peut pas le supprimer
 définitivement, mais on peut le **délocaliser hors du projet** via la variable
 d'environnement `WEBVIEW2_USER_DATA_FOLDER` (ex. vers `%LOCALAPPDATA%\Candimail`)
 : le dossier du projet reste mince et un `git clean` ne casse plus la session.
@@ -43,7 +43,7 @@ d'environnement `WEBVIEW2_USER_DATA_FOLDER` (ex. vers `%LOCALAPPDATA%\Candimail`
 ## 3. Hygiène
 - `requirements.txt` sans versions épinglées : épingler (`fastapi==x.y.z`, ...)
   sinon une mise à jour cassera l'app sans que vous sachiez pourquoi.
-- Ajouter `__pycache__/`, `.webview/`, `uploads/`, `app.db` au `.gitignore`
+- Ajouter `__pycache__/`, `.serveur web local/`, `uploads/`, `app.db` au `.gitignore`
   s'ils n'y sont pas déjà (données personnelles = jamais dans git).
 - `secret.key` à la racine : correct pour du desktop, mais ne jamais le committer.
 
