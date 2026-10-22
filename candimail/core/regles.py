@@ -1,5 +1,5 @@
 """
-Règles de classement Gmail (logique métier, SANS Flask).
+Règles de classement Gmail (logique métier pure, sans dépendance web).
 
 Extrait de `web/routes/divers.py` : les routes doivent valider → déléguer →
 répondre. Toute la logique des règles de filtres (création, normalisation,

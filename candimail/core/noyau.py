@@ -12,7 +12,7 @@ from candimail.core import db
 from candimail.core.config import UPLOADS_DIR, DEFAULT_CONFIG, TEMPLATES
 
 
-# ---- Session applicative (remplace flask.session pour l'app desktop) ----
+# ---- Session applicative (remplace le mécanisme de session du framework web) ----
 # Mono-utilisateur : un uid par défaut (0). Les routes FastAPI peuvent
 # surcharger via le header X-UID ou un cookie de session.
 _SESSION_LOCAL = threading.local()
@@ -27,7 +27,7 @@ def session_set(key, value):
 
 
 def current_uid():
-    """UID de l'utilisateur courant (0 par défaut, hors contexte Flask)."""
+    """UID de l'utilisateur courant (0 par défaut, hors contexte HTTP)."""
     try:
         return int(session_get("uid", 0) or 0)
     except (TypeError, ValueError):

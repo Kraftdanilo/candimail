@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Candimail — application FastAPI (remplace Flask).
+"""Candimail — application FastAPI.
 
 Routes HTTP de l'application web locale (FastAPI + uvicorn).
 Le serveur écoute sur 127.0.0.1 par défaut (option --lan = réseau local).
 
-Dépendances Flask retirées : noyau.py utilise désormais un stockage de session
-propre (thread-local) au lieu de flask.session.
+Dépendances legacy retirées : noyau.py utilise désormais un stockage de session
+propre (thread-local) au lieu d'une session framework.
 """
 import json, io, csv, time, uuid, threading, logging, socket, base64, os
 from datetime import datetime, timedelta
@@ -70,7 +70,7 @@ templates = Jinja2Templates(directory=str(RESS_DIR / "templates"))
 
 _AUTEUR = "Dane hk \\Manifest"
 _COPYRIGHT = ("Copyright © 2026 — Dane hk \\Manifest. "
-              "Tous droits réservés. Créateur de l'app — usage personnel.")
+              "Licence MIT — créateur de l'app.")
 
 app.state.MAX_CONTENT_LENGTH = 20 * 1024 * 1024
 
@@ -310,8 +310,8 @@ def demarrer_imap():
 def afficher_banniere(cfg, port):
     print()
     print("=" * 64)
-    print("  📧 CANDIMAIL — r0.0.1 — messagerie automatisée (usage personnel)")
-    print(f"  Créateur : {_AUTEUR}   |   © 2026 — Tous droits réservés")
+    print("  📧 CANDIMAIL — r0.0.1 — automatisation Gmail libre (licence MIT)")
+    print(f"  Créateur : {_AUTEUR}   |   © 2026 — Licence MIT")
     print("=" * 64)
     comptes = get_comptes_actifs()
     print(f"  Comptes Gmail : {len(comptes)} actif(s)")

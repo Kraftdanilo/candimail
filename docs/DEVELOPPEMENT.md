@@ -1,6 +1,6 @@
 # Développement
 
-> © 2026 Dane hk \Manifest — Tous droits réservés.
+> © 2026 Dane hk \Manifest — Licence MIT
 
 ---
 
@@ -180,4 +180,4 @@ Ce n'est **pas** l'authentification de l'interface (qui n'existe pas).
 
 ---
 
-**© 2026 Dane hk \Manifest — Tous droits réservés.**
+**© 2026 Dane hk \Manifest — Licence MIT**

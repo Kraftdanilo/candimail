@@ -1,6 +1,6 @@
 # Référence API
 
-> © 2026 Dane hk \Manifest — Tous droits réservés.
+> © 2026 Dane hk \Manifest — Licence MIT
 > **68 endpoints** — serveur local `http://127.0.0.1:9999`
 
 ## Conventions
@@ -224,4 +224,4 @@ curl -X POST http://127.0.0.1:9999/api/send `
 
 ---
 
-**© 2026 Dane hk \Manifest — Tous droits réservés.**
+**© 2026 Dane hk \Manifest — Licence MIT**

@@ -1,4 +1,4 @@
-"""Tests de la logique métier (core/regles) — sans Flask ni SMTP."""
+"""Tests de la logique métier (core/regles) — sans réseau ni SMTP."""
 from candimail.core import regles
 
 

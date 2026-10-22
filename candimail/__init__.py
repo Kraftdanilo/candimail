@@ -1,9 +1,9 @@
 """
-Candimail — automatisation Gmail pour candidatures (package).
+Candimail — automatisation de sa messagerie Gmail, libre et sans abonnement.
 
-Point d'entree : `candimail.web.api` (fabrique FastAPI) ou
-`candimail.py` (fenetre serveur web local).
+Point d'entree : `candimail.web.api` (app FastAPI) ou
+`candimail.py` (serveur web local + navigateur).
 """
 
-__version__ = "8.0.0"
+__version__ = "r0.0.1"
 

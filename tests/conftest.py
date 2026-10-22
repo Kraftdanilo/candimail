@@ -27,10 +27,10 @@ _db.init_db(with_migration=False)
 
 
 class _CompatResponse:
-    """Wrapper compat Flask autour d'une réponse httpx (TestClient FastAPI).
+    """Wrapper de compatibilité autour d'une réponse httpx (TestClient FastAPI).
 
-    Ajoute .get_json() et .data pour que les tests écrits pour Flask
-    continuent de fonctionner sans modification.
+    Ajoute .get_json() et .data pour que les anciens tests continuent
+    de fonctionner sans modification.
     """
     def __init__(self, response):
         self._r = response
@@ -50,7 +50,7 @@ class _CompatResponse:
 
 
 class _CompatClient:
-    """Wrapper compat Flask autour de TestClient FastAPI."""
+    """Wrapper de compatibilité autour de TestClient FastAPI."""
     def __init__(self, client):
         self._c = client
 

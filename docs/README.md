@@ -1,8 +1,8 @@
 # Documentation complète — Candimail r0.0.1
 
-> **Copyright © 2026 — Dane hk \Manifest. Tous droits réservés.**
-> Créateur de l'application. Voir [`LICENSE`](../LICENSE) (licence propriétaire)
-> et les [CGU](http://127.0.0.1:9999/cgu).
+> **Copyright © 2026 — Dane hk \Manifest** — Licence MIT.
+> Créateur de l'application. Usage, modification et redistribution libres
+> ([`LICENSE`](../LICENSE), [CGU](http://127.0.0.1:9999/cgu)).
 
 ---
 
@@ -62,7 +62,7 @@ ce qui s'envoie par e-mail peut être automatisé.
 ```
 autogmail/
 ├── candimail.py              Point d'entrée UNIQUE (uvicorn + FastAPI en thread)
-├── LICENSE                   Licence propriétaire — usage personnel
+├── LICENSE                   Licence MIT — usage, modification et redistribution libres
 │
 ├── candimail/                Package applicatif
 │   ├── core/
@@ -104,7 +104,7 @@ option `--lan` pour l'ouvrir au réseau local).
 # 1. Dépendances
 pip install -r requirements.txt
 
-# 2. Lancement (fenêtre de bureau, port 9999)
+# 2. Lancement (serveur web local, port 9999)
 python candimail.py
 
 # Variantes
@@ -139,15 +139,12 @@ python candimail.py --debug         # logs détaillés + console navigateur
 
 ## 6. Licence
 
-Candimail est un logiciel **propriétaire** sous licence « Tous droits
-réservés », à usage personnel et non commercial. L'exécution sur tes propres
-postes (Windows/Linux/mac), la modification privée à des fins
-d'apprentissage, et l'accès réseau local (`--lan`) sont autorisés. La
-revente, l'usage commercial et la redistribution publique sous un autre nom
-sont interdits.
+Candimail est un logiciel **libre sous licence MIT** : usage, modification,
+redistribution et usage commercial sont autorisés, avec conservation de la
+notice de copyright. Contribuez, forkez, adaptez librement.
 
-Voir [`LICENSE`](../LICENSE) pour le texte intégral (13 articles + 2 annexes).
+Voir [`LICENSE`](../LICENSE) pour le texte intégral.
 
 ---
 
-**© 2026 Dane hk \Manifest — Tous droits réservés.**
+**© 2026 Dane hk \Manifest — Licence MIT**

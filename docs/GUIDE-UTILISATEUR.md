@@ -1,6 +1,6 @@
 # Guide utilisateur
 
-> © 2026 Dane hk \Manifest — Tous droits réservés.
+> © 2026 Dane hk \Manifest — Licence MIT
 
 Guide fonctionnel complet, du premier lancement à l'envoi de masse.
 
@@ -377,4 +377,4 @@ L'export JSON produit un fichier contenant la configuration et le journal.
 
 ---
 
-**© 2026 Dane hk \Manifest — Tous droits réservés.**
+**© 2026 Dane hk \Manifest — Licence MIT**

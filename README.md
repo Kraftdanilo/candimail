@@ -1,11 +1,7 @@
 # Candimail r0.0.1 — automatisation Gmail libre (serveur web local + FastAPI)
 
-> **Copyright © 2026 — Dane hk \Manifest. Tous droits réservés.**
-> Créateur de l'application. Logiciel propriétaire, usage personnel :
-> exécution libre sur tes propres postes (Windows/Linux/mac), modification
-> privée autorisée (projet d'entraînement), mais pas de revente, d'usage
-> commercial, ni de redistribution publique sous un autre nom.
-> Voir [`LICENSE`](LICENSE).
+> **Copyright © 2026 — Dane hk \Manifest** — Licence MIT. Libre d'usage,
+> modification et redistribution (voir [`LICENSE`](LICENSE)).
 
 **Candimail** est un projet de compétences et d'entraînement : il facilite
 l'automatisation de sa messagerie Gmail **librement et sans abonnement coûteux** —
@@ -60,7 +56,7 @@ Documentation complète dans [`docs/`](docs/) :
 ```text
 autogmail/
   candimail.py            Point d'entrée UNIQUE (uvicorn + FastAPI en thread, --lan pour le réseau local)
-  LICENSE                 Licence propriétaire — usage personnel (14 articles)
+  LICENSE                 Licence MIT — usage, modification et redistribution libres
   candimail/              Package applicatif (r0.0.1)
     core/                 config.py, crypto.py, db.py, noyau.py, purge.py, regles.py
     services/             smtp.py (envoi), imap.py (reponses/bounces), ia_agent.py (agent IA)
@@ -69,13 +65,12 @@ autogmail/
   static/  templates/     Assets statiques + templates Jinja2 (servis via RESS_DIR)
   scripts/                admin_comptes
   uploads/  app.db        Donnees locales (jamais versionnees)
-  .serveur web local/               Logs + profil navigateur
-```
+    .webview/               Logs locaux (jamais versionnés)
+  ```
 
-> **Application de bureau** : Candimail n'est **pas** un site web. Il n'y a
-> ni déploiement, ni reverse proxy, ni vitrine publique, ni SEO. Le serveur
-> FastAPI/uvicorn est un support **interne** (`127.0.0.1` par défaut ;
-> option `--lan` pour l'ouvrir au réseau local).
+  > **Application web locale** : Candimail n'est **pas** un site web public. Il n'y a
+  > ni déploiement, ni reverse proxy, ni vitrine publique, ni SEO. Le serveur
+  > FastAPI/uvicorn sert l'interface sur `127.0.0.1` (option `--lan` pour le réseau local).
 
 Routes définies dans `candimail/web/api.py` (app FastAPI unique, 79 routes) :
 

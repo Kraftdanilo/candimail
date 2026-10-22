@@ -1,4 +1,4 @@
-"""Tests des routes Flask avec client de test (DB temporaire)."""
+"""Tests des routes API (FastAPI + TestClient, DB temporaire)."""
 import io
 import json
 

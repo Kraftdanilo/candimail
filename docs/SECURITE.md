@@ -1,6 +1,6 @@
 # Sécurité
 
-> © 2026 Dane hk \Manifest — Tous droits réservés.
+> © 2026 Dane hk \Manifest — Licence MIT
 
 ---
 
@@ -187,4 +187,4 @@ l'utilisateur : un envoi massif non maîtrisé serait un signal de spam.
 
 ---
 
-**© 2026 Dane hk \Manifest — Tous droits réservés.**
+**© 2026 Dane hk \Manifest — Licence MIT**

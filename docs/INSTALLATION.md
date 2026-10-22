@@ -1,6 +1,6 @@
 # Installation
 
-> © 2026 Dane hk \Manifest — Tous droits réservés.
+> © 2026 Dane hk \Manifest — Licence MIT
 
 ---
 
@@ -173,7 +173,7 @@ Au premier démarrage, l'application :
 ```
 ================================================================
   📧 CANDIMAIL — r0.0.1 — application de bureau (usage personnel)
-  Créateur : Dane hk \Manifest   |   © 2026 — Tous droits réservés
+  Créateur : Dane hk \Manifest   |   © 2026 — Licence MIT
 ================================================================
   Comptes Gmail : 1 actif(s)
   Pièces jointes: 1 active(s)
@@ -222,4 +222,4 @@ entièrement contenue dans son dossier.
 
 ---
 
-**© 2026 Dane hk \Manifest — Tous droits réservés.**
+**© 2026 Dane hk \Manifest — Licence MIT**

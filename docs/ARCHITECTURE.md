@@ -1,6 +1,6 @@
 # Architecture technique
 
-> © 2026 Dane hk \Manifest — Tous droits réservés.
+> © 2026 Dane hk \Manifest — Licence MIT
 
 ---
 
@@ -208,4 +208,4 @@ Python **3.11+** testé. SQLite inclus dans la bibliothèque standard.
 
 ---
 
-**© 2026 Dane hk \Manifest — Tous droits réservés.**
+**© 2026 Dane hk \Manifest — Licence MIT**

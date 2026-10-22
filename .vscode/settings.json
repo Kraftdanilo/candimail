@@ -1,6 +1,6 @@
 {
   // Interpréteur Python du projet : environnement virtuel local (.venv).
-  // Nécessaire pour que Pylance résolve waitress / webview / pywebview.
+  // Nécessaire pour que Pylance résolve fastapi / uvicorn / httpx.
   // Recréer avec :
   //   python -m venv .venv
   //   .venv\Scripts\pip install -r requirements.txt
