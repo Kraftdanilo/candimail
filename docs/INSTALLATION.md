@@ -53,32 +53,83 @@ pip install -r requirements.txt
 
 ## 3. Lancement
 
-Candimail est une **application de bureau**. Un seul point d'entrée :
+Candimail est une **application web locale** (serveur + navigateur).
+Un seul point d'entrée :
 
-```powershell
+```bash
 python candimail.py
 ```
 
-Le serveur démarre sur un port libre ≥ **9999** (interne à la fenêtre), puis
-une fenêtre native s'ouvre. L'application attend `/api/health` avant de
-l'afficher.
+Le serveur démarre sur un port libre ≥ **9999**, puis le navigateur
+s'ouvre automatiquement sur `http://127.0.0.1:<port>/app`.
 
 ### Options de `candimail.py`
 
 | Option | Effet |
 |---|---|
 | `--port 9000` | Impose le port (prioritaire sur `CANDIMAIL_PORT`) |
-| `--debug` | Logs détaillés + console de développement navigateur |
+| `--lan` | Écoute sur `0.0.0.0` — accessible depuis téléphone/tablette/autre PC du réseau |
+| `--debug` | Logs détaillés + `/api/debug/info` |
 | `--help` | Affiche l'aide |
 
 ### Variables d'environnement
 
-```powershell
-$env:CANDIMAIL_PORT = "9000"          # port imposé
-$env:CANDIMAIL_DEBUG = "1"            # logs détaillés + /api/debug/info
+```bash
+CANDIMAIL_PORT=9000          # port imposé
+CANDIMAIL_HOST=0.0.0.0       # équivaut à --lan
+CANDIMAIL_DEBUG=1            # logs détaillés
 ```
 
-> Il n'existe **pas** de mode serveur ni de mode navigateur : l'application
+## 3.1 Plateformes : Windows, Linux, macOS
+
+Le code est **portable** : chemins via `pathlib`, encodage UTF-8 explicite,
+`socket` standard, aucune API Windows. Python ≥ 3.11 suffit.
+
+### Windows
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\pip install -r requirements.txt
+.\.venv\Scripts\python candimail.py
+```
+
+### Linux
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python candimail.py
+```
+
+### macOS
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python candimail.py
+```
+
+> **macOS** : la première utilisation peut déclencher une demande
+> d'autorisation du pare-feu pour Python — acceptez-la. Le package
+> `cryptography` nécessite parfois `brew install openssl` sur les vieux
+> systèmes.
+
+### Réseau, routeurs, changement d'IP
+
+L'application est **insensible** à l'environnement réseau :
+
+| Situation | Effet |
+|---|---|
+| Changement de routeur | Aucun — le serveur écoute, les clients se reconnectent à la nouvelle IP affichée au démarrage |
+| IP dynamique (DHCP) | Aucun — `--lan` affiche l'IP détectée à chaque lancement (`ip_locale()`, UDP vers 10.255.255.255, portable) |
+| Nouvelle IP publique | Aucun — tout le trafic sortant (SMTP/IMAP/IA) part de la machine, l'IP publique n'est jamais stockée |
+| Wi-Fi ↔ Ethernet | Aucun — reconnexion automatique au prochain accès |
+
+En mode **`--lan`**, notez l'URL affichée au démarrage
+(`📱 Accès réseau local : http://<ip>:<port>/app`) : c'est celle que les
+autres appareils du réseau doivent utiliser. Si elle change (DHCP),
+relancez l'application ou réservez une IP fixe au PC dans le routeur
+(bail statique) pour une adresse stable.
 
 ---
 

@@ -82,6 +82,23 @@ def serveur_pret(port, timeout=20.0):
     return False
 
 
+def ip_locale(port):
+    """IP locale pour l'accès réseau, portable et robuste (Win/Linux/mac).
+    Utilise une connexion UDP (sans envoi) vers une adresse publique : la
+    carte réseau qui servirait le trafic sortant est identifiée fiablement,
+    même si le hostname ne se résout pas (fréquent sur macOS)."""
+    import socket as _s
+    s = _s.socket(_s.AF_INET, _s.SOCK_DGRAM)
+    try:
+        s.connect(("10.255.255.255", 1))     # rien n'est envoyé
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"                     # fallback universel
+    finally:
+        s.close()
+    return f"http://{ip}:{port}"
+
+
 def main(argv=None):
     try:
         if hasattr(sys.stdout, "reconfigure"):
@@ -135,12 +152,7 @@ def main(argv=None):
 
     print(f"\n  🌐 Ouverture du navigateur : {url}")
     if host == "0.0.0.0":
-        import socket as _s
-        try:
-            _ip = _s.gethostbyname(_s.gethostname())
-        except Exception:
-            _ip = "<ip-locale>"
-        print(f"  📱 Accès réseau local : http://{_ip}:{port}/app")
+        print(f"  📱 Accès réseau local : {ip_locale(port)}/app")
     print("  ⏹️  Fermez ce terminal pour arrêter Candimail.\n")
     try:
         webbrowser.open(url)

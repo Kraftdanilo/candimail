@@ -12,17 +12,19 @@ sur son propre compte, sans plateforme tierce ni quota payant.
 Il n'est **pas limité aux candidatures** : messages, groupes, parents d'élèves,
 collègues, notifications… tout ce qui s'envoie par e-mail peut être automatisé.
 
-## Portabilité (autre PC, autre utilisateur)
+## Portabilité (autre PC, autre utilisateur, autre OS)
 
-L'application fonctionne sur **n'importe quel PC** avec Python 3.11+ :
+L'application fonctionne sur **Windows, Linux et macOS** (Python 3.11+) :
 
-```powershell
-# Sur la nouvelle machine
+```bash
+# Sur la nouvelle machine (Win/Linux/mac — mêmes commandes)
 git clone https://github.com/Kraftdanilo/candimail.git
 cd candimail
 python -m venv .venv
-.\.venv\Scripts\pip install -r requirements.txt
-.\.venv\Scripts\python candimail.py
+# Windows : .\.venv\Scripts\pip install -r requirements.txt
+# Linux/mac : .venv/bin/pip install -r requirements.txt
+.venv/Scripts/pip install -r requirements.txt   # (Windows) ; .venv/bin/… sinon
+.venv/Scripts/python candimail.py               # (Windows) ; .venv/bin/… sinon
 ```
 
 - **Port** : jamais un problème — `9999` par défaut, sinon le 1er port libre,
@@ -32,6 +34,10 @@ premier démarrage, jamais versionnés). Copier ces dossiers d'un PC à un
 autre transfère la configuration complète.
 - **Réseau** : `127.0.0.1` par défaut ; `--lan` pour y accéder depuis un
 téléphone ou un autre appareil du même réseau.
+- **Routeur / changement d'IP** : aucun impact. Le serveur écoute en local,
+l'IP réseau affichée au démarrage (`ip_locale()`) se recalcule à chaque
+lancement. IP dynamique (DHCP) = relancer l'app, ou réserver une IP fixe
+dans le routeur pour une adresse stable.
 
 ## Documentation
 
