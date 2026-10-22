@@ -1,6 +1,9 @@
 # Candimail — dependances
-Flask==3.0.0
+# (épinglées : une mise à jour non maîtrisée ne doit jamais casser l'app)
+fastapi==0.115.0
+uvicorn==0.30.6
 openpyxl==3.1.2
 cryptography==46.0.7
-pywebview==6.2.1
-waitress==3.0.2
+pytest==8.0.0
+httpx==0.27.0
+python-multipart==0.0.9

@@ -27,8 +27,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from candimail.core import crypto, db
+from candimail.core.config import DATA_DIR
 
-ADMIN_KEY_FILE = crypto.BASE_DIR / "admin.key"
+ADMIN_KEY_FILE = DATA_DIR / "admin.key"
 
 
 # ---- Mot de passe admin (hash scrypt dans admin.key) ----

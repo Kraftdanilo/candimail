@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Historique & annulation — Candimail</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="stylesheet" href="/static/brutalist.css">
+<link rel="stylesheet" href="/static/motion.css">
+<style>
+  body{ margin:0; background:var(--bg); color:var(--text);
+        font-family:"Segoe UI",Roboto,Arial,sans-serif; }
+  .wrap{ max-width:1000px; margin:0 auto; padding:0 20px 40px; }
+
+  header.top{
+    background:var(--surface); border-bottom:3px solid var(--border-strong);
+    border-top:8px solid var(--accent); padding:18px 0 14px; margin-bottom:22px;
+  }
+  header.top h1{ margin:0 0 4px; font-size:22px; font-weight:900;
+                 text-transform:uppercase; letter-spacing:.04em; }
+  header.top p{ margin:0; font-size:13px; color:var(--muted); font-weight:600; }
+
+  .bar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+        padding:14px; margin-bottom:18px; background:var(--surface);
+        border:2px solid var(--border); border-radius:8px;
+        box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:20; }
+  .bar .sp{ flex:1 }
+
+  .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+          gap:10px; margin-bottom:18px; }
+  .stat{ background:var(--surface); border:2px solid var(--border);
+         border-radius:7px; padding:12px 14px; text-align:center;
+         transition:transform 180ms cubic-bezier(.22,1,.36,1); }
+  .stat:hover{ transform:translateY(-2px); }
+  .stat b{ display:block; font-size:26px; font-weight:900; line-height:1.1; }
+  .stat span{ font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+              color:var(--muted); font-weight:700; }
+
+  .filtres{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
+  .filtres .chip{ padding:6px 12px; border:1px solid var(--border);
+                 background:var(--surface); border-radius:20px;
+                 font-size:12px; font-weight:700; cursor:pointer; }
+  .filtres .chip.active{ background:var(--accent); color:#fff;
+                         border-color:var(--accent); }
+
+  #recherche{ width:100%; padding:10px 12px; font-size:14px;
+              font-family:inherit; border:2px solid var(--border);
+              border-radius:7px; background:var(--surface); margin-bottom:16px; }
+
+  .liste{ display:flex; flex-direction:column; gap:8px; }
+  .h-item{ display:flex; align-items:center; gap:12px; padding:11px 13px;
+           background:var(--surface); border:1px solid var(--border);
+           border-left:4px solid var(--accent); border-radius:7px;
+           box-shadow:var(--shadow-sm);
+           transition:transform 110ms cubic-bezier(.22,1,.36,1),
+                      border-color 110ms linear, opacity 180ms ease;
+           animation:motionRise 240ms cubic-bezier(.22,1,.36,1) both; }
+  .h-item:hover{ transform:translateX(4px); border-left-color:var(--accent2); }
+  .h-ico{ font-size:19px; width:26px; text-align:center; flex-shrink:0; }
+  .h-corps{ flex:1; min-width:0; }
+  .h-label{ font-size:14px; font-weight:700; margin-bottom:2px;
+            overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .h-type{ font-size:11px; color:var(--muted); font-weight:700;
+           text-transform:uppercase; letter-spacing:.05em; }
+  .h-date{ font-size:11.5px; color:var(--muted); white-space:nowrap;
+           flex-shrink:0; }
+  .h-item.undone{ opacity:.5; border-left-color:var(--muted); }
+  .h-item.undone .h-label{ text-decoration:line-through;
+    text-decoration-color:color-mix(in srgb,var(--muted) 60%,transparent); }
+
+  .vide{ padding:40px 20px; text-align:center; color:var(--muted);
+         font-size:14px; font-weight:600;
+         animation:breathe 2.6s cubic-bezier(.22,1,.36,1) infinite; }
+
+  footer.page-footer{ margin-top:26px; padding:16px 0 0;
+    border-top:2px solid var(--border); text-align:center;
+    font-size:11px; font-weight:600; opacity:.6; }
+  a.retour{ color:var(--accent); font-weight:800; text-decoration:none;
+            font-size:13px; }
+  a.retour:hover{ text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <h1>🕓 Historique &amp; annulation</h1>
+    <p>Chaque action menée est enregistrée côté serveur — vous pouvez
+       l'annuler puis la rétablir.
+       <a class="retour" href="/app">← Retour à l'application</a></p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="bar">
+    <button class="btn" id="btn-undo" title="Annuler la dernière action (Ctrl+Z)">↩︎ Annuler</button>
+    <button class="btn" id="btn-redo" title="Rétablir la dernière action annulée">↪︎ Rétablir</button>
+    <span class="sp"></span>
+    <button class="btn small" id="btn-refresh" title="Recharger">🔄</button>
+    <button class="btn small danger" id="btn-vider">🗑️ Vider</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="st-total">0</b><span>Actions</span></div>
+    <div class="stat"><b id="st-actives">0</b><span>Appliquées</span></div>
+    <div class="stat"><b id="st-annulees">0</b><span>Annulées</span></div>
+    <div class="stat"><b id="st-types">0</b><span>Types</span></div>
+  </div>
+
+  <input type="search" id="recherche" aria-label="Rechercher dans l'historique" placeholder="🔍 Rechercher dans l'historique…">
+
+  <div class="filtres" id="filtres"></div>
+
+  <div class="liste" id="liste"></div>
+
+  <footer class="page-footer">{{ COPYRIGHT }}</footer>
+</div>
+
+<script>
+const HIST_ICONS = {
+  supprimer_entreprise:'🏢', ajouter_entreprise:'🏢', renommer_entreprise:'✏️',
+  supprimer_groupe:'👥',      ajouter_groupe:'👥',
+  supprimer_template:'📝',    ajouter_template:'📝',
+  toggle_compte:'📧', toggle_piece:'📎', toggle_filtre:'🗂️',
+  parametres:'⚙️', toggle_reponse:'↔️', envoyer:'📤',
+};
+const HIST_LABELS = {
+  supprimer_entreprise:"Suppression d'entreprise",
+  ajouter_entreprise:"Ajout d'entreprise",
+  renommer_entreprise:"Renommage d'entreprise",
+  supprimer_groupe:'Suppression de groupe', ajouter_groupe:'Ajout de groupe',
+  supprimer_template:'Suppression de modèle', ajouter_template:'Ajout de modèle',
+  toggle_compte:'Activation / pause de compte',
+  toggle_piece:"Activation d'une pièce jointe",
+  toggle_filtre:"Activation d'une règle",
+  parametres:'Modification des paramètres',
+  toggle_reponse:'Changement du statut de réponse',
+  envoyer:"Envoi d'e-mail",
+};
+
+let actions = [], filtre = 'toutes', recherche = '';
+
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function toast(msg){
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:22px;right:22px;z-index:9999;'
+      + 'padding:11px 16px;background:#1E5AA8;color:#fff;border-radius:7px;'
+      + 'font-size:13px;font-weight:700;box-shadow:0 4px 0 #143E77;'
+      + 'transition:opacity 260ms ease,transform 260ms ease';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1'; t.style.transform = 'none';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => {
+    t.style.opacity = '0'; t.style.transform = 'translateX(24px)';
+  }, 2600);
+}
+
+async function charger(){
+  try {
+    const r = await fetch('/api/historique');
+    const d = await r.json();
+    if (d.ok) { actions = d.actions || []; rendre(); }
+  } catch (e) { /* serveur injoignable */ }
+}
+
+function majStats(){
+  const actives = actions.filter(a => !a.undone).length;
+  document.getElementById('st-total').textContent    = actions.length;
+  document.getElementById('st-actives').textContent  = actives;
+  document.getElementById('st-annulees').textContent = actions.length - actives;
+  document.getElementById('st-types').textContent =
+    new Set(actions.map(a => a.type)).size;
+}
+
+function majBoutons(){
+  document.getElementById('btn-undo').disabled = !actions.some(a => !a.undone);
+  document.getElementById('btn-redo').disabled = !actions.some(a => a.undone);
+}
+
+function rendreFiltres(){
+  const box = document.getElementById('filtres');
+  const opts = [['toutes','Toutes'], ['annulees','Annulées'],
+                ['appliquées','Appliquées'],
+                ...[...new Set(actions.map(a => a.type))]
+                  .map(t => [t, HIST_LABELS[t] || t])];
+  box.innerHTML = opts.map(([v,l]) =>
+    `<button class="chip${filtre === v ? ' active' : ''}" data-f="${esc(v)}">${esc(l)}</button>`
+  ).join('');
+  box.querySelectorAll('[data-f]').forEach(b =>
+    b.addEventListener('click', () => { filtre = b.dataset.f; rendre(); }));
+}
+
+function visibles(){
+  const q = recherche.trim().toLowerCase();
+  return actions.filter(a => {
+    if (filtre === 'annulees'   && !a.undone) return false;
+    if (filtre === 'appliquées' &&  a.undone) return false;
+    if (!['toutes','annulees','appliquées'].includes(filtre)
+        && a.type !== filtre) return false;
+    if (q && !String(a.label||'').toLowerCase().includes(q)
+           && !String(a.type||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function rendre(){
+  rendreFiltres(); majStats(); majBoutons();
+  const box = document.getElementById('liste');
+  const list = visibles();
+  if (!list.length) {
+    box.innerHTML = '<div class="vide">' + (actions.length
+      ? 'Aucune action ne correspond à ce filtre.'
+      : 'Aucune action enregistrée pour le moment.<br>'
+        + 'Vos suppressions et modifications apparaîtront ici.') + '</div>';
+    return;
+  }
+  box.innerHTML = list.map((a, i) => `
+    <div class="h-item${a.undone ? ' undone' : ''}" style="animation-delay:${i*22}ms">
+      <span class="h-ico">${HIST_ICONS[a.type] || '•'}</span>
+      <span class="h-corps">
+        <div class="h-label">${esc(a.label || a.type)}</div>
+        <div class="h-type">${esc(HIST_LABELS[a.type] || a.type)}</div>
+      </span>
+      <span class="h-date">${esc(a.created || '')}</span>
+      <button class="btn small" data-id="${a.id}">
+        ${a.undone ? '↪︎ Rétablir' : '↩︎ Annuler'}
+      </button>
+    </div>`).join('');
+  box.querySelectorAll('[data-id]').forEach(b =>
+    b.addEventListener('click', () => basculer(b.dataset.id, b)));
+}
+
+async function basculer(id, btn){
+  const cible = btn || document.querySelector(`[data-id="${id}"]`);
+  if (cible) { cible.disabled = true; cible.textContent = '⏳'; }
+  try {
+    const r = await fetch(`/api/historique/${id}/undo`, { method:'POST' });
+    const d = await r.json();
+    toast(d.ok ? '✅ ' + (d.message || 'OK') : '❌ ' + (d.error || 'Impossible'));
+    await charger();
+  } catch (e) {
+    toast('❌ Erreur réseau');
+    if (cible) { cible.disabled = false; cible.textContent = '↩︎ Annuler'; }
+  }
+}
+
+/* Ctrl+Z annule · Ctrl+Y rétablit */
+document.addEventListener('keydown', (e) => {
+  if (!(e.ctrlKey || e.metaKey)) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')) return;
+  if (e.key === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    const a = actions.find(x => !x.undone); if (a) basculer(a.id, null);
+  } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+    e.preventDefault();
+    const a = actions.find(x => x.undone); if (a) basculer(a.id, null);
+  }
+});
+
+document.getElementById('btn-undo').addEventListener('click', () => {
+  const a = actions.find(x => !x.undone);
+  if (a) basculer(a.id, document.querySelector(`[data-id="${a.id}"]`));
+});
+document.getElementById('btn-redo').addEventListener('click', () => {
+  const a = actions.find(x => x.undone);
+  if (a) basculer(a.id, document.querySelector(`[data-id="${a.id}"]`));
+});
+document.getElementById('btn-refresh').addEventListener('click', charger);
+document.getElementById('btn-vider').addEventListener('click', async () => {
+  if (!confirm("Effacer tout l'historique ? Les actions passées ne seront plus annulables.")) return;
+  await fetch('/api/historique', { method:'DELETE' });
+  await charger();
+  toast('🗑️ Historique vidé');
+});
+document.getElementById('recherche').addEventListener('input', e => {
+  recherche = e.target.value; rendre();
+});
+
+charger();
+</script>
+</body>
+</html>

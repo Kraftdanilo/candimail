@@ -85,8 +85,9 @@ input:focus,textarea:focus{outline:none;border-color:var(--accent);
 }
 </style>
 <link rel="stylesheet" href="/static/brutalist.css">
+<link rel="stylesheet" href="/static/motion.css">
 </head>
-<body>
+<body class="page-doc">
 <header>
   <div class="header-inner">
     <h1>📄 Personnaliser mon CV
@@ -102,8 +103,8 @@ input:focus,textarea:focus{outline:none;border-color:var(--accent);
     <section class="panel">
       <h2>🧑 Identité</h2>
       <div class="row">
-        <input type="text" id="cv-nom" placeholder="Nom complet">
-        <input type="text" id="cv-ville" placeholder="Ville, Côte d'Ivoire">
+        <input type="text" id="cv-nom" aria-label="Nom complet" placeholder="Nom complet">
+        <input type="text" id="cv-ville" aria-label="Ville" placeholder="Ville, Côte d'Ivoire">
       </div>
       <label>Poste / objectif
         <input type="text" id="cv-titre" placeholder="Ex : Stagiaire en Génie Civil">
@@ -162,7 +163,9 @@ input:focus,textarea:focus{outline:none;border-color:var(--accent);
 /* Sauvegarde navigateur (localStorage) */
 const LS_KEY = 'autogmail.cv.draft';
 function storeGet(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){ return null; } }
-function storeSet(d){ try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch(e){} }
+function storeSet(d){ try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      } }
 
 /* État */
 const LIST_FIELDS = {
@@ -250,7 +253,9 @@ async function loadServer(){
   try { const r=await fetch('/api/cv');
         if(r.status===401){ return false; }
         const d=await r.json();
-        if(d.ok&&d.cv){ cv=Object.assign(cv,d.cv); return true; } } catch(e){}
+        if(d.ok&&d.cv){ cv=Object.assign(cv,d.cv); return true; } } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
   return false;
 }
 function toast(msg,type=''){
@@ -283,5 +288,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAllLists(); writeIdentity(); renderPreview();
 });
 </script>
+
+<footer class="page-footer">
+  {{ COPYRIGHT }}
+</footer>
 </body>
 </html>

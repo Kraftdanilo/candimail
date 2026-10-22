@@ -9,7 +9,7 @@ from email.header import decode_header
 from email.utils import parseaddr
 
 from candimail.core import crypto
-from candimail.core.noyau import charger_config, sauver_config, charger_log, sauver_log, get_comptes_actifs
+from candimail.core.noyau import charger_config, sauver_config, charger_log, modifier_log, get_comptes_actifs, _MESSAGES_PUBLICS
 
 
 # ============================================================
@@ -88,11 +88,13 @@ def check_imap_compte(compte, jours=30, uid=None):
             except Exception:
                 continue
     except imaplib.IMAP4.error as e:
+        # Anti-fuite : le message IMAP brut reste dans le journal serveur
+        # (il peut contenir le nom de la boîte, l'ID du thread, l'hôte…).
         print(f"[IMAP] {compte['email']}: {e}")
-        result["erreur"] = f"Connexion refusée pour {compte['email']} : {e}"
+        result["erreur"] = _MESSAGES_PUBLICS["imap"]
     except Exception as e:
         print(f"[IMAP] {type(e).__name__}: {e}")
-        result["erreur"] = f"{type(e).__name__} : {e}"
+        result["erreur"] = _MESSAGES_PUBLICS["imap"]
     finally:
         if mail:
             try: mail.logout()
@@ -104,32 +106,40 @@ def verifier_toutes_boites(jours=30, uid=None):
     if not comptes:
         return {"ok": False, "error": "Aucun compte actif"}
 
-    log = charger_log(uid)
-    nb_reponses = 0
-    nb_bounces = 0
+    # Les appels réseau ci-dessus peuvent durer plusieurs secondes : on ne
+    # garde PAS le journal en mémoire pendant ce temps (sinon un envoi
+    # concurrent serait écrasé à l'écriture). Les réponses/bounces sont donc
+    # collectés puis appliqués en une écriture atomique.
     erreurs = []
-
+    reponses, bounces = {}, {}
     for compte in comptes:
         res = check_imap_compte(compte, jours=jours, uid=uid)
         if res.get("erreur"):
             erreurs.append(res["erreur"])
-        for company, info in res["reponses"].items():
-            if company in log and not log[company].get("repondu"):
-                log[company]["repondu"] = True
-                log[company]["date_reponse"] = info["date"][:20]
-                log[company]["sujet_reponse"] = info["sujet"]
-                nb_reponses += 1
-        for email_bounce, info in res["bounces"].items():
-            for company, entry in log.items():
+        reponses.update(res["reponses"])
+        bounces.update(res["bounces"])
+
+    def _appliquer(l):
+        n_rep = n_bou = 0
+        for company, info in reponses.items():
+            if company in l and not l[company].get("repondu"):
+                l[company]["repondu"] = True
+                l[company]["date_reponse"] = info["date"][:20]
+                l[company]["sujet_reponse"] = info["sujet"]
+                n_rep += 1
+        for email_bounce, info in bounces.items():
+            for entry in l.values():
                 emails_entry = entry.get("emails") or [entry.get("email", "")]
                 if any(e.lower() == email_bounce for e in emails_entry):
                     if not entry.get("bounce"):
                         entry["bounce"] = True
                         entry["bounce_raison"] = info["raison"]
                         entry["bounce_date"] = info["date"][:20]
-                        nb_bounces += 1
+                        n_bou += 1
+        return n_rep, n_bou
 
-    sauver_log(log, uid)
+    _, (nb_reponses, nb_bounces) = modifier_log(_appliquer, uid)
+
     cfg = charger_config(uid)
     cfg["imap"]["derniere_verif"] = int(time.time())
     sauver_config(cfg, uid)
@@ -340,9 +350,12 @@ def appliquer_filtres_compte(compte, filtres, uid=None):
                         "date":    int(time.time()),
                     })
             except Exception as e:
-                stats.append({"regle": _nom_regle(f), "erreur": str(e), "ok": False})
+                print(f"[FILTRE] {compte['email']}: {_nom_regle(f)} -> {e}")
+                stats.append({"regle": _nom_regle(f),
+                              "erreur": _MESSAGES_PUBLICS["imap"], "ok": False})
     except Exception as e:
-        stats.append({"erreur": f"Connexion {compte['email']}: {e}", "ok": False})
+        print(f"[FILTRE] {compte['email']}: {e}")
+        stats.append({"erreur": _MESSAGES_PUBLICS["imap"], "ok": False})
     finally:
         if mail:
             try: mail.logout()

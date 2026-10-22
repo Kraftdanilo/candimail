@@ -9,9 +9,9 @@ import json
 import sqlite3
 import threading
 
-from candimail.core.config import BASE_DIR
+from candimail.core.config import BASE_DIR, DATA_DIR
 
-DB_FILE  = BASE_DIR / "app.db"
+DB_FILE  = DATA_DIR / "app.db"
 
 _lock = threading.RLock()
 
@@ -52,6 +52,17 @@ CREATE TABLE IF NOT EXISTS users (
     pass_hash TEXT NOT NULL,
     created   TEXT
 );
+CREATE TABLE IF NOT EXISTS historique (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    uid     INTEGER NOT NULL DEFAULT 0,
+    type    TEXT NOT NULL,
+    label   TEXT,
+    undo    TEXT,          -- JSON : donnees necessaires pour ANNULER
+    redo    TEXT,          -- JSON : donnees pour RETABLIR
+    undone   INTEGER DEFAULT 0,
+    created TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_hist_uid ON historique(uid, id DESC);
 """
 
 _LOG_UID_MIGRATED = "log_uid_col"
@@ -115,22 +126,44 @@ def _meta_set(cle, valeur="1"):
 
 
 def _migrate_legacy():
+    """Importe une éventuelle config.json / envois.json legacy (une seule fois).
+
+    Les flags `migrated_config` / `migrated_log` de la table `meta` empêchent
+    toute ré-import ultérieur : ces fichiers deviennent des RELIQUES une fois
+    migrés et ne doivent plus jamais écraser la base (ils contiennent des mots
+    de passe en clair — voir crypto.py).
+    """
     cfg_file = BASE_DIR / "config.json"
     log_file = BASE_DIR / "envois.json"
     if cfg_file.exists() and not _meta_get("migrated_config"):
         try:
-            cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
+            cfg = json.loads(cfg_file.read_text(encoding="utf-8-sig"))
             config_set(cfg)
             _meta_set("migrated_config")
+            _purge_legacy(cfg_file, "config.json")
         except Exception:
             pass
     if log_file.exists() and not _meta_get("migrated_log"):
         try:
-            log = json.loads(log_file.read_text(encoding="utf-8"))
+            log = json.loads(log_file.read_text(encoding="utf-8-sig"))
             log_set(log)
             _meta_set("migrated_log")
+            _purge_legacy(log_file, "envois.json")
         except Exception:
             pass
+
+
+def _purge_legacy(path, nom):
+    """Archive puis supprime un fichier legacy migré (il contient des
+    secrets en clair). Un fichier .legacy-save est conservé en sécurité."""
+    try:
+        archive = path.with_suffix(path.suffix + ".legacy-save")
+        if not archive.exists():
+            archive.write_bytes(path.read_bytes())
+        path.unlink()
+        print(f"  🗑️  {nom} migré vers app.db — archivé en {archive.name}")
+    except Exception:
+        pass
 
 
 # --------------------------------
@@ -412,3 +445,94 @@ def uids_actifs():
 def datetime_now_str():
     from datetime import datetime as _dt
     return _dt.now().strftime("%Y-%m-%d %H:%M")
+
+
+# --------------------------------
+# HISTORIQUE DES ACTIONS (annulation / rétablissement)
+# --------------------------------
+HISTORIQUE_MAX = 100
+
+
+def hist_ajouter(type_action, label, undo=None, redo=None, uid=0):
+    """Enregistre une action réversible. `undo`/`redo` sont des dicts
+    sérialisés en JSON : ils suffisent à rejouer l'opération inverse."""
+    u = int(uid or 0)
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "INSERT INTO historique(uid, type, label, undo, redo, created) "
+                "VALUES(?, ?, ?, ?, ?, ?)",
+                (u, type_action, label,
+                 json.dumps(undo, ensure_ascii=False) if undo is not None else None,
+                 json.dumps(redo, ensure_ascii=False) if redo is not None else None,
+                 datetime_now_str()),
+            )
+            conn.commit()
+            hid = cur.lastrowid
+            # Purge : on garde seulement les N actions les plus récentes
+            conn.execute(
+                "DELETE FROM historique WHERE uid=? AND id NOT IN "
+                "(SELECT id FROM historique WHERE uid=? ORDER BY id DESC LIMIT ?)",
+                (u, u, HISTORIQUE_MAX),
+            )
+            conn.commit()
+            return hid
+        finally:
+            conn.close()
+
+
+def hist_lister(uid=0, limite=60):
+    u = int(uid or 0)
+    with _lock:
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                "SELECT id, type, label, undone, created FROM historique "
+                "WHERE uid=? ORDER BY id DESC LIMIT ?", (u, int(limite)),
+            ).fetchall()
+        finally:
+            conn.close()
+    return [dict(r) for r in rows]
+
+
+def hist_get(hid, uid=0):
+    with _lock:
+        conn = _connect()
+        try:
+            r = conn.execute(
+                "SELECT id, uid, type, label, undo, redo, undone FROM historique "
+                "WHERE id=? AND uid=?", (int(hid), int(uid or 0)),
+            ).fetchone()
+        finally:
+            conn.close()
+    if not r:
+        return None
+    d = dict(r)
+    for k in ("undo", "redo"):
+        try:
+            d[k] = json.loads(d[k]) if d[k] else None
+        except Exception:
+            d[k] = None
+    return d
+
+
+def hist_marquer(hid, undone, uid=0):
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute("UPDATE historique SET undone=? WHERE id=? AND uid=?",
+                         (1 if undone else 0, int(hid), int(uid or 0)))
+            conn.commit()
+        finally:
+            conn.close()
+
+
+def hist_purger(uid=0):
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute("DELETE FROM historique WHERE uid=?", (int(uid or 0),))
+            conn.commit()
+        finally:
+            conn.close()

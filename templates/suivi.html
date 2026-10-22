@@ -6,7 +6,15 @@
 <meta name="robots" content="noindex">
 <title>Suivi des envois — Candimail</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!--
+  BUG CORRIGÉ — plus aucune dépendance CDN.
+  Chart.js était chargé depuis cdn.jsdelivr.net : hors ligne (ou
+  réseau d'entreprise bloquant le CDN), « new Chart » levait
+  ReferenceError et les deux graphiques restaient vide. Candimail
+  est une application de bureau sur 127.0.0.1 : elle doit fonctionner
+  SANS Internet. Les graphiques sont désormais dessinés en SVG pur,
+  avec la même palette et les mêmes données.
+-->
 <style>
 :root{
   --bg:#F7F1E4; --surface:#FFF; --border:#DED2BC;
@@ -78,6 +86,16 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
   text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;
 }
 .chart-box canvas{max-height:260px}
+/* Les graphiques sont désormais en SVG (plus de canvas / Chart.js) :
+   on garde une hauteur max pour ne pas écraser la mise en page. */
+.chart-box svg{width:100%;height:auto;max-height:260px;overflow:visible}
+.chart-legend{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px;
+}
+.chart-legend span{
+  display:flex;align-items:center;gap:5px;font-size:11px;color:#7A6E5B;
+}
+.chart-legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
 .filters-bar{
   display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;
   align-items:center;
@@ -187,8 +205,9 @@ tbody tr.hidden{display:none}
 }
 </style>
 <link rel="stylesheet" href="/static/brutalist.css">
+<link rel="stylesheet" href="/static/motion.css">
 </head>
-<body>
+<body class="page-doc">
 
 <header>
   <div class="header-inner">
@@ -249,7 +268,7 @@ tbody tr.hidden{display:none}
     <button class="chip" data-f="bounce">⚠️ Bounces ({{ bounces }})</button>
     <button class="chip" data-f="err">❌ Échecs ({{ echecs }})</button>
     <button class="chip" data-f="sans_pj">📎 Sans PJ</button>
-    <input type="search" id="search-mini" class="search-mini"
+    <input type="search" id="search-mini" aria-label="Recherche" class="search-mini"
            placeholder="Rechercher une entreprise, un email...">
   </div>
 
@@ -345,81 +364,101 @@ tbody tr.hidden{display:none}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============================================================
-   DONNÉES CHART.JS
-   ============================================================ */
+/* ==============================================================
+   DONNÉES DES GRAPHIQUES
+   ==============================================================
+   Servies par Flask (source : _calculer_suivi() dans pages.py).
+   Rendu 100 % SVG : aucune librairie externe, donc aucun besoin
+   d'Internet. Chart.js était chargé depuis un CDN, ce qui rendait
+   les graphiques vides hors ligne.
+   ============================================================== */
 const CHART_DATA = {{ chart_data | safe }};
+const COULEURS = {
+  envoyes: '#1E5AA8', echecs: '#722F37',
+  repondus: '#3A2E63', bounces: '#C98F0D',
+};
 
-/* Pie chart */
-const ctxPie = document.getElementById('chart-pie');
-if (ctxPie) {
-  new Chart(ctxPie, {
-    type: 'doughnut',
-    data: {
-      labels: ['Envoyés', 'Échecs', 'Réponses', 'Bounces'],
-      datasets: [{
-        data: [
-          CHART_DATA.envoyes,
-          CHART_DATA.echecs,
-          CHART_DATA.repondus,
-          CHART_DATA.bounces
-        ],
-        backgroundColor: ['#1E5AA8', '#722F37', '#143E77', '#C98F0D'],
-        borderWidth: 2,
-        borderColor: '#fff',
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { padding: 16, font: { size: 12 } }
-        }
-      }
-    }
-  });
+/** Anneau de répartition. */
+function dessinerRepartition() {
+  const el = document.getElementById('chart-pie');
+  if (!el) return;
+  const parts = [
+    { cle: 'envoyes', label: 'Envoyés', v: CHART_DATA.envoyes || 0 },
+    { cle: 'repondus', label: 'Réponses', v: CHART_DATA.repondus || 0 },
+    { cle: 'bounces', label: 'Bounces', v: CHART_DATA.bounces || 0 },
+    { cle: 'echecs', label: 'Échecs', v: CHART_DATA.echecs || 0 },
+  ].filter(p => p.v > 0);
+  const total = parts.reduce((s, p) => s + p.v, 0);
+  const R = 60, C = 2 * Math.PI * R, cx = 80, cy = 80;
+  let offset = 0;
+
+  if (!total) {
+    el.innerHTML = `<svg viewBox="0 0 160 160" role="img"
+      aria-label="Aucun envoi enregistré">
+      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none"
+        stroke="#E8DCC4" stroke-width="22"/>
+      <text x="${cx}" y="${cy + 5}" text-anchor="middle"
+        font-size="13" fill="#7A6E5B">Aucun envoi</text></svg>`;
+    return;
+  }
+  const anneaux = parts.map(p => {
+    const dash = C * (p.v / total);
+    const seg = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none"
+      stroke="${COULEURS[p.cle]}" stroke-width="22"
+      stroke-dasharray="${dash} ${C - dash}"
+      stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})">
+      <title>${p.label} : ${p.v}</title></circle>`;
+    offset += dash;
+    return seg;
+  }).join('');
+  const legende = parts.map(p =>
+    `<span><i style="background:${COULEURS[p.cle]}"></i>
+       ${p.label} · ${p.v}</span>`).join('');
+  el.innerHTML = `<svg viewBox="0 0 160 160" role="img"
+    aria-label="Répartition des envois">${anneaux}
+    <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="24"
+      font-weight="700" fill="#2A141A">${total}</text>
+    <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="10"
+      fill="#7A6E5B">ENVOIS</text></svg>
+    <div class="chart-legend">${legende}</div>`;
 }
 
-/* Bar chart activité 7 jours */
-const ctxLine = document.getElementById('chart-line');
-if (ctxLine) {
-  const labels = CHART_DATA.jours.map(j => {
-    const d = new Date(j.date);
-    return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' });
-  });
-  const values = CHART_DATA.jours.map(j => j.total);
+/** Barres d'activité sur 7 jours. */
+function dessinerActivite() {
+  const el = document.getElementById('chart-line');
+  if (!el) return;
+  const jours = CHART_DATA.jours || [];
+  if (!jours.length) { el.innerHTML = ''; return; }
+  const W = 320, H = 160, pad = 26;
+  const max = Math.max(1, ...jours.map(j => j.total));
+  const pas = (W - pad * 2) / jours.length;
+  const larg = Math.min(34, pas * 0.6);
+  const jour = iso => new Date(iso + 'T00:00:00')
+    .toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 3);
 
-  new Chart(ctxLine, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Emails envoyés',
-        data: values,
-        backgroundColor: '#1E5AA8',
-        borderRadius: 6,
-        barThickness: 32,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { stepSize: 1, precision: 0 },
-          grid: { color: '#EFE7D4' }
-        },
-        x: { grid: { display: false } }
-      }
-    }
-  });
+  const barres = jours.map((j, i) => {
+    const h = ((H - 52) * j.total) / max;
+    const x = pad + i * pas + (pas - larg) / 2;
+    const y = H - 26 - h;
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}"
+      width="${larg.toFixed(1)}"
+      height="${Math.max(h, j.total ? 2 : 0).toFixed(1)}" rx="3"
+      fill="${j.total ? '#1E5AA8' : '#E8DCC4'}">
+      <title>${j.date} : ${j.total} envoi(s)</title></rect>
+      <text x="${(x + larg / 2).toFixed(1)}" y="${(y - 5).toFixed(1)}"
+        text-anchor="middle" font-size="10" fill="#463D31"
+        font-weight="700">${j.total || ''}</text>
+      <text x="${(x + larg / 2).toFixed(1)}" y="${H - 10}"
+        text-anchor="middle" font-size="9" fill="#7A6E5B">${jour(j.date)}</text>`;
+  }).join('');
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img"
+    aria-label="Activité des 7 derniers jours">
+    <line x1="${pad - 6}" y1="${H - 26}" x2="${W - pad + 6}"
+      y2="${H - 26}" stroke="#DED2BC" stroke-width="1"/>${barres}</svg>`;
 }
+
+dessinerActivite();
 
 /* ============================================================
    FILTRES + RECHERCHE
@@ -541,5 +580,8 @@ document.addEventListener('keydown', e => {
 });
 </script>
 
+<footer class="page-footer">
+  {{ COPYRIGHT }}
+</footer>
 </body>
 </html>

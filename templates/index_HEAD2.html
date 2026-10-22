@@ -1,0 +1,2958 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Candimail — HOBA Koutoua Daniel</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+:root {
+  --bg:#F7F1E4; --surface:#FFF; --border:#DED2BC;
+  --text:#2A141A; --muted:#7A6E5B;
+  --accent:#1E5AA8; --accent2:#143E77;
+  --ok:#1E5AA8; --warn:#C98F0D; --danger:#722F37;
+  --purple:#143E77;
+  --sent:#EAF2FB; --radius:10px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-h:0 4px 12px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;
+  padding-bottom:60px;
+}
+header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:20px 32px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);
+}
+.header-inner{
+  max-width:1200px;margin:0 auto;display:flex;align-items:center;
+  gap:16px;flex-wrap:wrap;
+}
+h1{font-size:19px;font-weight:700;flex:1;min-width:240px}
+h1 small{display:block;font-size:12px;color:var(--muted);margin-top:2px;font-weight:400}
+.badge-cv{
+  padding:6px 12px;background:#FCEFC2;color:#8A6410;border-radius:20px;
+  font-size:12px;font-weight:600;white-space:nowrap;
+}
+.badge-cv.ok{background:#DCEAFB;color:#143E77}
+.badge-cv.warn{background:#F3E0E2;color:#722F37}
+.badge-cv.purple{background:#DCEAFB;color:#143E77}
+.top-actions{display:flex;gap:6px;flex-wrap:wrap}
+main{max-width:1200px;margin:0 auto;padding:24px 32px}
+.panel{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 24px;margin-bottom:20px;box-shadow:var(--shadow);
+}
+.panel h2{
+  font-size:13px;font-weight:600;margin-bottom:12px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;
+  display:flex;align-items:center;gap:8px;
+}
+.panel h2 .badge-count{
+  display:inline-block;padding:2px 8px;background:var(--bg);border-radius:10px;
+  font-size:11px;letter-spacing:0;color:var(--text);font-weight:700;
+}
+.pj-warning{
+  background:#FCEFC2;border:1px solid #E8CE74;border-radius:8px;
+  padding:12px 18px;margin-bottom:20px;font-size:13px;color:#8A6410;
+}
+.config-row{
+  display:flex;gap:16px;flex-wrap:wrap;align-items:center;
+  margin-top:14px;padding-top:14px;border-top:1px solid var(--border);
+}
+.config-row:first-of-type{border-top:none;padding-top:0;margin-top:0}
+.config-row label{display:flex;align-items:center;gap:8px;font-size:13px}
+.config-row input[type=number]{
+  width:80px;padding:6px 10px;border:1px solid var(--border);
+  border-radius:6px;font-size:13px;font-family:inherit;
+}
+.config-row input[type=text],
+.config-row input[type=email],
+.config-row input[type=password]{
+  padding:8px 10px;border:1px solid var(--border);border-radius:6px;
+  font-size:13px;font-family:inherit;
+}
+.config-row select{
+  padding:6px 10px;border:1px solid var(--border);border-radius:6px;
+  font-size:13px;font-family:inherit;background:var(--surface);
+}
+.config-row input:disabled{background:#EFE7D4;color:var(--muted)}
+.stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:12px;margin-bottom:20px;
+}
+.stat{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px;box-shadow:var(--shadow);
+}
+.stat .n{font-size:24px;font-weight:700}
+.stat .l{
+  font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;margin-top:2px;
+}
+.stat.ok .n{color:var(--ok)}
+.stat.warn .n{color:var(--warn)}
+.stat.err .n{color:var(--danger)}
+.stat.purple .n{color:var(--purple)}
+.bulk-panel{
+  background:#F2E7CE;border:1px solid #E0C979;border-radius:var(--radius);
+  padding:16px 20px;margin-bottom:20px;display:flex;gap:14px;
+  align-items:center;flex-wrap:wrap;
+}
+.bulk-panel strong{font-size:14px}
+.bulk-panel .info{flex:1;min-width:200px}
+.bulk-panel .progress{
+  height:6px;background:#EFE0BC;border-radius:3px;overflow:hidden;margin-top:6px;
+}
+.bulk-panel .progress-bar{
+  height:100%;background:var(--accent);width:0%;transition:width .3s;
+}
+.bulk-panel.running{background:#FCEFC2;border-color:#E8CE74}
+.bulk-panel.running .progress{background:#E8CE74}
+.bulk-panel.running .progress-bar{background:var(--warn)}
+.search-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.search-bar input{
+  flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--border);
+  border-radius:8px;font-size:14px;font-family:inherit;background:var(--surface);
+}
+.search-bar input:focus{
+  outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(30,90,168,.1);
+}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  padding:8px 14px;border:1px solid var(--border);background:var(--surface);
+  border-radius:20px;font-size:12px;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:all .15s;
+}
+.chip:hover{border-color:#C8B896;color:var(--text)}
+.chip.active{background:var(--text);color:#fff;border-color:var(--text)}
+.category{margin-bottom:24px}
+.category-head{
+  display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:0 4px;
+}
+.category-head h3{
+  font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+}
+.category-head .count{
+  padding:2px 8px;background:var(--bg);color:var(--muted);font-size:11px;
+  font-weight:700;border-radius:10px;
+}
+.category-head hr{flex:1;border:none;border-top:1px solid var(--border)}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:10px;transition:all .15s;overflow:hidden;
+}
+.card:hover{box-shadow:var(--shadow-h);border-color:#C8B896}
+.card.sent{background:var(--sent);border-color:#BFD7F2}
+.card.error{background:#F6E9EA;border-color:#D9B3B8}
+.card.responded{background:#DCEAFB;border-color:#BFD7F2}
+.card.bounce{background:#FCEFC2;border-color:#E8CE74}
+.card-head{
+  padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;
+}
+.card-head .title{flex:1;min-width:0}
+.card-head .name{
+  font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.card.sent .name{color:var(--muted);text-decoration:line-through}
+.card-head .email{
+  font-size:12px;color:var(--muted);
+  font-family:ui-monospace,"SF Mono",Consolas,monospace;margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.card-head .badge{
+  padding:3px 8px;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;border-radius:4px;background:var(--bg);color:var(--muted);
+  flex-shrink:0;
+}
+.card-head .badge.grand{background:#F3E0E2;color:#722F37}
+.card-head .badge.port{background:#F2E7CE;color:#8A6410}
+.card-head .badge.response{background:#BFD7F2;color:#143E77}
+.card-head .badge.bounce{background:#E8CE74;color:#8A6410}
+.card-head .badge.nopj{background:#F3E0E2;color:#722F37}
+.card-head .date{font-size:11px;color:var(--muted);flex-shrink:0}
+.card-head .toggle{
+  font-size:12px;color:var(--muted);flex-shrink:0;transition:transform .2s;
+}
+.card.open .card-head .toggle{transform:rotate(90deg)}
+.card-body{
+  display:none;padding:16px 18px 18px;border-top:1px solid var(--border);
+}
+.card.open .card-body{display:block}
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.btn{
+  padding:9px 16px;border:1px solid var(--border);background:var(--surface);
+  color:var(--text);border-radius:6px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;
+  gap:6px;text-decoration:none;
+}
+.btn:hover:not(:disabled){background:#FBF6EA;border-color:#C8B896}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover:not(:disabled){background:var(--accent2);border-color:var(--accent2)}
+.btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btn.danger{color:var(--danger);border-color:#D9B3B8}
+.btn.danger:hover:not(:disabled){background:#F6E9EA}
+.btn.small{padding:6px 12px;font-size:12px}
+.piece-item{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  border:1px solid var(--border);border-radius:8px;background:#EAF2FB;
+}
+.piece-item.inactive{background:#FBF6EA}
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(10,14,20,.65);z-index:200;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.visible{display:flex}
+.modal{
+  background:#fff;border-radius:12px;max-width:760px;width:100%;
+  max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.modal-head{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.modal-head h3{font-size:16px;font-weight:700;flex:1}
+.modal-close{
+  background:none;border:none;font-size:20px;cursor:pointer;
+  color:var(--muted);padding:4px 8px;border-radius:6px;
+}
+.modal-close:hover{background:#EFE7D4}
+.modal-body{padding:20px 22px;overflow-y:auto;flex:1}
+.modal-body label{
+  display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--muted);margin-bottom:6px;margin-top:14px;
+}
+.modal-body label:first-child{margin-top:0}
+.modal-body input[type=text],.modal-body textarea,.modal-body input[type=email]{
+  width:100%;padding:10px 12px;border:1px solid var(--border);
+  border-radius:6px;font-size:13px;font-family:inherit;background:#FBF6EA;
+}
+.modal-body input:focus,.modal-body textarea:focus{
+  outline:none;border-color:var(--accent);background:#fff;
+  box-shadow:0 0 0 3px rgba(30,90,168,.1);
+}
+.modal-body textarea{
+  min-height:200px;resize:vertical;line-height:1.5;
+  font-family:ui-monospace,Consolas,monospace;font-size:12px;
+}
+.modal-foot{
+  padding:16px 22px;border-top:1px solid var(--border);
+  display:flex;gap:10px;justify-content:flex-end;align-items:center;
+  background:#FBF6EA;
+}
+.modal-foot .info{flex:1;font-size:12px;color:var(--muted)}
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;
+  padding:12px 22px;border-radius:8px;font-size:13px;font-weight:500;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);opacity:0;transition:all .25s;
+  pointer-events:none;z-index:999;max-width:90%;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--ok)}
+.toast.err{background:var(--danger)}
+.toast.warn{background:var(--warn)}
+.empty-box{
+  padding:14px;background:#FCEFC2;border-radius:6px;
+  font-size:13px;color:#8A6410;
+}
+@media(max-width:640px){
+  header,main{padding:16px}
+  h1{font-size:16px}
+  .card-head{padding:12px 14px}
+  .card-head .badge,.card-head .date{display:none}
+  .badge-cv{font-size:11px;padding:5px 10px}
+}
+
+/* ============ SIDEBAR + LAYOUT (modèle bureau) ============ */
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 14px;
+}
+.sidebar .logo{
+  display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;
+  padding:4px 8px 18px;border-bottom:1px solid var(--border);margin-bottom:14px;
+}
+.sidebar .logo .dot{
+  width:30px;height:30px;border-radius:8px;background:var(--accent);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.sidebar .recherche{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border:1px solid var(--border);border-radius:8px;background:var(--bg);margin-bottom:16px;
+}
+.sidebar .recherche input{
+  border:none;background:transparent;font-family:inherit;font-size:13px;
+  outline:none;flex:1;min-width:0;
+}
+.sidebar .recherche kbd{
+  font-size:10px;background:#fff;border:1px solid var(--border);
+  border-radius:4px;padding:1px 5px;color:var(--muted);
+}
+.sidebar .nav-group{margin-bottom:16px}
+.sidebar .nav-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);padding:0 8px 6px;
+}
+.sidebar a.nav-item{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;
+  color:var(--text);text-decoration:none;font-size:13px;font-weight:500;
+  transition:background .12s;cursor:pointer;border:none;background:none;
+  width:100%;text-align:left;font-family:inherit;
+}
+.sidebar a.nav-item:hover{background:var(--bg)}
+.sidebar a.nav-item.active{background:var(--sent);color:var(--accent2);font-weight:700}
+.sidebar a.nav-item .ico{width:20px;text-align:center;flex-shrink:0}
+.sidebar .spacer{flex:1}
+.sidebar .bas-de-page{
+  border-top:1px solid var(--border);padding-top:10px;font-size:11px;color:var(--muted);
+  padding-left:8px;
+}
+.content{flex:1;min-width:0;display:flex;flex-direction:column}
+.breadcrumb{
+  display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
+  padding:14px 32px 0;
+}
+.breadcrumb b{color:var(--text);font-weight:600}
+.breadcrumb .sep{opacity:.5}
+@media(max-width:900px){
+  .sidebar{display:none}
+  .breadcrumb{padding:14px 16px 0}
+}
+/* ===== PIED DE PAGE (pleine largeur, sous le contenu) ===== */
+.app-footer{ width:100%; margin-top:auto; padding:16px 24px;
+  border-top:2px solid var(--border,#1a1a1a);
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px;
+  font-size:12px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.03em; }
+.app-footer .sp{ flex:1 }
+.app-footer a{ color:inherit; text-decoration:none;
+  border-bottom:2px solid transparent; padding-bottom:1px; }
+.app-footer a:hover{ border-bottom-color:currentColor; }
+.app-footer .info{ opacity:.65; text-transform:none; letter-spacing:0; font-weight:600 }
+@media(max-width:900px){ .app-footer .sp{ display:none } }
+</style>
+<link rel="stylesheet" href="/static/brutalist.css">
+</head>
+<body>
+
+<div class="layout">
+
+<!-- ===== BARRE LATÉRALE ===== -->
+<aside class="sidebar">
+  <div class="logo"><span class="dot">📧</span> Candimail</div>
+  <div class="recherche">
+    <span>🔍</span>
+    <input type="search" id="search-side" placeholder="Rechercher…">
+    <kbd>/</kbd>
+  </div>
+  <nav class="nav-group">
+    <div class="nav-label">Menu</div>
+    <a class="nav-item active" data-nav="dash"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item" href="/suivi"><span class="ico">📊</span> Analytique</a>
+    <a class="nav-item" data-nav="imap"><span class="ico">📨</span> Réponses IMAP</a>
+  </nav>
+  <nav class="nav-group">
+    <div class="nav-label">Comptes</div>
+    <a class="nav-item" data-nav="comptes"><span class="ico">📧</span> Gmail <span class="badge-count" id="side-comptes" style="margin-left:auto">0</span></a>
+    <a class="nav-item" data-nav="filtres"><span class="ico">🗂️</span> Filtres</a>
+  </nav>
+  <nav class="nav-group">
+    <div class="nav-label">Autres</div>
+    <a class="nav-item" data-nav="params"><span class="ico">⚙️</span> Paramètres</a>
+    <a class="nav-item" data-nav="hist"><span class="ico">🕓</span> Historique</a>
+    <a class="nav-item" href="/cgu" target="_blank"><span class="ico">❓</span> Aide</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="bas-de-page">HOBA Koutoua Daniel<br> Soubré, Côte d'Ivoire</div>
+</aside>
+
+<!-- ===== COLONNE PRINCIPALE ===== -->
+<div class="content">
+
+<header>
+  <div class="header-inner">
+    <h1 id="page-titre">
+      Tableau de bord
+      <small id="header-sub">Candimail · Candidatures Stage Génie Civil</small>
+    </h1>
+    <div class="badge-cv" id="cv-badge">📎 0 pièce(s)</div>
+    <div class="badge-cv warn" id="pj-warn-badge" style="display:none"
+         title="Aucune pièce jointe — emails sans CV">⚠️ Sans PJ</div>
+    <div class="badge-cv" id="comptes-badge" title="Comptes Gmail actifs">📧 0</div>
+    <div class="badge-cv" id="rate-badge" title="Rate limit horaire">⏱️ 0/30</div>
+    <div class="top-actions">
+      <a class="btn small" href="/api/export-excel">⬇️ Excel</a>
+      <a class="btn small" href="/api/export-csv">⬇️ CSV</a>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <span>Candimail</span><span class="sep">/</span><b id="bc-page">Tableau de bord</b>
+</div>
+
+<main>
+
+  <!-- Banner PJ -->
+  <div class="pj-warning" id="pj-warning" style="display:none">
+    ⚠️ <strong>Aucune pièce jointe active</strong> — les emails partiront sans CV.
+  </div>
+
+  <!-- COMPTES GMAIL -->
+  <section class="panel" id="sec-comptes">
+    <h2>📧 Comptes Gmail <span class="badge-count" id="comptes-count">0 actif(s)</span></h2>
+    <div id="comptes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+    <div class="config-row">
+      <input type="email" id="new-email" placeholder="battiment64@gmail.com"
+             style="flex:1;min-width:220px">
+      <input type="password" id="new-password"
+             placeholder="xxxx xxxx xxxx xxxx"
+             style="flex:1;min-width:260px">
+      <button class="btn primary small" id="btn-add-compte">+ Ajouter</button>
+      <button class="btn small" id="btn-help-password">❓ Où trouver mon mot de passe ?</button>
+    </div>
+  </section>
+
+  <!-- MES MESSAGES (TEMPLATES) -->
+  <section class="panel">
+    <h2>📝 Mes messages <span class="badge-count" id="tpl-count">0</span></h2>
+    <div id="tpl-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+    <div class="config-row">
+      <button class="btn primary small" id="btn-new-tpl">+ Nouveau message</button>
+      <span style="font-size:12px;color:var(--muted)">
+        Modèles réutilisables (candidature, parents, collègues…)
+      </span>
+    </div>
+  </section>
+
+  <!-- ENVOI PERSONNALISÉ -->
+  <section class="panel">
+    <h2>✉️ Envoi personnalisé <span class="badge-count">email libre</span></h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;grid-column:1/-1">
+        Destinataire(s) *
+        <textarea id="custom-email" rows="2"
+                  placeholder="dan@gmail.com, dan1dan@gmail.com, autre@exemple.com&#10;(virgule, point-virgule ou retour ligne)"
+                  style="padding:9px 12px;border:1px solid var(--border);border-radius:6px;
+                         font-size:13px;font-family:ui-monospace,Consolas,monospace;
+                         resize:vertical;line-height:1.5"></textarea>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;grid-column:1/-1">
+        Nom de l'entreprise / organisation *
+        <input type="text" id="custom-company"
+               placeholder="Ex : SOTRA, Groupe X, Cabinet Y…"
+               style="padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+    </div>
+
+    <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                  font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+      Contexte personnalisé (optionnel)
+      <textarea id="custom-context" rows="3"
+                placeholder="Ex : Je vous contacte car je suis particulièrement intéressé par votre projet…"
+                style="padding:9px 12px;border:1px solid var(--border);border-radius:6px;
+                       font-size:13px;font-family:inherit;resize:vertical;line-height:1.5"></textarea>
+    </label>
+
+    <div class="config-row">
+      <label>
+        Template :
+        <select id="custom-template"></select>
+      </label>
+      <button class="btn small" id="btn-custom-preview">👁️ Aperçu</button>
+      <button class="btn primary small" id="btn-custom-send">📤 Envoyer maintenant</button>
+      <span id="custom-info" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+
+    <div id="custom-preview-zone" style="display:none;margin-top:14px">
+      <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);
+                    text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">
+        Aperçu de la lettre
+      </label>
+      <textarea id="custom-preview-body" readonly
+                style="width:100%;min-height:280px;padding:12px;border:1px solid var(--border);
+                       border-radius:6px;font-size:12px;font-family:ui-monospace,Consolas,monospace;
+                       line-height:1.5;background:#FBF6EA;resize:vertical"></textarea>
+    </div>
+  </section>
+
+  <!-- MES GROUPES -->
+  <section class="panel">
+    <h2>👥 Mes groupes <span class="badge-count" id="groupes-count">0</span></h2>
+    <div id="groupes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+    <div class="config-row">
+      <button class="btn primary small" id="btn-new-groupe">+ Nouveau groupe</button>
+      <span style="font-size:12px;color:var(--muted)">
+        Pour envoyer le même message à plusieurs personnes (parents d'élèves, collègues…)
+      </span>
+    </div>
+  </section>
+
+  <!-- INFORMATIONS CANDIDAT -->
+  <section class="panel">
+    <h2>👤 Informations candidat</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Nom complet
+        <input type="text" id="cfg-nom"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Téléphone
+        <input type="text" id="cfg-tel"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Email
+        <input type="email" id="cfg-email"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Ville
+        <input type="text" id="cfg-ville"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Diplôme
+        <input type="text" id="cfg-diplome"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Spécialité
+        <input type="text" id="cfg-spec"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+    </div>
+    <div class="config-row">
+      <label>
+        Template par défaut :
+        <select id="cfg-template"></select>
+      </label>
+      <button class="btn primary small" id="btn-save-config">💾 Enregistrer</button>
+    </div>
+  </section>
+
+  <!-- PIÈCES JOINTES -->
+  <section class="panel">
+    <h2>📎 Pièces jointes <span class="badge-count" id="pieces-count">0 active(s)</span></h2>
+    <div id="pieces-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+    <div class="config-row">
+      <label class="btn small" style="cursor:pointer">
+        📄 Ajouter un PDF
+        <input type="file" id="pj-input" accept="application/pdf" hidden multiple>
+      </label>
+      <span style="font-size:12px;color:var(--muted)">CV, LM, diplôme…</span>
+    </div>
+  </section>
+
+  <!-- IMAP -->
+  <section class="panel" id="sec-imap">
+    <h2>📨 Détection des réponses <span class="badge-count" id="imap-status-badge">—</span></h2>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <button class="btn primary small" id="btn-imap-check">🔄 Vérifier maintenant</button>
+      <span style="font-size:12px;color:var(--muted)">
+        Analyse les boîtes Gmail (30 derniers jours) : réponses + bounces.
+      </span>
+    </div>
+  </section>
+
+  <!-- FILTRES GMAIL -->
+  <section class="panel" id="sec-filtres">
+    <h2>🗂️ Règles de classement <span class="badge-count" id="regles-count">0</span></h2>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 10px">
+      Les règles sont testées PAR ORDRE DE PRIORITÉ (1 = en premier) : la première
+      qui correspond gagne. Glisse-dépose pour réordonner, ⏸️ pour mettre en pause.
+      🔔 = déclenche une notification. Sans match, le mail reste tel quel.
+    </p>
+    <div id="regles-liste" style="margin-bottom:12px"></div>
+    <details open style="border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+      <summary style="font-size:13px;font-weight:700;cursor:pointer">➕ Nouvelle règle</summary>
+      <div class="config-row" style="align-items:flex-end;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <label style="display:flex;flex-direction:column;font-size:12px">
+          Nom de la règle
+          <input type="text" id="flt-nom" placeholder="ex : Bourse" style="padding:6px">
+        </label>
+        <label style="display:flex;flex-direction:column;font-size:12px">
+          Champ
+          <select id="flt-champ" style="padding:6px">
+            <option value="motcle">Mot-clé (sujet ou texte)</option>
+            <option value="from">Expéditeur</option>
+            <option value="sujet">Sujet</option>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;font-size:12px">
+          Valeur
+          <input type="text" id="flt-valeur" placeholder="ex : recrutement" style="padding:6px">
+        </label>
+        <label style="display:flex;flex-direction:column;font-size:12px">
+          Libellé (🏷️)
+          <input type="text" id="flt-label" placeholder="ex : Candidatures" style="padding:6px">
+        </label>
+        <div style="display:flex;flex-direction:column;font-size:12px;gap:4px">
+          <label><input type="checkbox" id="act-label" checked> 🏷️ Libellé</label>
+          <label><input type="checkbox" id="act-lu"> 👁️ Marquer comme lu</label>
+          <label><input type="checkbox" id="act-notif"> 🔔 Notifier</label>
+          <label><input type="checkbox" id="act-archive"> 📦 Archiver</label>
+          <label><input type="checkbox" id="act-supprimer"> 🗑️ Supprimer</label>
+        </div>
+        <button class="btn primary small" id="btn-flt-add">➕ Ajouter la règle</button>
+        <button class="btn small" id="btn-flt-appliquer">⚡ Appliquer maintenant</button>
+        <button class="btn small" id="btn-flt-libelles">🏷️ Créer les libellés dans Gmail</button>
+      </div>
+    </details>
+    <details style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px">
+      <summary style="font-size:13px;font-weight:700;cursor:pointer">🧠 Apprentissage — corriger un classement</summary>
+      <p style="font-size:12px;color:var(--muted);margin:8px 0">
+        Indique que les mails d'un expéditeur doivent aller dans un libellé précis :
+        l'app crée une règle prioritaire qui passe devant toutes les autres.
+      </p>
+      <div class="config-row" style="align-items:flex-end;gap:8px;flex-wrap:wrap">
+        <label style="display:flex;flex-direction:column;font-size:12px">
+          Email expéditeur
+          <input type="text" id="app-email" placeholder="ex : contact@boursorama.fr" style="padding:6px;min-width:220px">
+        </label>
+        <label style="display:flex;flex-direction:column;font-size:12px">
+          Libellé correct
+          <input type="text" id="app-label" placeholder="ex : Bourse" style="padding:6px">
+        </label>
+        <button class="btn small" id="btn-app-corriger">🧠 Enseigner</button>
+      </div>
+      <div id="app-liste" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+    </details>
+  </section>
+
+  <!-- NOTIFICATIONS -->
+  <section class="panel" id="sec-notifs">
+    <h2>🔔 Notifications <span class="badge-count" id="notifs-badge">0</span></h2>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn small" id="btn-notifs-activer">📱 Activer les notifications</button>
+      <span style="font-size:12px;color:var(--muted)">
+        Notifié quand un mail est classé dans une règle avec 🔔 (ex : Travail, Opportunité).
+      </span>
+    </div>
+    <div id="notifs-liste" style="font-size:13px;max-height:200px;overflow-y:auto"></div>
+  </section>
+
+  <!-- HISTORIQUE LOCAL (navigateur) -->
+  <section class="panel" id="sec-hist">
+    <h2>🕓 Historique (cet appareil)</h2>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 10px">
+      Mémoire locale du navigateur : conserve les dernières actions
+      (envois, vérifications, filtres) même après fermeture. Stocké en
+      localStorage, jamais envoyé au serveur.
+    </p>
+    <div id="hist-liste" style="font-size:13px;max-height:200px;overflow-y:auto"></div>
+    <button class="btn small danger" id="btn-hist-vider" style="margin-top:8px">🗑️ Vider l'historique</button>
+  </section>
+
+  <!-- PARAMÈTRES -->
+  <section class="panel" id="sec-params">
+    <h2>⚙️ Paramètres d'envoi</h2>
+    <div class="config-row">
+      <label>
+        Délai anti-spam :
+        <input type="number" id="cfg-delai" min="5" max="300" value="40">
+        <span style="font-size:12px;color:var(--muted)">s</span>
+      </label>
+      <label>
+        <input type="checkbox" id="cfg-delai-alea"> 🎲 Aléatoire (35-55s)
+      </label>
+      <span id="delai-info" style="font-size:11px;color:var(--muted)"></span>
+      <label>
+        Max / heure :
+        <input type="number" id="cfg-maxh" min="1" max="500" value="100">
+      </label>
+      <button class="btn small danger" id="btn-reset-log">🗑️ Réinitialiser le log</button>
+      <button class="btn small" id="btn-import-json">⬆️ Importer JSON</button>
+      <input type="file" id="import-json-input" accept=".json" hidden>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="n" id="stat-total">0</div><div class="l">Entreprises</div></div>
+    <div class="stat ok"><div class="n" id="stat-sent">0</div><div class="l">Envoyées</div></div>
+    <div class="stat warn"><div class="n" id="stat-pending">0</div><div class="l">En attente</div></div>
+    <div class="stat purple"><div class="n" id="stat-responded">0</div><div class="l">Réponses</div></div>
+  </div>
+
+  <!-- BULK -->
+  <div class="bulk-panel" id="bulk-panel">
+    <div class="info">
+      <strong id="bulk-title">🚀 Envoi en masse</strong>
+      <div id="bulk-desc" style="font-size:12px;color:var(--muted);margin-top:2px">
+        Envoie aux entreprises non contactées
+      </div>
+      <div class="progress"><div class="progress-bar" id="bulk-bar"></div></div>
+    </div>
+    <button class="btn primary" id="bulk-start">▶️ Tout envoyer</button>
+    <button class="btn danger" id="bulk-stop" style="display:none">⏹️ Arrêter</button>
+    <div class="sel-bar">
+      <span class="sel-count" id="sel-count">0 sélectionnée(s)</span>
+      <button class="btn small" id="sel-all">☑️ Tout cocher</button>
+      <button class="btn small" id="sel-none">☐ Tout décocher</button>
+      <button class="btn primary small" id="sel-send" disabled>📤 Envoyer la sélection</button>
+    </div>
+  </div>
+
+  <!-- RECHERCHE -->
+  <div class="search-bar">
+    <input type="search" id="search" placeholder="Rechercher une entreprise...">
+    <div class="filters" id="filters"></div>
+    <button class="btn primary small" id="btn-add-company">➕ Entreprise</button>
+  </div>
+
+  <div id="list"></div>
+
+</main>
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<!-- ===== PIED DE PAGE ===== -->
+<footer class="app-footer">
+  <a href="/vitrine">Vitrine</a>
+  <a href="/cv">Mon CV</a>
+  <a href="/suivi">Suivi des envois</a>
+  <span class="sp"></span>
+  <a href="/cgu">CGU</a>
+  <a href="/rgpd">RGPD</a>
+  <span class="info">Candimail v7 — usage local</span>
+</footer>
+
+<!-- MODAL APERÇU -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">✏️ Aperçu avant envoi</h3>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Destinataire</label>
+      <input type="text" id="modal-dest" readonly style="background:#EFE7D4">
+      <label>Objet</label>
+      <input type="text" id="modal-subject">
+      <label>Corps du message</label>
+      <textarea id="modal-body"></textarea>
+    </div>
+    <div class="modal-foot">
+      <span class="info" id="modal-info"></span>
+      <button class="btn" id="modal-cancel">Annuler</button>
+      <button class="btn primary" id="modal-send">📤 Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AIDE GMAIL -->
+<div class="modal-overlay" id="help-modal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-head">
+      <h3>🔑 Mot de passe d'application Gmail</h3>
+      <button class="modal-close" id="help-close">✕</button>
+    </div>
+    <div class="modal-body" style="line-height:1.65;font-size:14px">
+      <div style="padding:14px;background:#FCEFC2;border-left:4px solid #C98F0D;
+                  border-radius:6px;margin-bottom:18px">
+        <strong>⚠️ Important :</strong> il faut un <strong>mot de passe d'application</strong>,
+        pas ton mot de passe Gmail habituel.
+      </div>
+
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px">
+        Étape 1 — Activer la validation en deux étapes
+      </h4>
+      <ol style="padding-left:20px;margin-bottom:16px">
+        <li>Va sur <a href="https://myaccount.google.com/security" target="_blank"
+            style="color:var(--accent)">myaccount.google.com/security</a></li>
+        <li>Clique sur <strong>Validation en deux étapes</strong></li>
+        <li>Suis les instructions (SMS ou appli Authenticator)</li>
+      </ol>
+
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px">
+        Étape 2 — Générer un mot de passe d'application
+      </h4>
+      <ol style="padding-left:20px;margin-bottom:16px">
+        <li>Va sur <a href="https://myaccount.google.com/apppasswords" target="_blank"
+            style="color:var(--accent)">myaccount.google.com/apppasswords</a></li>
+        <li>Dans « Nom de l'application », tape <strong>Candimail</strong></li>
+        <li>Clique sur <strong>Créer</strong></li>
+        <li>Google affiche un mot de passe de 16 caractères :
+          <code style="background:#EFE7D4;padding:2px 6px;border-radius:4px">abcd efgh ijkl mnop</code></li>
+      </ol>
+
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px">
+        Étape 3 — Colle-le dans l'application
+      </h4>
+      <p style="margin-bottom:16px">
+        Copie ce mot de passe et colle-le dans le champ « mot de passe d'application ».
+        Clique ensuite sur <strong>🧪 Tester</strong> pour vérifier.
+      </p>
+
+      <div style="padding:14px;background:#F2E7CE;border-left:4px solid var(--accent);
+                  border-radius:6px">
+        <strong>💡 Astuce :</strong> tu peux ajouter plusieurs comptes Gmail. Ils sont
+        utilisés en rotation automatique à chaque envoi.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <a class="btn primary" href="https://myaccount.google.com/apppasswords" target="_blank">
+        🔗 Ouvrir Google
+      </a>
+      <button class="btn" id="help-close-btn">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GROUPE (création/édition) -->
+<div class="modal-overlay" id="grp-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head">
+      <h3 id="grp-modal-title">👥 Nouveau groupe</h3>
+      <button class="modal-close" id="grp-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="grp-id">
+      <label>Nom du groupe *</label>
+      <input type="text" id="grp-nom" placeholder="Ex : Parents 6ème A">
+      <label>Description (optionnel)</label>
+      <input type="text" id="grp-desc" placeholder="Ex : Groupe WhatsApp parents">
+      <label>Emails des membres * (un par ligne ou séparés par virgule)</label>
+      <textarea id="grp-emails" rows="6"
+                placeholder="parent1@gmail.com&#10;parent2@gmail.com&#10;parent3@gmail.com"></textarea>
+      <div id="grp-email-count" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="info" id="grp-modal-info"></span>
+      <button class="btn" id="grp-modal-cancel">Annuler</button>
+      <button class="btn primary" id="grp-modal-save">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENVOI GROUPE -->
+<div class="modal-overlay" id="grp-send-modal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-head">
+      <h3 id="grp-send-title">📤 Envoyer au groupe</h3>
+      <button class="modal-close" id="grp-send-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="grp-send-id">
+      <label>Template (optionnel)</label>
+      <select id="grp-send-template" style="width:100%;padding:10px 12px;
+              border:1px solid var(--border);border-radius:6px;
+              font-size:13px;font-family:inherit;margin-bottom:12px">
+        <option value="">— Message libre —</option>
+      </select>
+
+      <label>Objet *</label>
+      <input type="text" id="grp-send-subject" placeholder="Ex : Réunion parents jeudi 20h">
+
+      <label>Message *</label>
+      <textarea id="grp-send-body" rows="10"
+                placeholder="Bonjour à tous,&#10;&#10;Je vous informe que…"></textarea>
+
+      <div style="margin-top:16px;padding:12px 14px;background:#FBF6EA;border-radius:8px;
+                  display:flex;flex-direction:column;gap:10px">
+        <strong style="font-size:12px;color:var(--muted);text-transform:uppercase;
+                       letter-spacing:.05em">Options d'envoi</strong>
+
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="radio" name="grp-mode" value="individuel" checked>
+          📧 <strong>Individuel</strong> — un email séparé pour chacun
+          <span style="color:var(--muted);font-size:11px">(personne ne voit personne)</span>
+        </label>
+
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="radio" name="grp-mode" value="groupe">
+          👥 <strong>Groupé (Cci)</strong> — 1 seul email en copie cachée
+          <span style="color:var(--muted);font-size:11px">(rapide, invisible)</span>
+        </label>
+
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;
+                      padding-top:8px;border-top:1px solid var(--border)">
+          <input type="checkbox" id="grp-send-pj">
+          📎 <strong>Joindre les pièces jointes actives</strong>
+        </label>
+      </div>
+
+      <div id="grp-send-info"
+           style="margin-top:12px;font-size:12px;color:var(--muted)"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="info" id="grp-send-status"></span>
+      <button class="btn" id="grp-send-cancel">Annuler</button>
+      <button class="btn primary" id="grp-send-go">📤 Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TEMPLATE -->
+<div class="modal-overlay" id="tpl-modal">
+  <div class="modal" style="max-width:800px">
+    <div class="modal-head">
+      <h3 id="tpl-modal-title">📝 Nouveau message</h3>
+      <button class="modal-close" id="tpl-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tpl-id">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
+        <div>
+          <label>Nom *</label>
+          <input type="text" id="tpl-nom" placeholder="Ex : Candidature stage">
+        </div>
+        <div>
+          <label>Catégorie</label>
+          <select id="tpl-categorie" style="width:100%;padding:10px 12px;
+                  border:1px solid var(--border);border-radius:6px;
+                  font-size:13px;font-family:inherit">
+            <option value="candidature">💼 Candidature</option>
+            <option value="parents">👨‍👩‍👧 Parents</option>
+            <option value="collegues">👥 Collègues</option>
+            <option value="amis">🎉 Amis</option>
+            <option value="autre">📌 Autre</option>
+          </select>
+        </div>
+      </div>
+      <label>Objet *</label>
+      <input type="text" id="tpl-objet" placeholder="Ex : Demande de stage — {entreprise}">
+      <label>Corps du message *</label>
+      <textarea id="tpl-corps" rows="14" style="min-height:280px"
+                placeholder="Bonjour,&#10;&#10;{contexte}&#10;&#10;Cordialement,&#10;{nom}"></textarea>
+
+      <div style="margin-top:12px;padding:12px 14px;background:#F2E7CE;border-radius:8px;
+                  font-size:12px;line-height:1.6;color:#143E77">
+        <strong>💡 Variables :</strong>
+        <code>{contexte}</code> <code>{entreprise}</code> <code>{nom}</code>
+        <code>{tel}</code> <code>{email}</code> <code>{ville}</code>
+        <code>{diplome}</code> <code>{spec}</code>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span class="info" id="tpl-modal-info"></span>
+      <button class="btn" id="tpl-modal-cancel">Annuler</button>
+      <button class="btn primary" id="tpl-modal-save">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENTREPRISE (ajout / édition) -->
+<div class="modal-overlay" id="company-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3 id="company-modal-title">➕ Nouvelle entreprise</h3>
+      <button class="modal-close" id="company-modal-close">✕</button>
+    </div>    <div class="modal-body">
+      <label>Nom de l'entreprise</label>
+      <input type="text" id="company-f-name" placeholder="Ex : COLAS Afrique">
+      <label>Email destinataire</label>
+      <input type="text" id="company-f-email" placeholder="recrutement@entreprise.com">
+      <label>Catégorie</label>
+      <select id="company-f-cat">
+        <option value="pme">PME</option>
+        <option value="grands">Grands groupes</option>
+        <option value="port">Port / Maritime</option>
+      </select>
+      <label>Contexte (inséré dans le message)</label>
+      <textarea id="company-f-context" rows="4"
+                placeholder="Pourquoi cette entreprise t'intéresse..."></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="company-cancel">Annuler</button>
+      <button class="btn primary" id="company-save">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FILTRE (ajout / édition) -->
+<div class="modal-overlay" id="filter-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3 id="filter-modal-title">✏️ Modifier la règle</h3>
+      <button class="modal-close" id="filter-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Nom de la règle</label>
+      <input type="text" id="filter-f-name">
+      <label>Type de règle</label>
+      <select id="filter-f-type">
+        <option value="sender">Adresse de l'expéditeur</option>
+        <option value="subject">Objet du mail</option>
+        <option value="domain">Domaine de l'expéditeur</option>
+      </select>
+      <label>Valeur (adresse, domaine ou mot-clé)</label>
+      <input type="text" id="filter-f-value">
+      <label>Libellé Gmail à appliquer</label>
+      <input type="text" id="filter-f-label">
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="filter-cancel">Annuler</button>
+      <button class="btn primary" id="filter-save">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ENTREPRISES */
+let COMPANIES = [
+  { cat:'grands', name:'SOGEA-SATOM (VINCI)', email:'sogea-satom.cote-ivoire@vinci-construction.com',
+    context:`Membre du groupe VINCI, SOGEA-SATOM est un acteur de référence des travaux publics en Côte d'Ivoire. C'est précisément cette expertise sur les grands projets d'infrastructure routière et d'ouvrages d'art qui motive ma candidature.` },
+  { cat:'grands', name:'PFO Africa', email:'recrutement@pfoafrica.com',
+    context:`Je suis avec un vif intérêt les activités de PFO Africa, notamment votre chantier de réhabilitation de l'axe San-Pédro – Soubré. Résidant à Soubré même, je vois quotidiennement l'avancement de vos travaux.` },
+  { cat:'grands', name:'PFO Construction', email:'recrutement@pfo-construction.com',
+    context:`Filiale du groupe PFO Africa, PFO Construction incarne l'excellence ivoirienne dans le secteur du bâtiment et des travaux publics.` },
+  { cat:'grands', name:'Bouygues Travaux Publics', email:'byes.ci@bouygues-es.com',
+    context:`Rejoindre Bouygues Travaux Publics représenterait pour moi une opportunité exceptionnelle de me former aux standards internationaux du génie civil.` },
+  { cat:'grands', name:'SICMA', email:'c2a@aviso.ci',
+    context:`Le Groupe SICMA est reconnu pour son engagement en faveur de la formation et de l'insertion professionnelle des jeunes ivoiriens.` },
+  { cat:'grands', name:'SETAO', email:'setao@setao.ci',
+    context:`Membre du groupe Bouygues, SETAO est l'un des acteurs historiques du BTP en Côte d'Ivoire.` },
+  { cat:'grands', name:'RAZEL', email:'recrutement.razel.ci@razel.fr',
+    context:`La réputation de RAZEL dans les travaux publics et le génie civil n'est plus à démontrer.` },
+  { cat:'grands', name:'COLAS Afrique', email:'colasci@colasafrique.com',
+    context:`Spécialiste mondial des routes, COLAS Afrique est une référence dans la construction et l'entretien d'infrastructures routières.` },
+  { cat:'grands', name:'H2C Africa', email:'recrutement@h2c-africa.com',
+    context:`Votre implantation à San-Pédro et votre dynamisme dans le secteur du BTP en Côte d'Ivoire retiennent toute mon attention.` },
+  { cat:'pme', name:'B-Constructions (B-Group)', email:'info@b-groupci.com',
+    context:`Depuis votre création en 2015, B-Constructions s'est imposée comme un acteur dynamique du bâtiment et des travaux publics.` },
+  { cat:'pme', name:'S.I.E TRAVAUX', email:'me_ngoran_ake@yahoo.fr',
+    context:`L'expertise de la S.I.E TRAVAUX dans l'adduction en eau potable et l'assainissement est un domaine technique qui m'intéresse particulièrement.` },
+  { cat:'pme', name:'Magnon Construction & TP', email:'recrutements@mctp.ci',
+    context:`Vous recherchez régulièrement des profils d'ingénieurs travaux et d'études. C'est précisément l'orientation que je souhaite donner à ma carrière.` },
+  { cat:'pme', name:'SOTIC', email:'info@sotici.com',
+    context:`SOTIC s'est construit une solide réputation dans le bâtiment et l'ingénierie en Côte d'Ivoire.` },
+  { cat:'pme', name:'SOGENAM-CI', email:'sogenam@sogenam.com',
+    context:`La double casquette de SOGENAM — génie civil et négoce de matériaux — offre une vision complète du secteur de la construction.` },
+  { cat:'pme', name:'CORIAS', email:'secretariatcorias@gmail.com',
+    context:`Vous proposez un stage de perfectionnement au sein de votre Direction Technique, avec des missions de suivi de chantiers, appels d'offres et contrôle qualité.` },
+  { cat:'pme', name:"MATRELEC Côte d'Ivoire", email:'secretariat@matrelec-ci.com',
+    context:`Votre offre de stage en Génie Civil à Marcory correspond parfaitement à mes compétences actuelles de licencié.` },
+  { cat:'pme', name:'BEESHOP GENIUS', email:'meyerlansky225@gmail.com',
+    context:`La dimension technico-commerciale du BTP est une facette du métier que je souhaite découvrir.` },
+  { cat:'pme', name:'OCEANE INTERNATIONAL', email:'oceaneinternational@gmail.com',
+    context:`Votre structure basée à Cocody recherche un stagiaire en Génie Civil Bâtiment.` },
+  { cat:'pme', name:'ITB Group', email:'itbgroupci@gmail.com',
+    context:`La double approche d'ITB Group — architecture et génie civil — rejoint ma propre ambition de carrière.` },
+  { cat:'pme', name:'EGTP SARL', email:'egtp.btp@gmail.com',
+    context:`Votre implantation dans la région des Montagnes (Man) témoigne d'une capacité à intervenir sur des terrains complexes.` },
+  { cat:'pme', name:'UNISERV BTP', email:'recrutement@uniservci.net',
+    context:`Votre couverture nationale et votre expérience depuis 2013 dans le bâtiment et le génie civil vous positionnent comme un partenaire de confiance.` },
+  { cat:'pme', name:'Porteo BTP', email:'recrutement@porteo-btp.com',
+    context:`Je suis attentif à vos projets d'asphaltage et de réhabilitation routière, notamment dans la région de Korhogo.` },
+  { cat:'pme', name:'ETRAKO-BTP', email:'etrakobtpsarl@gmail.com',
+    context:`ETRAKO-BTP fait partie des entreprises dynamiques qui contribuent au développement du Nord ivoirien.` },
+  { cat:'pme', name:"NEUCE Côte d'Ivoire", email:'cote.ivoire@neuce.com',
+    context:`NEUCE Côte d'Ivoire combine construction et travaux publics, avec une présence régionale notamment à Daloa.` },
+  { cat:'port', name:'Port Autonome de San-Pédro (PASP)', email:'pasp@pasp.ci',
+    context:`Le Port Autonome de San-Pédro, classé parmi les plus performants de la zone UEMOA, est un acteur stratégique du développement économique ivoirien.` },
+  { cat:'port', name:'PASP — Direction Stratégie', email:'pzahabi@pasp.ci',
+    context:`Je me permets de vous contacter directement, en votre qualité de responsable de la Direction Stratégie du PASP.` },
+  { cat:'port', name:'PASP — Partenariats Public-Privé', email:'kkoffi@pasp.ci',
+    context:`Les Partenariats Public-Privé sont au cœur du développement des infrastructures portuaires modernes.` },
+  { cat:'port', name:'IDM', email:'nziakissivictorine@yahoo.fr',
+    context:`Votre entreprise IDM intervient dans le BTP à San-Pédro, une ville en pleine expansion.` },
+  { cat:'port', name:'Groupe Cacao', email:'groupecacao@gmail.com',
+    context:`Vos activités à la croisée du BTP et de la gestion immobilière m'intéressent.` },
+  { cat:'port', name:'San Pedro Truck (Groupe CIERA)', email:'sanpedrotrucks007@gmail.com',
+    context:`La logistique et le transport sont le prolongement naturel du BTP.` },
+  { cat:'port', name:'LBTP San-Pédro', email:'lbtp@aviso.ci',
+    context:`Le Laboratoire du Bâtiment et des Travaux Publics est une référence dans le contrôle qualité des matériaux et des ouvrages.` },
+  { cat:'port', name:"Les Grands Moulins d'Abidjan", email:'recrutement@gma.ci',
+    context:`Les Grands Moulins d'Abidjan sont une entreprise industrielle majeure, et votre présence à San-Pédro m'intéresse.` },
+];
+
+const CATEGORIES = {
+  grands:'🏢 Grands groupes', pme:'🏗️ PME dynamiques', port:'⚓ San-Pédro & Port',
+};
+
+/* ÉTAT */
+let serverLog = {};
+let TEMPLATES_DISPO = {};
+let piecesActives = 0;
+let rateLimit = { utilises: 0, max: 30, ok: true };
+let activeFilter = 'all';
+let searchQuery = '';
+let bulkPollTimer = null;
+let currentSendCompany = null;
+let templatesCache = [];
+let predefinis = {};
+let groupesCache = [];
+
+/* STATUS */
+async function refreshStatus() {
+  try {
+    const r = await fetch('/api/status');
+    if (r.status === 401) { toast('❌ Session expirée', 'err'); return; }
+    const data = await r.json();
+    serverLog = data.log || {};
+    piecesActives = data.pieces_count || 0;
+    rateLimit = data.rate_limit || rateLimit;
+
+    const cvBadge = document.getElementById('cv-badge');
+    if (piecesActives > 0) {
+      cvBadge.textContent = `📎 ${piecesActives} pièce(s)`;
+      cvBadge.className = 'badge-cv ok';
+    } else {
+      cvBadge.textContent = '📎 0 pièce';
+      cvBadge.className = 'badge-cv';
+    }
+
+    const cptBadge = document.getElementById('comptes-badge');
+    const nb = data.comptes_actifs || 0;
+    cptBadge.textContent = `📧 ${nb}`;
+    cptBadge.className = 'badge-cv ' + (nb > 0 ? 'ok' : 'warn');
+    const sideCpt = document.getElementById('side-comptes');
+    if (sideCpt) sideCpt.textContent = nb;
+
+    const rlBadge = document.getElementById('rate-badge');
+    rlBadge.textContent = `⏱️ ${rateLimit.utilises}/${rateLimit.max}`;
+    rlBadge.className = 'badge-cv ' + (rateLimit.ok ? 'ok' : 'warn');
+
+    const warn = document.getElementById('pj-warning');
+    if (warn) warn.style.display = piecesActives === 0 ? 'block' : 'none';
+    const pjWarn = document.getElementById('pj-warn-badge');
+    if (pjWarn) pjWarn.style.display = piecesActives === 0 ? '' : 'none';
+
+    updateStats();
+    render();
+  } catch (e) { console.error(e); }
+}
+
+/* CONFIG */
+async function loadConfig() {
+  try {
+    const r = await fetch('/api/config');
+    const cfg = await r.json();
+    const cand = cfg.candidat || {};
+    const params = cfg.parametres || {};
+    document.getElementById('cfg-nom').value      = cand.nom || '';
+    document.getElementById('cfg-tel').value      = cand.tel || '';
+    document.getElementById('cfg-email').value    = cand.email || '';
+    document.getElementById('cfg-ville').value    = cand.ville || '';
+    document.getElementById('cfg-diplome').value  = cand.diplome || '';
+    document.getElementById('cfg-spec').value     = cand.spec || '';
+
+    if (!params.delai_aleatoire) {
+      document.getElementById('cfg-delai').value = params.delai_secondes || 40;
+    }
+    document.getElementById('cfg-delai-alea').checked = !!params.delai_aleatoire;
+    document.getElementById('cfg-maxh').value = params.max_par_heure || 100;
+
+    updateHeaderSub();
+    TEMPLATES_DISPO = cfg.templates_dispo || {};
+    renderComptes(cfg.comptes || []);
+  } catch (e) { console.error(e); }
+}
+
+function updateHeaderSub() {
+  const nom   = document.getElementById('cfg-nom').value || 'HOBA Koutoua Daniel';
+  const ville = document.getElementById('cfg-ville').value || 'Soubré';
+  document.getElementById('header-sub').textContent = `${nom} · ${ville}, Côte d'Ivoire`;
+}
+
+async function saveCandidatConfig() {
+  const payload = {
+    candidat: {
+      nom:     document.getElementById('cfg-nom').value.trim(),
+      tel:     document.getElementById('cfg-tel').value.trim(),
+      email:   document.getElementById('cfg-email').value.trim(),
+      ville:   document.getElementById('cfg-ville').value.trim(),
+      diplome: document.getElementById('cfg-diplome').value.trim(),
+      spec:    document.getElementById('cfg-spec').value.trim(),
+    },
+    parametres: {
+      template: document.getElementById('cfg-template').value,
+    }
+  };
+  try {
+    const r = await fetch('/api/config', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast('Configuration enregistrée', 'ok');
+      updateHeaderSub();
+    }
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+/* COMPTES */
+function renderComptes(comptes) {
+  const el = document.getElementById('comptes-list');
+  const actifs = comptes.filter(c => c.actif).length;
+  document.getElementById('comptes-count').textContent = `${actifs} actif(s)`;
+  if (!comptes.length) {
+    el.innerHTML = `<div class="empty-box">⚠️ Aucun compte Gmail configuré.</div>`;
+    return;
+  }
+  const tplOptions = Object.entries(TEMPLATES_DISPO)
+    .map(([id, t]) => `<option value="${escapeHtml(id)}">${escapeHtml(t.nom || id)}</option>`)
+    .join('');
+  el.innerHTML = comptes.map(c => `
+    <div class="compte-row ${c.actif ? 'active' : 'inactive'}">
+      <span style="font-size:18px">${c.actif ? '✅' : '⏸️'}</span>
+      <div style="flex:1;min-width:180px">
+        <div style="font-weight:700;font-size:13px">${escapeHtml(c.email)}
+          <span style="font-size:10px;font-weight:800;text-transform:uppercase;
+                color:${c.actif ? '#1E7A3C' : 'var(--muted)'}">${c.actif ? '• actif' : '• en pause'}</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          ${c.has_password
+            ? `🔑 <span class="compte-mdp" data-index="${c.index}" data-email="${escapeHtml(c.email)}"
+                   title="Cliquer pour afficher/masquer le mot de passe d'application (16 caractères)"
+                   style="cursor:pointer;user-select:all;font-family:Consolas,monospace;
+                          letter-spacing:1px;background:#F2E7CE;border:1px solid var(--border);
+                          padding:1px 6px;border-radius:4px;">••••••••••••••••</span>`
+            : '❌ mot de passe manquant'}
+        </div>
+      </div>
+      <select class="compte-tpl" data-index="${c.index}" title="Message utilisé par ce compte"
+              style="padding:6px 8px;font-size:12px;font-weight:600;border:2px solid var(--border);
+                     background:#fff;max-width:220px">
+        <option value="" ${!c.template ? 'selected' : ''}>📨 Message global</option>
+        ${tplOptions}
+      </select>
+      <button class="btn small" data-action="test-compte" data-email="${escapeHtml(c.email)}">🧪 Tester</button>
+      <button class="btn small" data-action="reveal-compte" data-index="${c.index}">👁️ Voir</button>
+      <button class="btn small" data-action="toggle-compte" data-index="${c.index}">
+        ${c.actif ? '⏸️' : '▶️'}
+      </button>
+      <button class="btn small danger" data-action="delete-compte" data-index="${c.index}">🗑️</button>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('.compte-tpl').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const r = await fetch(`/api/comptes/${sel.dataset.index}/template`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ template: sel.value })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        const label = sel.selectedOptions[0].textContent;
+        toast(`${label} pour ce compte`, 'ok');
+      } else toast(d.error || 'Erreur', 'err');
+    });
+  });
+
+  el.querySelectorAll('[data-action="test-compte"]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const orig = b.textContent; b.textContent = '⏳'; b.disabled = true;
+      try {
+        const r = await fetch('/api/comptes/test', { method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email: b.dataset.email })
+        });
+        const data = await r.json();
+        toast(data.message || data.error, data.ok ? 'ok' : 'err');
+      } catch (e) { toast('Erreur réseau', 'err'); }
+      b.textContent = orig; b.disabled = false;
+    });
+  });
+  el.querySelectorAll('[data-action="toggle-compte"]').forEach(b => {
+    b.addEventListener('click', async () => {
+      await fetch(`/api/comptes/${b.dataset.index}/toggle`, { method:'POST' });
+      await loadConfig(); await refreshStatus();
+    });
+  });
+  el.querySelectorAll('[data-action="delete-compte"]').forEach(b => {
+    b.addEventListener('click', async () => {
+      if (!confirm('Supprimer ce compte ?')) return;
+      await fetch(`/api/comptes/${b.dataset.index}`, { method:'DELETE' });
+      await loadConfig(); await refreshStatus();
+    });
+  });
+  el.querySelectorAll('[data-action="reveal-compte"]').forEach(b => {
+    b.addEventListener('click', () => afficherIdentifiantsOnglet(b));
+  });
+
+  // ── Mot de passe 16 car. affiché en ligne dans le dashboard (cliquer pour révéler) ──
+  el.querySelectorAll('.compte-mdp').forEach(s => {
+    s.addEventListener('click', async () => {
+      if (s.dataset.mdp) {                       // déjà chargé → basculer masqué/visible
+        s.textContent = s.textContent.startsWith('•') ? s.dataset.mdp : '•'.repeat(16);
+        return;
+      }
+      const old = s.textContent; s.textContent = '⏳';
+      try {
+        const r = await fetch(`/api/comptes/${s.dataset.index}/reveal`, { method:'POST' });
+        const d = await r.json();
+        if (!d.ok) { s.textContent = old; toast('❌ ' + (d.error || 'Erreur'), 'err'); return; }
+        s.dataset.mdp = d.password;
+        s.textContent = d.password;
+        s.title = d.longueur === 16
+          ? '✅ 16 caractères — mot de passe d\'application correct'
+          : `⚠️ ${d.longueur} caractères — ce n\'est pas un mot de passe d\'application`;
+        toast(d.longueur === 16 ? '✅ 16 caractères — format correct'
+                                : `⚠️ ${d.longueur} caractères`, d.longueur === 16 ? 'ok' : 'err');
+      } catch (e) { s.textContent = old; toast('❌ Erreur réseau', 'err'); }
+    });
+  });
+}
+
+// ── Ouvre les identifiants dans un NOUVEL ONGLET (vérification visuelle) ──
+async function afficherIdentifiantsOnglet(btn) {
+  const libelle = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Chargement…';
+  try {
+    const r = await fetch(`/api/comptes/${btn.dataset.index}/reveal`, { method:'POST' });
+    const d = await r.json();
+    if (!d.ok) { toast('❌ ' + (d.error || 'Erreur'), 'err'); return; }
+
+    const ok16 = d.longueur === 16;
+    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>Identifiants — ${d.email}</title>
+<style>
+ body{font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;
+      justify-content:center;min-height:100vh;margin:0;background:#F2E7CE;}
+ .box{background:#fff;border:3px solid #43161C;box-shadow:8px 8px 0 #43161C;
+      padding:30px 28px;width:min(460px,92vw);border-top:8px solid #1E5AA8;}
+ h1{margin:0 0 4px;font-size:20px;text-transform:uppercase;}
+ p.sub{margin:0 0 20px;font-size:12px;color:#7A6E5B;font-weight:600;}
+ label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;margin:14px 0 4px;}
+ .val{border:2px solid #43161C;padding:10px 12px;font-size:15px;background:#F2E7CE;
+      user-select:all;word-break:break-all;}
+ .mdp{font-family:Consolas,monospace;font-size:18px;letter-spacing:3px;}
+ .etat{margin:16px 0 0;font-size:13px;font-weight:700;}
+ button{margin-top:18px;width:100%;padding:10px;font-weight:800;cursor:pointer;
+        background:#1E5AA8;color:#fff;border:2px solid #43161C;}
+</style></head><body><div class="box">
+ <h1>🔑 Identifiants du compte</h1>
+ <p class="sub">Vérification — mot de passe d'application Gmail</p>
+ <label>Compte Gmail</label>
+ <div class="val">${d.email}</div>
+ <label>Mot de passe d'application</label>
+ <div class="val mdp">${d.password}</div>
+ <p class="etat">${ok16
+   ? '✅ 16 caractères — format correct'
+   : `⚠️ ${d.longueur} caractères — ce n'est pas un mot de passe d'application (il doit faire exactement 16 caractères)`}</p>
+ <button onclick="window.close()">Fermer cet onglet</button>
+</div></body></html>`;
+
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+    } else {
+      // Popup bloqué → repli sur le modal dans la page courante
+      afficherIdentifiants(d.email, d.password, d.longueur);
+    }
+  } catch (e) { toast('❌ Erreur réseau', 'err'); }
+  // Restauration garantie du bouton, même en cas d'erreur
+  btn.disabled = false; btn.textContent = libelle;
+}
+
+// ── Panneau de vérification des identifiants (Gmail + mot de passe 16 car.) ──
+function afficherIdentifiants(email, mdp, longueur) {
+  let ov = document.getElementById('ov-identifiants');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'ov-identifiants';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);'
+      + 'display:flex;align-items:center;justify-content:center;z-index:9999;';
+    document.body.appendChild(ov);
+  }
+  const ok16 = (longueur === 16);
+  ov.innerHTML = `
+    <div style="background:#fff;border:3px solid #43161C;box-shadow:8px 8px 0 #43161C;
+                padding:26px 24px;width:min(420px,92vw);border-top:8px solid #1E5AA8;">
+      <h2 style="margin:0 0 4px;font-size:17px;text-transform:uppercase;">🔑 Identifiants du compte</h2>
+      <p style="margin:0 0 16px;font-size:12px;color:#7A6E5B;font-weight:600;">
+        Vérification — mot de passe d'application Gmail</p>
+      <label style="display:block;font-size:11px;font-weight:800;text-transform:uppercase;">Compte Gmail</label>
+      <div style="border:2px solid #43161C;padding:8px 10px;font-size:14px;margin:4px 0 12px;
+                  user-select:all;background:#F2E7CE;">${escapeHtml(email)}</div>
+      <label style="display:block;font-size:11px;font-weight:800;text-transform:uppercase;">
+        Mot de passe d'application (16 caractères)</label>
+      <div style="border:2px solid #43161C;padding:8px 10px;font-size:16px;letter-spacing:2px;
+                  margin:4px 0 8px;user-select:all;background:#F2E7CE;
+                  font-family:Consolas,monospace;word-break:break-all;">${escapeHtml(mdp)}</div>
+      <p style="margin:0 0 14px;font-size:12px;font-weight:700;">
+        ${ok16 ? '✅ 16 caractères — format correct'
+               : `⚠️ ${longueur} caractères — ce n\u2019est pas un mot de passe d\u2019application\n                     (il doit faire exactement 16 caractères)`.replace(/\n +/, ' ')}
+      </p>
+      <div style="display:flex;gap:8px;">
+        <button id="cop-mdp" style="flex:1;padding:10px;font-weight:800;cursor:pointer;
+                background:#1E5AA8;color:#fff;border:2px solid #43161C;">📋 Copier</button>
+        <button id="ferm-idf" style="flex:1;padding:10px;font-weight:800;cursor:pointer;
+                background:#fff;border:2px solid #43161C;">Fermer</button>
+      </div>
+    </div>`;
+  ov.querySelector('#ferm-idf').onclick = () => ov.remove();
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.querySelector('#cop-mdp').onclick = async () => {
+    try { await navigator.clipboard.writeText(mdp); toast('📋 Mot de passe copié', 'ok'); }
+    catch (e) { toast('❌ Copie impossible', 'err'); }
+  };
+}
+
+async function addCompte() {
+  const email = document.getElementById('new-email').value.trim();
+  const password = document.getElementById('new-password').value.trim();
+  if (!email || !password) { toast('Email et mot de passe requis', 'err'); return; }
+  const btn = document.getElementById('btn-add-compte');
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const r = await fetch('/api/comptes', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(data.updated ? 'Mis à jour' : 'Ajouté', 'ok');
+      document.getElementById('new-email').value = '';
+      document.getElementById('new-password').value = '';
+      await loadConfig(); await refreshStatus();
+    } else toast(data.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+  btn.disabled = false; btn.textContent = '+ Ajouter';
+}
+
+/* PIÈCES */
+async function loadPieces() {
+  try {
+    const r = await fetch('/api/pieces');
+    const data = await r.json();
+    renderPieces(data.pieces || []);
+  } catch (e) { console.error(e); }
+}
+
+function renderPieces(pieces) {
+  const el = document.getElementById('pieces-list');
+  const actives = pieces.filter(p => p.actif).length;
+  document.getElementById('pieces-count').textContent = `${actives} active(s)`;
+  if (!pieces.length) {
+    el.innerHTML = `<div class="empty-box">⚠️ Aucune pièce jointe.</div>`;
+    return;
+  }
+  el.innerHTML = pieces.map(p => `
+    <div class="piece-item ${p.actif ? '' : 'inactive'}">
+      <input type="checkbox" ${p.actif ? 'checked' : ''}
+             data-action="toggle-piece" data-id="${escapeHtml(p.id)}"
+             style="width:18px;height:18px;accent-color:var(--ok);cursor:pointer">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px">📄 ${escapeHtml(p.nom_original)}</div>
+        <div style="font-size:11px;color:var(--muted)">${p.taille_kb} Ko</div>
+      </div>
+      <button class="btn small danger" data-action="del-piece" data-id="${escapeHtml(p.id)}">🗑️</button>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-action="toggle-piece"]').forEach(cb => {
+    cb.addEventListener('change', async () => {
+      await fetch(`/api/pieces/${cb.dataset.id}/toggle`, { method:'POST' });
+      await loadPieces(); await refreshStatus();
+    });
+  });
+  el.querySelectorAll('[data-action="del-piece"]').forEach(b => {
+    b.addEventListener('click', async () => {
+      if (!confirm('Supprimer ce fichier ?')) return;
+      await fetch(`/api/pieces/${b.dataset.id}`, { method:'DELETE' });
+      await loadPieces(); await refreshStatus();
+    });
+  });
+}
+
+async function uploadPieces(files) {
+  let nb = 0;
+  for (const file of files) {
+    if (!file.name.toLowerCase().endsWith('.pdf')) continue;
+    const form = new FormData();
+    form.append('fichier', file);
+    try {
+      const r = await fetch('/api/pieces', { method:'POST', body: form });
+      const data = await r.json();
+      if (data.ok) nb++;
+    } catch (e) {}
+  }
+  await loadPieces(); await refreshStatus();
+  if (nb > 0) toast(`${nb} fichier(s) ajouté(s)`, 'ok');
+}
+
+/* TEMPLATES */
+const CAT_ICONS = { candidature:'💼', parents:'👨‍👩‍👧', collegues:'👥', amis:'🎉', autre:'📌' };
+
+async function loadTemplates() {
+  try {
+    const r = await fetch('/api/templates');
+    const data = await r.json();
+    templatesCache = data.templates || [];
+    const r2 = await fetch('/api/config');
+    const cfg = await r2.json();
+    predefinis = {};
+    for (const [k, v] of Object.entries(cfg.templates_dispo || {})) {
+      if (v.predefini) predefinis[k] = v;
+    }
+    renderTemplates();
+    populateTemplateSelects();
+  } catch (e) { console.error(e); }
+}
+
+function renderTemplates() {
+  const el = document.getElementById('tpl-list');
+  const total = templatesCache.length + Object.keys(predefinis).length;
+  document.getElementById('tpl-count').textContent = total;
+
+  if (!templatesCache.length) {
+    el.innerHTML = `<div class="empty-box">
+      Aucun message perso. Les prédéfinis restent disponibles dans les menus.
+    </div>`;
+    return;
+  }
+  el.innerHTML = templatesCache.map(t => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
+                background:#FBF6EA;border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
+      <span style="font-size:20px">${CAT_ICONS[t.categorie] || '📝'}</span>
+      <div style="flex:1;min-width:180px">
+        <div style="font-weight:600;font-size:14px">${escapeHtml(t.nom)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;
+                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+          ${escapeHtml(t.objet)}
+        </div>
+      </div>
+      <button class="btn small" data-action="edit-tpl" data-id="${escapeHtml(t.id)}">✏️</button>
+      <button class="btn small" data-action="dup-tpl" data-id="${escapeHtml(t.id)}">📋</button>
+      <button class="btn small danger" data-action="del-tpl" data-id="${escapeHtml(t.id)}">🗑️</button>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-action="edit-tpl"]').forEach(b => {
+    b.addEventListener('click', () => openEditTpl(b.dataset.id));
+  });
+  el.querySelectorAll('[data-action="dup-tpl"]').forEach(b => {
+    b.addEventListener('click', async () => {
+      await fetch(`/api/templates/${b.dataset.id}/duplicate`, { method:'POST' });
+      await loadTemplates();
+      toast('Template dupliqué', 'ok');
+    });
+  });
+  el.querySelectorAll('[data-action="del-tpl"]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const t = templatesCache.find(x => x.id === b.dataset.id);
+      if (!confirm(`Supprimer "${t.nom}" ?`)) return;
+      await fetch(`/api/templates/${b.dataset.id}`, { method:'DELETE' });
+      await loadTemplates();
+      toast('Supprimé', 'ok');
+    });
+  });
+}
+
+function populateTemplateSelects() {
+  const html = [];
+  if (templatesCache.length) {
+    html.push('<optgroup label="✨ Mes messages">');
+    templatesCache.forEach(t => {
+      html.push(`<option value="${escapeHtml(t.id)}">${CAT_ICONS[t.categorie] || '📝'} ${escapeHtml(t.nom)}</option>`);
+    });
+    html.push('</optgroup>');
+  }
+  html.push('<optgroup label="📚 Prédéfinis">');
+  for (const [k, v] of Object.entries(predefinis)) {
+    html.push(`<option value="${escapeHtml(k)}">${escapeHtml(v.nom)}</option>`);
+  }
+  html.push('</optgroup>');
+
+  ['cfg-template', 'custom-template', 'grp-send-template'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id === 'grp-send-template') {
+      el.innerHTML = '<option value="">— Message libre —</option>' + html.join('');
+    } else {
+      el.innerHTML = html.join('');
+    }
+  });
+}
+
+function openNewTpl() {
+  document.getElementById('tpl-id').value = '';
+  document.getElementById('tpl-nom').value = '';
+  document.getElementById('tpl-categorie').value = 'candidature';
+  document.getElementById('tpl-objet').value = '';
+  document.getElementById('tpl-corps').value = '';
+  document.getElementById('tpl-modal-title').textContent = '📝 Nouveau message';
+  document.getElementById('tpl-modal').classList.add('visible');
+}
+
+function openEditTpl(id) {
+  const t = templatesCache.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('tpl-id').value = t.id;
+  document.getElementById('tpl-nom').value = t.nom;
+  document.getElementById('tpl-categorie').value = t.categorie || 'autre';
+  document.getElementById('tpl-objet').value = t.objet;
+  document.getElementById('tpl-corps').value = t.corps;
+  document.getElementById('tpl-modal-title').textContent = `✏️ Éditer : ${t.nom}`;
+  document.getElementById('tpl-modal').classList.add('visible');
+}
+
+function closeTplModal() {
+  document.getElementById('tpl-modal').classList.remove('visible');
+}
+
+async function saveTpl() {
+  const id    = document.getElementById('tpl-id').value;
+  const nom   = document.getElementById('tpl-nom').value.trim();
+  const cat   = document.getElementById('tpl-categorie').value;
+  const objet = document.getElementById('tpl-objet').value.trim();
+  const corps = document.getElementById('tpl-corps').value;
+  if (!nom || !objet || !corps) { toast('Champs requis', 'err'); return; }
+  try {
+    const r = await fetch('/api/templates', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ id, nom, categorie: cat, objet, corps })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(id ? 'Mis à jour' : 'Créé', 'ok');
+      closeTplModal();
+      await loadTemplates();
+    } else toast(data.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+/* GROUPES */
+async function loadGroupes() {
+  try {
+    const r = await fetch('/api/groupes');
+    const data = await r.json();
+    groupesCache = data.groupes || [];
+    renderGroupes();
+  } catch (e) { console.error(e); }
+}
+
+function renderGroupes() {
+  const el = document.getElementById('groupes-list');
+  document.getElementById('groupes-count').textContent = groupesCache.length;
+  if (!groupesCache.length) {
+    el.innerHTML = `<div class="empty-box">
+      Aucun groupe — clique sur <strong>+ Nouveau groupe</strong>
+    </div>`;
+    return;
+  }
+  el.innerHTML = groupesCache.map(g => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
+                background:#FBF6EA;border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
+      <span style="font-size:22px">👥</span>
+      <div style="flex:1;min-width:180px">
+        <div style="font-weight:600;font-size:14px">${escapeHtml(g.nom)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">
+          ${g.emails.length} membre(s)
+          ${g.description ? ` · ${escapeHtml(g.description)}` : ''}
+        </div>
+      </div>
+      <button class="btn primary small" data-action="send-groupe" data-id="${escapeHtml(g.id)}">📤 Envoyer</button>
+      <button class="btn small" data-action="edit-groupe" data-id="${escapeHtml(g.id)}">✏️</button>
+      <button class="btn small danger" data-action="del-groupe" data-id="${escapeHtml(g.id)}">🗑️</button>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-action="send-groupe"]').forEach(b => {
+    b.addEventListener('click', () => openSendGroupe(b.dataset.id));
+  });
+  el.querySelectorAll('[data-action="edit-groupe"]').forEach(b => {
+    b.addEventListener('click', () => openEditGroupe(b.dataset.id));
+  });
+  el.querySelectorAll('[data-action="del-groupe"]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const grp = groupesCache.find(g => g.id === b.dataset.id);
+      if (!confirm(`Supprimer "${grp.nom}" ?`)) return;
+      await fetch(`/api/groupes/${b.dataset.id}`, { method:'DELETE' });
+      await loadGroupes();
+      toast('Supprimé', 'ok');
+    });
+  });
+}
+
+function openNewGroupe() {
+  document.getElementById('grp-id').value = '';
+  document.getElementById('grp-nom').value = '';
+  document.getElementById('grp-desc').value = '';
+  document.getElementById('grp-emails').value = '';
+  document.getElementById('grp-modal-title').textContent = '👥 Nouveau groupe';
+  updateGrpEmailCount();
+  document.getElementById('grp-modal').classList.add('visible');
+}
+
+function openEditGroupe(id) {
+  const g = groupesCache.find(x => x.id === id);
+  if (!g) return;
+  document.getElementById('grp-id').value = g.id;
+  document.getElementById('grp-nom').value = g.nom;
+  document.getElementById('grp-desc').value = g.description || '';
+  document.getElementById('grp-emails').value = g.emails.join('\n');
+  document.getElementById('grp-modal-title').textContent = `✏️ Éditer : ${g.nom}`;
+  updateGrpEmailCount();
+  document.getElementById('grp-modal').classList.add('visible');
+}
+
+function closeGrpModal() {
+  document.getElementById('grp-modal').classList.remove('visible');
+}
+
+function updateGrpEmailCount() {
+  const raw = document.getElementById('grp-emails').value;
+  const emails = raw.split(/[,;\n]+/).map(e => e.trim()).filter(e => e.includes('@'));
+  document.getElementById('grp-email-count').textContent =
+    emails.length ? `${emails.length} email(s) valide(s)` : '';
+}
+
+async function saveGroupe() {
+  const id    = document.getElementById('grp-id').value;
+  const nom   = document.getElementById('grp-nom').value.trim();
+  const desc  = document.getElementById('grp-desc').value.trim();
+  const raw   = document.getElementById('grp-emails').value;
+  const emails = raw.split(/[,;\n]+/).map(e => e.trim()).filter(e => e.includes('@'));
+  if (!nom || !emails.length) { toast('Nom et emails requis', 'err'); return; }
+  const payload = { nom, description: desc, emails };
+  if (id) payload.id = id;
+  try {
+    const r = await fetch('/api/groupes', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(data.updated ? 'Mis à jour' : 'Créé', 'ok');
+      closeGrpModal();
+      await loadGroupes();
+    } else toast(data.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+function openSendGroupe(id) {
+  const g = groupesCache.find(x => x.id === id);
+  if (!g) return;
+  document.getElementById('grp-send-id').value = id;
+  document.getElementById('grp-send-title').textContent = `📤 Envoyer à : ${g.nom}`;
+  document.getElementById('grp-send-subject').value = '';
+  document.getElementById('grp-send-body').value = '';
+  document.getElementById('grp-send-pj').checked = false;
+  document.getElementById('grp-send-template').value = '';
+  document.querySelector('input[name="grp-mode"][value="individuel"]').checked = true;
+  document.getElementById('grp-send-status').textContent = '';
+  majGrpSendInfo(g);
+  document.getElementById('grp-send-modal').classList.add('visible');
+}
+
+function closeGrpSendModal() {
+  document.getElementById('grp-send-modal').classList.remove('visible');
+}
+
+function majGrpSendInfo(g) {
+  const mode = document.querySelector('input[name="grp-mode"]:checked').value;
+  const joindre = document.getElementById('grp-send-pj').checked;
+  let info = `${g.emails.length} destinataire(s)`;
+  if (mode === 'individuel') {
+    info += ` · 1 email par personne · délai ${parseInt(document.getElementById('cfg-delai').value) || 40}s`;
+  } else {
+    info += ` · 1 email groupé (Cci)`;
+  }
+  if (joindre) info += ` · ${piecesActives} PJ`;
+  document.getElementById('grp-send-info').textContent = info;
+}
+
+/* Applique un template au formulaire groupe */
+function appliquerTemplateGroupe() {
+  const tid = document.getElementById('grp-send-template').value;
+  if (!tid) return;
+  // Cherche le template
+  const t = templatesCache.find(x => x.id === tid);
+  const tpl = t || predefinis[tid] ? (t || { objet:'', corps:'' }) : null;
+
+  if (t) {
+    document.getElementById('grp-send-subject').value = t.objet || '';
+    document.getElementById('grp-send-body').value = t.corps || '';
+  }
+}
+
+async function envoyerGroupe() {
+  const id = document.getElementById('grp-send-id').value;
+  const g = groupesCache.find(x => x.id === id);
+  if (!g) return;
+  const subject = document.getElementById('grp-send-subject').value.trim();
+  const body = document.getElementById('grp-send-body').value.trim();
+  const mode = document.querySelector('input[name="grp-mode"]:checked').value;
+  const joindre = document.getElementById('grp-send-pj').checked;
+  if (!subject) { toast('Objet requis', 'err'); return; }
+  if (!body) { toast('Message requis', 'err'); return; }
+
+  const modeTxt = mode === 'groupe'
+    ? `👥 GROUPÉ (Cci) — 1 email`
+    : `📧 INDIVIDUEL — ${g.emails.length} emails`;
+
+  if (!confirm(`Envoyer à "${g.nom}" ?\n\n${modeTxt}\nDestinataires : ${g.emails.length}\n${joindre ? `${piecesActives} PJ` : 'Sans PJ'}\n\nConfirmer ?`)) return;
+
+  const btn = document.getElementById('grp-send-go');
+  btn.disabled = true; btn.textContent = '⏳ Envoi...';
+  document.getElementById('grp-send-status').textContent = 'Envoi...';
+
+  try {
+    const r = await fetch(`/api/groupes/${id}/send`, { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ subject, body, mode, joindre_pieces: joindre })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(`✅ ${data.envoyes}/${data.total}`, 'ok');
+      document.getElementById('grp-send-status').textContent = `${data.envoyes}/${data.total}`;
+      setTimeout(() => { closeGrpSendModal(); refreshStatus(); }, 1200);
+    } else {
+      toast(data.error || 'Erreur', 'err');
+      btn.disabled = false; btn.textContent = '📤 Envoyer';
+    }
+  } catch (e) {
+    toast('Erreur réseau', 'err');
+    btn.disabled = false; btn.textContent = '📤 Envoyer';
+  }
+}
+
+/* IMAP */
+async function checkIMAP() {
+  const btn = document.getElementById('btn-imap-check');
+  const badge = document.getElementById('imap-status-badge');
+  btn.disabled = true; btn.textContent = '⏳ Analyse...';
+  badge.textContent = 'En cours...';
+  try {
+    const r = await fetch('/api/imap/check', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ jours: 30 })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(`✅ ${data.reponses} rép · ${data.bounces} bounce`, 'ok');
+      badge.textContent = `${data.reponses} rép · ${data.bounces} bnc`;
+      histAjouter({ type: 'IMAP', detail: `${data.reponses} rép · ${data.bounces} bounce` });
+      await refreshStatus();
+      await loadIMAPStatus();
+    } else toast(data.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+  btn.disabled = false; btn.textContent = '🔄 Vérifier maintenant';
+}
+
+async function loadIMAPStatus() {
+  try {
+    const r = await fetch('/api/imap/status');
+    const data = await r.json();
+    const badge = document.getElementById('imap-status-badge');
+    if (data.derniere_verif) {
+      const d = new Date(data.derniere_verif * 1000);
+      const mins = Math.floor((Date.now() - d) / 60000);
+      badge.textContent = `Dernière : ${mins < 1 ? 'instant' : mins < 60 ? `${mins}min` : `${Math.floor(mins/60)}h`}`;
+    } else badge.textContent = 'Jamais';
+  } catch (e) {}
+}
+
+/* RÈGLES DE CLASSEMENT */
+let filtresCache = [];
+let apprentissageCache = {};
+
+const FLT_LABELS = { from: 'Expéditeur', sujet: 'Sujet', motcle: 'Mot-clé' };
+const ACT_ICONS = { label: '🏷️', marquer_lu: '👁️', archive: '📦', supprimer: '🗑️', notify: '🔔' };
+
+async function loadFiltres() {
+  try {
+    const r = await fetch('/api/filtres');
+    const data = await r.json();
+    if (data.ok) { filtresCache = data.filtres || []; renderFiltres(); }
+  } catch (e) {}
+  try {
+    const r = await fetch('/api/filtres/suggestions');
+    const d = await r.json();
+    if (d.ok) { apprentissageCache = d.apprentissage || {}; renderApprentissage(); }
+  } catch (e) {}
+}
+
+function renderFiltres() {
+  const box = document.getElementById('regles-liste');
+  document.getElementById('regles-count').textContent =
+    `${filtresCache.filter(f => f.enabled !== false).length} active(s)`;
+  if (!filtresCache.length) {
+    box.innerHTML = '<span style="color:var(--muted)">Aucune règle pour l\'instant.</span>';
+    return;
+  }
+  const tries = [...filtresCache].sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
+  box.innerHTML = tries.map((f) => {
+    const i = filtresCache.indexOf(f);
+    const off = f.enabled === false;
+    const acts = (f.actions || []).map(a => ACT_ICONS[a] || a).join(' ');
+    const conds = (f.items || []).map(it =>
+      `${FLT_LABELS[it.champ] || it.champ} = <b>${escapeHtml(it.valeur)}</b>`).join(' OU ');
+    const lbl = f.label ? ` → « ${escapeHtml(f.label)} »` : '';
+    const icone = f.icon || '🏷️';
+    const couleur = f.color || 'var(--muted)';
+    return `<div class="regle-row ${off ? 'regle-off' : ''}" draggable="true"
+        data-idx="${i}" style="display:flex;align-items:center;gap:8px;
+        padding:7px 9px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;
+        background:${off ? '#f6f2ea' : '#fff'};cursor:grab;opacity:${off ? '.6' : '1'}">
+      <span style="font-weight:900;color:${couleur};min-width:20px">${f.priority ?? i + 1}</span>
+      <span style="font-size:16px">${icone}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px;color:${couleur}">${escapeHtml(f.name || '')}
+          <span style="color:var(--muted);font-weight:600">${lbl} ${acts}</span>
+          ${f.source === 'apprentissage' ? '<span title="Apprise de tes corrections">🧠</span>' : ''}
+        </div>
+        <div style="font-size:11px;color:var(--muted)">Si ${conds}</div>
+      </div>
+      <button class="btn small" data-action="toggle-regle" data-idx="${i}"
+        title="${off ? 'Réactiver' : 'Mettre en pause'}">${off ? '▶️' : '⏸️'}</button>
+      <button class="btn small" data-action="edit-regle" data-idx="${i}" title="Modifier">✏️</button>
+      <button class="btn small danger" data-action="del-regle" data-idx="${i}" title="Supprimer">🗑️</button>
+    </div>`;
+  }).join('');
+  activerDragDrop();
+  box.querySelectorAll('[data-action="toggle-regle"]').forEach(b =>
+    b.addEventListener('click', async () => {
+      const r = await fetch(`/api/filtres/${b.dataset.idx}/toggle`, { method: 'POST' });
+      const d = await r.json();
+      if (d.ok) { filtresCache = d.filtres; renderFiltres(); }
+    }));
+  box.querySelectorAll('[data-action="edit-regle"]').forEach(b =>
+    b.addEventListener('click', () => editerRegle(+b.dataset.idx)));
+  box.querySelectorAll('[data-action="del-regle"]').forEach(b =>
+    b.addEventListener('click', async () => {
+      if (!confirm('Supprimer cette règle ?')) return;
+      const r = await fetch(`/api/filtres/${b.dataset.idx}`, { method: 'DELETE' });
+      const d = await r.json();
+      if (d.ok) { filtresCache = d.filtres; renderFiltres(); }
+    }));
+}
+
+/* MODALE règle : ajout ou édition */
+let editRegleIdx = null;   // null = ajout, sinon index de la règle à modifier
+
+function openRegleModal(idx) {
+  const f = idx == null ? {} : (filtresCache[idx] || {});
+  editRegleIdx = idx ?? null;
+  document.getElementById('filter-modal-title').textContent = editRegleIdx == null ? '➕ Nouvelle règle' : '✏️ Modifier la règle';
+  document.getElementById('filter-f-name').value = f.name || '';
+  const champ = f.items?.[0]?.champ || 'sender';
+  document.getElementById('filter-f-type').value = champ;
+  document.getElementById('filter-f-value').value = f.items?.map(it => it.valeur).join(', ') || '';
+  document.getElementById('filter-f-label').value = f.label || '';
+  document.getElementById('filter-modal').classList.add('open');
+}
+
+function closeRegleModal() {
+  editRegleIdx = null;
+  document.getElementById('filter-modal').classList.remove('open');
+}
+
+function editerRegle(idx) { openRegleModal(idx); }
+
+function soumettreRegle() {
+  const nom  = document.getElementById('filter-f-name').value.trim();
+  const champ = document.getElementById('filter-f-type').value;
+  const brut = document.getElementById('filter-f-value').value.trim();
+  const label = document.getElementById('filter-f-label').value.trim();
+  if (!nom) { toast('Le nom de la règle est requis', 'err'); return; }
+  const items = brut.split(',').map(v => v.trim()).filter(Boolean)
+                     .map(v => ({ champ, valeur: v }));
+  if (!items.length) { toast('Au moins une valeur est requise', 'err'); return; }
+  if (!label) { toast('Le libellé Gmail est requis', 'err'); return; }
+  const body = { name: nom, items, label, actions: ['label'] };
+  const url = editRegleIdx == null ? '/api/filtres' : `/api/filtres/${editRegleIdx}`;
+  const method = editRegleIdx == null ? 'POST' : 'PUT';
+  fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        filtresCache = d.filtres;
+        renderFiltres();
+        toast(editRegleIdx == null ? 'Règle ajoutée ✅' : 'Règle modifiée ✅', 'ok');
+        closeRegleModal();
+      } else toast(d.error || 'Erreur', 'err');
+    })
+    .catch(() => toast('Erreur réseau', 'err'));
+}
+
+function activerDragDrop() {
+  const box = document.getElementById('regles-liste');
+  let enCours = null;
+  box.querySelectorAll('.regle-row').forEach(row => {
+    row.addEventListener('dragstart', () => { enCours = row; row.style.opacity = '.4'; });
+    row.addEventListener('dragend', () => { row.style.opacity = ''; enCours = null; });
+    row.addEventListener('dragover', e => { e.preventDefault(); });
+    row.addEventListener('drop', async e => {
+      e.preventDefault();
+      if (!enCours || enCours === row) return;
+      box.insertBefore(enCours, row);
+      const ordre = [...box.querySelectorAll('.regle-row')]
+        .map(r => filtresCache[+r.dataset.idx].id);
+      const resp = await fetch('/api/filtres/reorder', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordre }) });
+      const d = await resp.json();
+      if (d.ok) { filtresCache = d.filtres; renderFiltres(); toast('Priorité mise à jour', 'ok'); }
+    });
+  });
+}
+
+async function addFiltre() {
+  const actions = [];
+  if (document.getElementById('act-label').checked) actions.push('label');
+  if (document.getElementById('act-lu').checked) actions.push('marquer_lu');
+  if (document.getElementById('act-notif').checked) actions.push('notify');
+  if (document.getElementById('act-archive').checked) actions.push('archive');
+  if (document.getElementById('act-supprimer').checked) actions.push('supprimer');
+  const body = {
+    name: document.getElementById('flt-nom').value.trim(),
+    champ: document.getElementById('flt-champ').value,
+    valeur: document.getElementById('flt-valeur').value.trim(),
+    label: document.getElementById('flt-label').value.trim(),
+    actions,
+  };
+  if (!body.valeur) { toast('Valeur manquante', 'err'); return; }
+  if (!actions.length) { toast('Coche au moins une action', 'err'); return; }
+  const r = await fetch('/api/filtres', { method: 'POST',
+    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await r.json();
+  if (data.ok) {
+    filtresCache = data.filtres; renderFiltres();
+    document.getElementById('flt-valeur').value = '';
+    toast('Règle ajoutée ✅', 'ok');
+  } else toast(data.error || 'Erreur', 'err');
+}
+
+async function creerLibelles() {
+  const btn = document.getElementById('btn-flt-libelles');
+  btn.disabled = true; btn.textContent = '⏳ Création...';
+  try {
+    const r = await fetch('/api/filtres/creer-libelles', { method: 'POST' });
+    const d = await r.json();
+    if (d.ok) {
+      const ok = d.resultats.filter(x => x.ok);
+      const nb = ok.reduce((s, x) => s + (x.crees || []).length, 0);
+      toast(`🏷️ ${d.libelles.length} libellé(s) vérifié(s) sur ${ok.length} compte(s) — ${nb} créé(s)`, 'ok');
+    } else toast(d.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+  btn.disabled = false; btn.textContent = '🏷️ Créer les libellés dans Gmail';
+}
+
+async function appliquerFiltres() {
+  const btn = document.getElementById('btn-flt-appliquer');
+  btn.disabled = true; btn.textContent = '⏳ Application...';
+  try {
+    const r = await fetch('/api/filtres/appliquer', { method: 'POST' });
+    const data = await r.json();
+    if (data.ok) {
+      const total = (data.resultats || []).reduce((s, x) => s + (x.trouves || 0), 0);
+      const errs = (data.resultats || []).filter(x => !x.ok).length;
+      toast(`✅ ${total} mail(s) classé(s)${errs ? `, ${errs} erreur(s)` : ''}`, errs ? 'warn' : 'ok');
+      await chargerNotifs();
+    } else toast(data.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+  btn.disabled = false; btn.textContent = '⚡ Appliquer maintenant';
+}
+
+/* APPRENTISSAGE */
+async function apprendre() {
+  const email = document.getElementById('app-email').value.trim();
+  const label = document.getElementById('app-label').value.trim();
+  if (!email || !label) { toast('Email et libellé requis', 'err'); return; }
+  const r = await fetch('/api/filtres/corriger', { method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, label }) });
+  const d = await r.json();
+  if (d.ok) {
+    filtresCache = d.filtres; apprentissageCache = d.apprentissage || {};
+    renderFiltres(); renderApprentissage();
+    document.getElementById('app-email').value = '';
+    document.getElementById('app-label').value = '';
+    toast(`🧠 Appris : ${email} → ${label}`, 'ok');
+  } else toast(d.error || 'Erreur', 'err');
+}
+
+function renderApprentissage() {
+  const box = document.getElementById('app-liste');
+  const entrees = Object.entries(apprentissageCache || {});
+  if (!entrees.length) { box.textContent = 'Aucune correction apprise pour l\'instant.'; return; }
+  box.innerHTML = entrees.map(([email, e]) =>
+    `<div>🧠 ${escapeHtml(email)} → <b>${escapeHtml(e.label || '')}</b>
+      (${e.corrections || 0} correction(s))</div>`).join('');
+}
+
+/* NOTIFICATIONS (Web Notification API + panneau) */
+async function chargerNotifs() {
+  try {
+    const r = await fetch('/api/notifications');
+    const d = await r.json();
+    if (!d.ok) return;
+    const box = document.getElementById('notifs-liste');
+    const badge = document.getElementById('notifs-badge');
+    badge.textContent = `${d.non_vues} non vue(s)`;
+    const list = d.notifications || [];
+    box.innerHTML = list.length ? list.map(n =>
+      `<div style="padding:5px 8px;border-bottom:1px solid #eee">
+        🔔 <b>${escapeHtml(n.regle || '')}</b> — ${n.nombre} mail(s) sur ${escapeHtml(n.email || '')}
+        <span style="color:var(--muted)">${new Date((n.date || 0) * 1000).toLocaleString('fr-FR')}</span>
+      </div>`).join('')
+      : '<span style="color:var(--muted)">Aucune notification.</span>';
+    // Notification desktop pour les nouvelles non vues
+    if (d.non_vues > 0 && 'Notification' in window
+        && Notification.permission === 'granted' && list.length) {
+      const n = list[0];
+      new Notification(`🔔 ${n.regle}`, {
+        body: `${n.nombre} mail(s) classé(s) — ${n.label || n.regle}` });
+    }
+    if (d.non_vues > 0) await fetch('/api/notifications/vue', { method: 'POST' });
+  } catch (e) {}
+}
+
+function activerNotifs() {
+  if (!('Notification' in window)) { toast('Notifications non supportées', 'err'); return; }
+  Notification.requestPermission().then(p => {
+    toast(p === 'granted' ? '✅ Notifications activées'
+                          : '❌ Notifications refusées', p === 'granted' ? 'ok' : 'err');
+  });
+}
+
+/* HISTORIQUE NAVIGATEUR (localStorage) */
+const HIST_KEY = 'candimail_historique';
+const HIST_MAX = 200;
+
+function histLire() {
+  try { return JSON.parse(localStorage.getItem(HIST_KEY)) || []; }
+  catch (e) { return []; }
+}
+
+function histAjouter(entree) {
+  const h = histLire();
+  h.unshift({ ...entree, t: Date.now() });
+  localStorage.setItem(HIST_KEY, JSON.stringify(h.slice(0, HIST_MAX)));
+  renderHistorique();
+}
+
+function histVider() {
+  localStorage.removeItem(HIST_KEY);
+  renderHistorique();
+}
+
+function renderHistorique() {
+  const box = document.getElementById('hist-liste');
+  if (!box) return;
+  const h = histLire();
+  if (!h.length) {
+    box.innerHTML = '<span style="color:var(--muted)">Aucune action enregistrée sur cet appareil.</span>';
+    return;
+  }
+  box.innerHTML = h.map(e => {
+    const d = new Date(e.t);
+    const heure = d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+    return `<div style="padding:4px 8px;border-bottom:1px solid #eee;font-size:12px">
+      <b>${escapeHtml(e.type || 'action')}</b> ${escapeHtml(e.detail || '')}
+      <span style="color:var(--muted);float:right">${heure}</span>
+    </div>`;
+  }).join('');
+}
+
+/* DÉLAI */
+function bindDelaiUI() {
+  const cb = document.getElementById('cfg-delai-alea');
+  const input = document.getElementById('cfg-delai');
+  const info = document.getElementById('delai-info');
+  function maj() {
+    if (cb.checked) { input.disabled = true; info.textContent = '🎲 35-55s'; }
+    else { input.disabled = false; info.textContent = ''; }
+  }
+  cb.addEventListener('change', async () => {
+    maj();
+    await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ parametres: { delai_aleatoire: cb.checked } })
+    });
+  });
+  input.addEventListener('change', async () => {
+    const d = parseInt(input.value) || 40;
+    await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ parametres: { delai_secondes: d } })
+    });
+    toast(`Délai : ${d}s`, 'ok');
+  });
+  maj();
+}
+
+/* RESET / IMPORT */
+async function resetLog() {
+  if (!confirm('Effacer tout l\'historique ?')) return;
+  try {
+    const r = await fetch('/api/reset-log', { method:'POST' });
+    const data = await r.json();
+    if (data.ok) { toast('Log réinitialisé', 'ok'); refreshStatus(); }
+    else toast(data.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+async function importJSON(file) {
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const r = await fetch('/api/import-json', { method:'POST', body: form });
+    const data = await r.json();
+    if (data.ok) { toast(`${data.importees} importées`, 'ok'); refreshStatus(); }
+    else toast(data.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+/* MODAL APERÇU */
+function openModal(company) {
+  currentSendCompany = company;
+  const template = document.getElementById('cfg-template').value || 'standard';
+  fetch('/api/preview', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ company: company.name, context: company.context, template })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.ok) { toast(data.error, 'err'); return; }
+    document.getElementById('modal-dest').value = company.email;
+    document.getElementById('modal-subject').value = data.subject;
+    document.getElementById('modal-body').value = data.body;
+    const pj = piecesActives === 0 ? '⚠️ Aucune PJ' : `${piecesActives} PJ`;
+    document.getElementById('modal-info').textContent = `${pj}`;
+    document.getElementById('modal').classList.add('visible');
+  })
+  .catch(() => toast('Erreur aperçu', 'err'));
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('visible');
+  currentSendCompany = null;
+  // Réinitialise le bouton d'envoi pour la prochaine ouverture
+  const btn = document.getElementById('modal-send');
+  if (btn) { btn.disabled = false; btn.textContent = '📤 Envoyer'; }
+}
+
+async function sendFromModal() {
+  if (!currentSendCompany) return;
+  const subject = document.getElementById('modal-subject').value.trim();
+  const body = document.getElementById('modal-body').value.trim();
+  if (!subject || !body) { toast('Objet et corps requis', 'err'); return; }
+  if (piecesActives === 0) {
+    if (!confirm('⚠️ AUCUNE PJ\n\nContinuer ?')) return;
+  }
+  const btn = document.getElementById('modal-send');
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const r = await fetch('/api/send', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        email: currentSendCompany.email,
+        company: currentSendCompany.name,
+        subject, body
+      })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(`✅ Envoyé`, 'ok');
+      closeModal(); await refreshStatus();
+    } else {
+      toast(data.error || 'Erreur', 'err');
+    }
+  } catch (e) {
+    toast('Erreur réseau', 'err');
+  } finally {
+    // Toujours réinitialiser le bouton, même si closeModal a échoué
+    btn.disabled = false; btn.textContent = '📤 Envoyer';
+  }
+}
+
+/* ENVOI PERSONNALISÉ */
+async function previewCustom() {
+  const emailsRaw = document.getElementById('custom-email').value.trim();
+  const company   = document.getElementById('custom-company').value.trim();
+  const context   = document.getElementById('custom-context').value.trim();
+  const template  = document.getElementById('custom-template').value;
+  const emails = emailsRaw.split(/[,;\n]+/).map(e => e.trim()).filter(e => e.includes('@'));
+  if (!emails.length || !company) { toast('Email valide + nom requis', 'err'); return; }
+  const ctx = context || `Je me permets de vous contacter car je suis très intéressé
+par les activités de ${company} et par les opportunités de stage.`;
+  try {
+    const r = await fetch('/api/preview', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ company, context: ctx, template })
+    });
+    const data = await r.json();
+    if (!data.ok) { toast(data.error, 'err'); return; }
+    document.getElementById('custom-preview-body').value = data.body;
+    document.getElementById('custom-preview-zone').style.display = 'block';
+    document.getElementById('custom-info').textContent = `${emails.length} dest · ${piecesActives} PJ`;
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+async function sendCustom() {
+  const emailsRaw = document.getElementById('custom-email').value.trim();
+  const company   = document.getElementById('custom-company').value.trim();
+  const context   = document.getElementById('custom-context').value.trim();
+  const template  = document.getElementById('custom-template').value;
+  const emails = emailsRaw.split(/[,;\n]+/).map(e => e.trim()).filter(e => e.includes('@'));
+  if (!emails.length) { toast('Au moins un email valide requis', 'err'); return; }
+  if (!company) { toast('Nom requis', 'err'); return; }
+  if (!rateLimit.ok) { toast('Rate limit — attends 1h', 'err'); return; }
+  const nbComptes = parseInt(document.getElementById('comptes-badge').textContent.replace(/\D/g, '')) || 0;
+  if (nbComptes === 0) { toast('Ajoute un compte Gmail', 'err'); return; }
+
+  let avertissementPJ = '';
+  if (piecesActives === 0) avertissementPJ = '\n\n⚠️ AUCUNE PJ — emails sans CV';
+
+  const destPreview = emails.slice(0, 3).join('\n');
+  const plus = emails.length > 3 ? `\n... +${emails.length - 3}` : '';
+  if (!confirm(`📧 ${emails.length} email(s) INDIVIDUEL(S)\n\nDestinataires :\n${destPreview}${plus}\n\nEntreprise : ${company}\nPièces : ${piecesActives}${avertissementPJ}\n\nConfirmer ?`)) return;
+
+  const btn = document.getElementById('btn-custom-send');
+  btn.disabled = true; btn.textContent = '⏳ Envoi...';
+
+  const ctx = context || `Je me permets de vous contacter car je suis très intéressé
+par les activités de ${company} et par les opportunités de stage.`;
+
+  try {
+    const r1 = await fetch('/api/preview', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ company, context: ctx, template })
+    });
+    const preview = await r1.json();
+    if (!preview.ok) { toast(preview.error, 'err'); return; }
+
+    const r2 = await fetch('/api/send', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        email: emails.join(', '),
+        company, subject: preview.subject, body: preview.body,
+        mode_groupe: false,
+      })
+    });
+    const data = await r2.json();
+    if (data.ok) {
+      toast(`✅ ${emails.length} envoi(s)`, piecesActives === 0 ? 'warn' : 'ok');
+      document.getElementById('custom-email').value = '';
+      document.getElementById('custom-company').value = '';
+      document.getElementById('custom-context').value = '';
+      document.getElementById('custom-preview-zone').style.display = 'none';
+      document.getElementById('custom-info').textContent = '';
+      await refreshStatus();
+    } else {
+      toast(data.error || 'Erreur', 'err');
+    }
+  } catch (e) {
+    toast('Erreur réseau', 'err');
+  } finally {
+    // Toujours réinitialiser le bouton, quoi qu'il arrive
+    btn.disabled = false; btn.textContent = '📤 Envoyer maintenant';
+  }
+}
+
+/* BULK */
+function getPendingCompanies() {
+  return COMPANIES.filter(c => !serverLog[c.name]?.envoye);
+}
+
+const selectedCompanies = new Set();
+
+function updateSelectionUI() {
+  const n = selectedCompanies.size;
+  const countEl = document.getElementById('sel-count');
+  if (countEl) countEl.textContent = `${n} sélectionnée(s)`;
+  const sendBtn = document.getElementById('sel-send');
+  if (sendBtn) sendBtn.disabled = n === 0;
+}
+
+function toggleSelect(name, checked, cardEl) {
+  if (checked) selectedCompanies.add(name); else selectedCompanies.delete(name);
+  if (cardEl) cardEl.classList.toggle('selected', checked);
+  updateSelectionUI();
+}
+
+function selectAllFiltered() {
+  getFiltered().forEach(c => selectedCompanies.add(c.name));
+  render();
+}
+
+function clearSelection() {
+  selectedCompanies.clear();
+  render();
+}
+
+async function sendSelected() {
+  const target = COMPANIES.filter(c => selectedCompanies.has(c.name));
+  if (!target.length) { toast('Aucune entreprise cochée', 'warn'); return; }
+  await startBulk(target);
+  selectedCompanies.clear();
+  render();
+}
+
+async function startBulk(target) {
+  if (!rateLimit.ok) { toast('Rate limit atteint', 'err'); return; }
+  const nbComptes = parseInt(document.getElementById('comptes-badge').textContent.replace(/\D/g, '')) || 0;
+  if (nbComptes === 0) { toast('Ajoute un compte Gmail', 'err'); return; }
+  const pending = target && target.length ? target : getPendingCompanies();
+  if (!pending.length) { toast('Tout est déjà envoyé', 'warn'); return; }
+  const delay = parseInt(document.getElementById('cfg-delai').value) || 40;
+  const alea = document.getElementById('cfg-delai-alea').checked;
+  const template = document.getElementById('cfg-template').value || 'standard';
+  const minutes = Math.ceil((pending.length * (alea ? 45 : delay)) / 60);
+  const delaiTxt = alea ? '35-55s' : `${delay}s`;
+  let avertissementPJ = '';
+  if (piecesActives === 0) avertissementPJ = '\n\n⚠️ AUCUNE PJ — emails sans CV';
+  if (!confirm(`Envoyer ${pending.length} emails ?\n\nTemplate : ${template}\nDélai : ${delaiTxt}\nPièces : ${piecesActives}\n~${minutes} min${avertissementPJ}\n\nConfirmer ?`)) return;
+  try {
+    const r = await fetch('/api/send-bulk', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ companies: pending, template })
+    });
+    const data = await r.json();
+    if (!data.ok) { toast(data.error, 'err'); return; }
+    setBulkUIRunning(true); startBulkPolling();
+    histAjouter({ type: 'envoi', detail: `Envoi en masse lancé (${pending.length} emails)` });
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+async function stopBulk() {
+  try {
+    await fetch('/api/send-bulk-stop', { method:'POST' });
+    toast('Arrêt demandé', 'warn');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+function setBulkUIRunning(running) {
+  document.getElementById('bulk-panel').classList.toggle('running', running);
+  document.getElementById('bulk-start').style.display = running ? 'none' : '';
+  document.getElementById('bulk-stop').style.display  = running ? '' : 'none';
+}
+
+function startBulkPolling() {
+  if (bulkPollTimer) clearInterval(bulkPollTimer);
+  bulkPollTimer = setInterval(async () => {
+    try {
+      const r = await fetch('/api/send-bulk-status');
+      const s = await r.json();
+      updateBulkUI(s);
+      if (!s.en_cours) {
+        clearInterval(bulkPollTimer);
+        bulkPollTimer = null;
+        setBulkUIRunning(false);
+        await refreshStatus();
+        toast(`Terminé : ${s.envoyes} ✅ / ${s.erreurs} ❌`, s.erreurs ? 'warn' : 'ok');
+      }
+    } catch (e) {}
+  }, 2000);
+}
+
+function updateBulkUI(s) {
+  document.getElementById('bulk-title').textContent =
+    s.en_cours ? `⏳ ${s.index}/${s.total}` : '🚀 Envoi en masse';
+  document.getElementById('bulk-desc').textContent = s.en_cours
+    ? `${s.derniere} — ✅ ${s.envoyes} · ❌ ${s.erreurs}`
+    : 'Envoie aux entreprises non contactées';
+  const pct = s.total ? Math.round(100 * s.index / s.total) : 0;
+  document.getElementById('bulk-bar').style.width = pct + '%';
+}
+
+/* RENDU LISTE */
+function getFiltered() {
+  const q = searchQuery.toLowerCase().trim();
+  return COMPANIES.filter(c => {
+    if (activeFilter !== 'all' && c.cat !== activeFilter) return false;
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+  });
+}
+
+function render() {
+  const list = document.getElementById('list');
+  const filtered = getFiltered();
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">Aucun résultat</div>';
+    return;
+  }
+  const groups = {};
+  filtered.forEach(c => {
+    if (!groups[c.cat]) groups[c.cat] = [];
+    groups[c.cat].push(c);
+  });
+  list.innerHTML = Object.entries(groups).map(([cat, items]) => `
+    <section class="category">
+      <div class="category-head">
+        <h3>${CATEGORIES[cat] || cat}</h3>
+        <span class="count">${items.length}</span>
+        <hr>
+      </div>
+      ${items.map(renderCard).join('')}
+    </section>
+  `).join('');
+  bindEvents();
+  updateSelectionUI();
+}
+
+function renderCard(c) {
+  const entry = serverLog[c.name];
+  const isSent = !!entry?.envoye;
+  const isError = entry && !entry.envoye;
+  const isReplied = !!entry?.repondu;
+  const isBounce = !!entry?.bounce;
+  const sansPJ = !!entry?.sans_pj;
+  const badgeClass = c.cat === 'port' ? 'port' : (c.cat === 'grands' ? 'grand' : '');
+  const catLabel = c.cat === 'port' ? 'Port' : (c.cat === 'grands' ? 'Grand' : 'PME');
+
+  let cardCls = '';
+  if (isBounce) cardCls = 'bounce';
+  else if (isReplied) cardCls = 'responded';
+  else if (isSent) cardCls = 'sent';
+  else if (isError) cardCls = 'error';
+
+  let badgeStatus = '';
+  if (isReplied) badgeStatus = '<span class="badge response">✨ Réponse</span>';
+  else if (isBounce) badgeStatus = '<span class="badge bounce">⚠️ Bounce</span>';
+  else if (sansPJ && isSent) badgeStatus = '<span class="badge nopj">⚠️ Sans PJ</span>';
+
+  return `
+    <div class="card ${cardCls}" data-name="${escapeHtml(c.name)}">
+      <div class="card-head" onclick="this.parentElement.classList.toggle('open')">
+        <input type="checkbox" class="sel-ck" data-action="toggle-select"
+               data-name="${escapeHtml(c.name)}" title="Cocher pour envoi ciblé"
+               ${selectedCompanies.has(c.name) ? 'checked' : ''}>
+        <div class="title">
+          <div class="name">${escapeHtml(c.name)}</div>
+          <div class="email">${escapeHtml(c.email)}</div>
+        </div>
+        ${badgeStatus}
+        ${entry?.date ? `<span class="date">${escapeHtml(entry.date)}</span>` : ''}
+        <span class="badge ${badgeClass}">${catLabel}</span>
+        <span class="toggle">▶</span>
+      </div>
+      <div class="card-body">
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">
+          ${escapeHtml(c.context)}
+        </div>
+        ${entry?.compte ? `<div class="via-compte" title="Compte Gmail utilisé">📨 envoyé via ${escapeHtml(entry.compte)}</div>` : ''}
+        <div class="actions">
+          <button class="btn primary" data-action="preview"
+                  data-name="${escapeHtml(c.name)}" ${isSent ? 'disabled' : ''}>
+            ${isSent ? '✅ Envoyé' : (isError ? '🔄 Réessayer' : '✏️ Aperçu & envoyer')}
+          </button>
+          <button class="btn small" data-action="edit-company"
+                  data-name="${escapeHtml(c.name)}" title="Modifier">✏️</button>
+          <button class="btn small danger" data-action="delete-company"
+                  data-name="${escapeHtml(c.name)}" title="Supprimer">🗑️</button>
+          ${isSent ? `
+            <button class="btn small ${isReplied ? 'ok' : ''}"
+                    data-action="toggle-reply" data-name="${escapeHtml(c.name)}">
+              ${isReplied ? '✓ Répondu' : 'Marquer réponse'}
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bindEvents() {
+  document.querySelectorAll('[data-action="preview"]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const c = COMPANIES.find(x => x.name === btn.dataset.name);
+      if (c) openModal(c);
+    });
+  });
+  document.querySelectorAll('[data-action="edit-company"]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const c = COMPANIES.find(x => x.name === btn.dataset.name);
+      if (c) openCompanyModal(c);
+    });
+  });
+  document.querySelectorAll('[data-action="delete-company"]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const name = btn.dataset.name;
+      if (!confirm(`Supprimer "${name}" de la liste ?`)) return;
+      try {
+        const r = await fetch(`/api/companies/${encodeURIComponent(name)}`,
+                              { method:'DELETE' });
+        const d = await r.json();
+        if (d.ok) {
+          selectedCompanies.delete(name);
+          toast('Entreprise supprimée', 'ok');
+          await syncCompanies();
+        } else toast(d.error || 'Erreur', 'err');
+      } catch (err) { toast('Erreur réseau', 'err'); }
+    });
+  });
+  document.querySelectorAll('[data-action="toggle-select"]').forEach(cb => {
+    cb.addEventListener('click', e => e.stopPropagation());
+    cb.addEventListener('change', e => {
+      e.stopPropagation();
+      toggleSelect(cb.dataset.name, cb.checked, cb.closest('.card'));
+    });
+  });
+  document.querySelectorAll('[data-action="toggle-reply"]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const name = btn.dataset.name;
+      const current = !!serverLog[name]?.repondu;
+      try {
+        const r = await fetch('/api/mark-response', { method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ company: name, repondu: !current })
+        });
+        if (r.status === 401) { toast('❌ Session expirée', 'err'); return; }
+        const data = await r.json();
+        if (data.ok) { toast('OK', 'ok'); refreshStatus(); }
+        else toast(data.error || 'Erreur', 'err');
+      } catch (err) { toast('Erreur réseau', 'err'); }
+    });
+  });
+}
+
+/* MODALE ENTREPRISE : ajout / édition */
+let companyEditName = null; // null = ajout
+
+function openCompanyModal(c) {
+  companyEditName = c ? c.name : null;
+  document.getElementById('company-modal-title').textContent =
+    c ? `✏️ Modifier : ${c.name}` : '➕ Nouvelle entreprise';
+  document.getElementById('company-f-name').value    = c ? c.name : '';
+  document.getElementById('company-f-email').value   = c ? c.email : '';
+  document.getElementById('company-f-cat').value     = c ? c.cat : 'pme';
+  document.getElementById('company-f-context').value = c ? c.context : '';
+  document.getElementById('company-modal').classList.add('visible');
+  setTimeout(() => document.getElementById('company-f-name').focus(), 50);
+}
+
+function closeCompanyModal() {
+  document.getElementById('company-modal').classList.remove('visible');
+}
+
+async function saveCompany() {
+  const name    = document.getElementById('company-f-name').value.trim();
+  const email   = document.getElementById('company-f-email').value.trim();
+  const cat     = document.getElementById('company-f-cat').value;
+  const context = document.getElementById('company-f-context').value.trim();
+  if (!name || !email || !email.includes('@')) {
+    toast('Nom et email valides requis', 'err'); return;
+  }
+  const btn = document.getElementById('company-save');
+  btn.disabled = true;
+  try {
+    const url = companyEditName
+      ? `/api/companies/${encodeURIComponent(companyEditName)}`
+      : '/api/companies';
+    const method = companyEditName ? 'PUT' : 'POST';
+    const r = await fetch(url, {
+      method, headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, cat, context })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      toast(companyEditName ? 'Entreprise modifiée' : 'Entreprise ajoutée', 'ok');
+      closeCompanyModal();
+      await syncCompanies();
+    } else toast(d.error || 'Erreur', 'err');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+  btn.disabled = false;
+}
+
+/* Synchronise la liste avec la base : seed au 1er lancement, puis lecture */
+async function syncCompanies() {
+  try {
+    await fetch('/api/companies/seed', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ companies: COMPANIES })
+    });
+    const r = await fetch('/api/companies');
+    const d = await r.json();
+    if (d.ok && Array.isArray(d.companies) && d.companies.length) {
+      COMPANIES = d.companies;
+    }
+  } catch (e) { console.error('syncCompanies', e); }
+  render();
+  updateStats();
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+
+function updateStats() {
+  const total = COMPANIES.length;
+  const sent = COMPANIES.filter(c => serverLog[c.name]?.envoye).length;
+  const responded = COMPANIES.filter(c => serverLog[c.name]?.repondu).length;
+  animateCount('stat-total', total);
+  animateCount('stat-sent', sent);
+  animateCount('stat-pending', total - sent);
+  animateCount('stat-responded', responded);
+}
+
+/* Compteur animé : glisse vers la nouvelle valeur */
+const _countAnims = {};
+function animateCount(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const from = parseInt(el.textContent) || 0;
+  if (from === target) { el.textContent = target; return; }
+  if (_countAnims[id]) cancelAnimationFrame(_countAnims[id]);
+  const t0 = performance.now(), dur = 450;
+  const step = now => {
+    const p = Math.min(1, (now - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (target - from) * eased);
+    if (p < 1) _countAnims[id] = requestAnimationFrame(step);
+  };
+  _countAnims[id] = requestAnimationFrame(step);
+}
+
+function renderFilters() {
+  const f = document.getElementById('filters');
+  const counts = { all: COMPANIES.length };
+  COMPANIES.forEach(c => { counts[c.cat] = (counts[c.cat] || 0) + 1; });
+  f.innerHTML = `
+    <button class="chip active" data-cat="all">Tout (${counts.all})</button>
+    ${Object.entries(CATEGORIES).map(([cat, label]) =>
+      `<button class="chip" data-cat="${cat}">${label} (${counts[cat] || 0})</button>`
+    ).join('')}
+  `;
+  f.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      f.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.cat;
+      render();
+    });
+  });
+}
+
+function bindSearch() {
+  const input = document.getElementById('search');
+  let t;
+  input.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => { searchQuery = input.value; render(); }, 120);
+  });
+}
+
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* INIT */
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadConfig();
+  await loadTemplates();
+  await loadPieces();
+  await loadGroupes();
+  await loadIMAPStatus();
+  await syncCompanies();
+
+  bindSearch();
+  renderFilters();
+  bindDelaiUI();
+
+  // Entreprises : ajout / édition / suppression
+  document.getElementById('btn-add-company').addEventListener('click', () => openCompanyModal(null));
+  document.getElementById('company-modal-close').addEventListener('click', closeCompanyModal);
+  document.getElementById('company-cancel').addEventListener('click', closeCompanyModal);
+  document.getElementById('company-save').addEventListener('click', saveCompany);
+  document.getElementById('company-modal').addEventListener('click', e => {
+    if (e.target.id === 'company-modal') closeCompanyModal();
+  });
+
+  // Max par heure
+  document.getElementById('cfg-maxh').addEventListener('change', async () => {
+    const mx = Math.max(1, Math.min(500, parseInt(document.getElementById('cfg-maxh').value) || 100));
+    document.getElementById('cfg-maxh').value = mx;
+    await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ parametres: { max_par_heure: mx } })
+    });
+    toast(`Max / heure : ${mx}`, 'ok');
+    refreshStatus();
+  });
+
+  // Sélection individuelle
+  document.getElementById('sel-all').addEventListener('click', selectAllFiltered);
+  document.getElementById('sel-none').addEventListener('click', clearSelection);
+  document.getElementById('sel-send').addEventListener('click', sendSelected);
+  updateSelectionUI();
+
+  // Config
+  document.getElementById('btn-save-config').addEventListener('click', saveCandidatConfig);
+  document.getElementById('cfg-template').addEventListener('change', saveCandidatConfig);
+
+  // Comptes
+  document.getElementById('btn-add-compte').addEventListener('click', addCompte);
+  document.getElementById('btn-help-password').addEventListener('click', () => {
+    document.getElementById('help-modal').classList.add('visible');
+  });
+  document.getElementById('help-close').addEventListener('click', () => {
+    document.getElementById('help-modal').classList.remove('visible');
+  });
+  document.getElementById('help-close-btn').addEventListener('click', () => {
+    document.getElementById('help-modal').classList.remove('visible');
+  });
+  document.getElementById('help-modal').addEventListener('click', e => {
+    if (e.target.id === 'help-modal') document.getElementById('help-modal').classList.remove('visible');
+  });
+  document.getElementById('new-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addCompte();
+  });
+
+  // Templates
+  document.getElementById('btn-new-tpl').addEventListener('click', openNewTpl);
+  document.getElementById('tpl-modal-close').addEventListener('click', closeTplModal);
+  document.getElementById('tpl-modal-cancel').addEventListener('click', closeTplModal);
+  document.getElementById('tpl-modal-save').addEventListener('click', saveTpl);
+  document.getElementById('tpl-modal').addEventListener('click', e => {
+    if (e.target.id === 'tpl-modal') closeTplModal();
+  });
+
+  // Envoi personnalisé
+  document.getElementById('btn-custom-preview').addEventListener('click', previewCustom);
+  document.getElementById('btn-custom-send').addEventListener('click', sendCustom);
+
+  // Groupes
+  document.getElementById('btn-new-groupe').addEventListener('click', openNewGroupe);
+  document.getElementById('grp-modal-close').addEventListener('click', closeGrpModal);
+  document.getElementById('grp-modal-cancel').addEventListener('click', closeGrpModal);
+  document.getElementById('grp-modal-save').addEventListener('click', saveGroupe);
+  document.getElementById('grp-emails').addEventListener('input', updateGrpEmailCount);
+  document.getElementById('grp-modal').addEventListener('click', e => {
+    if (e.target.id === 'grp-modal') closeGrpModal();
+  });
+  document.getElementById('grp-send-close').addEventListener('click', closeGrpSendModal);
+  document.getElementById('grp-send-cancel').addEventListener('click', closeGrpSendModal);
+  document.getElementById('grp-send-go').addEventListener('click', envoyerGroupe);
+  document.getElementById('grp-send-modal').addEventListener('click', e => {
+    if (e.target.id === 'grp-send-modal') closeGrpSendModal();
+  });
+  document.querySelectorAll('input[name="grp-mode"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const id = document.getElementById('grp-send-id').value;
+      const g = groupesCache.find(x => x.id === id);
+      if (g) majGrpSendInfo(g);
+    });
+  });
+  document.getElementById('grp-send-pj').addEventListener('change', () => {
+    const id = document.getElementById('grp-send-id').value;
+    const g = groupesCache.find(x => x.id === id);
+    if (g) majGrpSendInfo(g);
+  });
+  document.getElementById('grp-send-template').addEventListener('change', appliquerTemplateGroupe);
+
+  // Pièces
+  document.getElementById('pj-input').addEventListener('change', e => {
+    if (e.target.files.length) uploadPieces(e.target.files);
+    e.target.value = '';
+  });
+
+  // IMAP
+  document.getElementById('btn-imap-check').addEventListener('click', checkIMAP);
+
+  // Navigation sidebar : active + scroll + fil d'Ariane
+  const NAV_TITRES = { dash: 'Tableau de bord', imap: 'Détection des réponses',
+                       comptes: 'Comptes Gmail', filtres: 'Filtres Gmail',
+                       params: "Paramètres d'envoi", hist: 'Historique' };
+  document.querySelectorAll('.sidebar .nav-item[data-nav]').forEach(a => {
+    a.addEventListener('click', () => {
+      document.querySelectorAll('.sidebar .nav-item').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+      const nav = a.dataset.nav;
+      document.getElementById('bc-page').textContent = NAV_TITRES[nav] || 'Tableau de bord';
+      const cible = { dash: null, imap: 'sec-imap', comptes: 'sec-comptes',
+                      filtres: 'sec-filtres', params: 'sec-params', hist: 'sec-hist' }[nav];
+      if (cible) {
+        const el = document.getElementById(cible);
+        el && el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Recherche sidebar synchronisée + raccourci clavier « / »
+  const sMain = document.getElementById('search'), sSide = document.getElementById('search-side');
+  sSide.addEventListener('input', () => { sMain.value = sSide.value; sMain.dispatchEvent(new Event('input')); });
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+      e.preventDefault(); sSide.focus();
+    }
+  });
+
+  // Règles de classement
+  document.getElementById('btn-flt-add').addEventListener('click', addFiltre);
+  document.getElementById('btn-flt-appliquer').addEventListener('click', appliquerFiltres);
+  document.getElementById('btn-flt-libelles').addEventListener('click', creerLibelles);
+  document.getElementById('btn-app-corriger').addEventListener('click', apprendre);
+  document.getElementById('btn-notifs-activer').addEventListener('click', activerNotifs);
+  await loadFiltres();
+  await chargerNotifs();
+  setInterval(chargerNotifs, 60000);   // poll toutes les minutes
+
+  // Historique local
+  document.getElementById('btn-hist-vider').addEventListener('click', histVider);
+  renderHistorique();
+  histAjouter({ type: 'session', detail: 'Ouverture de Candimail' });
+
+  // Import/reset
+  document.getElementById('btn-reset-log').addEventListener('click', resetLog);
+  document.getElementById('btn-import-json').addEventListener('click',
+    () => document.getElementById('import-json-input').click());
+  document.getElementById('import-json-input').addEventListener('change', e => {
+    if (e.target.files[0]) importJSON(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  // Bulk
+  document.getElementById('bulk-start').addEventListener('click', startBulk);
+  document.getElementById('bulk-stop').addEventListener('click', stopBulk);
+
+  // Modal aperçu
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-send').addEventListener('click', sendFromModal);
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target.id === 'modal') closeModal();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.getElementById('help-modal').classList.remove('visible');
+      closeGrpModal();
+      closeGrpSendModal();
+      closeTplModal();
+    }
+  });
+
+  await refreshStatus();
+
+  try {
+    const r = await fetch('/api/send-bulk-status');
+    const s = await r.json();
+    if (s.en_cours) {
+      setBulkUIRunning(true);
+      updateBulkUI(s);
+      startBulkPolling();
+    }
+  } catch (e) {}
+});
+</script>
+</body>
+</html>

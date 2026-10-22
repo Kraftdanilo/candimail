@@ -7,39 +7,20 @@ from pathlib import Path
 
 
 # ============================================================
-# CHEMINS (compatibles PyInstaller : données = dossier de l'exe,
-# templates/static = dossier bundle _MEIPASS en mode gelé)
+# CHEMINS — exécution directe via .venv (pas d'exécutable gelé).
 # Racine projet = parent du package (…/autogmail), pas candimail/core.
 # ============================================================
 def _racine_projet():
-    import sys
     from pathlib import Path as _P
-    meipass = getattr(sys, "_MEIPASS", None)
-    if meipass:
-        return _P(meipass)
     # candimail/core/config.py → racine = parents[2]
     return _P(__file__).resolve().parents[2]
 
 
-def _dossier_base():
-    import sys
-    if getattr(sys, "frozen", False):
-        # Exe PyInstaller : données modifiables à côté de l'exécutable
-        return Path(sys.executable).parent
-    return _racine_projet()
-
-
-def _dossier_ressources():
-    import sys
-    meipass = getattr(sys, "_MEIPASS", None)
-    if meipass:
-        return Path(meipass)
-    return _racine_projet()
-
-
-BASE_DIR = _dossier_base()
-RESS_DIR = _dossier_ressources()
-RACINE = _racine_projet()  # racine projet (…/autogmail), parent du package
+BASE_DIR = _racine_projet()
+RESS_DIR = _racine_projet()
+RACINE = _racine_projet()
+DATA_DIR = BASE_DIR / "data"
+DATA_DIR.mkdir(exist_ok=True)
 UPLOADS_DIR = BASE_DIR / "uploads"
 UPLOADS_DIR.mkdir(exist_ok=True)
 
@@ -51,14 +32,19 @@ LOG_FILE    = BASE_DIR / "envois.json"
 # ============================================================
 DEFAULT_CONFIG = {
     "candidat": {
-        "nom":     "HOBA Koutoua Daniel",
-        "tel":     "+225 07 19 44 04 84",
-        "email":   "battiment64@gmail.com",
-        "ville":   "Soubré",
-        "diplome": "Licence en Génie Civil",
-        "spec":    "Bâtiment",
+        "nom":     "Candidat Démo",
+        "tel":     "+000 00 00 00 00",
+        "email":   "candidat.demo@exemple.com",
+        "ville":   "Ma Ville",
+        "pays":    "Côte d'Ivoire",
+        "diplome": "Votre diplôme (à personnaliser)",
+        "spec":    "Votre spécialité (à personnaliser)",
     },
-    "comptes": [],
+    "comptes": [{
+        "email": "compte.demo@exemple.com",
+        "password": "",
+        "actif": False,
+    }],
     "parametres": {
         "delai_secondes":   40,
         "delai_aleatoire":  False,
@@ -97,7 +83,7 @@ de formation pratique. Je reste néanmoins ouvert à toute formule que
 vous jugerez adaptée.
 
 Je suis basé à {ville} et entièrement mobile pour me déplacer sur vos
-chantiers ou dans vos bureaux à travers la Côte d'Ivoire.
+chantiers ou dans vos bureaux à travers le pays.
 
 Compétences principales :
   • Conception et dimensionnement d'ouvrages (béton armé, charpente)
@@ -197,7 +183,7 @@ mes frais de déplacement et de subsistance pendant cette période de formation
 pratique. Je reste néanmoins ouvert à toute formule que vous jugerez adaptée.
 
 Je suis basé à {ville} et entièrement mobile pour me déplacer sur vos chantiers
-ou dans vos bureaux à travers la Côte d'Ivoire.
+ou dans vos bureaux à travers le pays.
 
 Compétences principales :
   • Conception et dimensionnement d'ouvrages (béton armé, charpente)
@@ -217,7 +203,7 @@ distinguées.
 {nom}
 Tél : {tel}
 Email : {email}
-{ville}, Côte d'Ivoire""",
+{ville}, {pays}""",
     },
     "direct": {
         "nom": "Direct (concis)",
@@ -257,7 +243,7 @@ d'apprendre au service de vos projets.
 Mon profil :
   • Formation : {diplome}, spécialité {spec}
   • Outils : AutoCAD, ArchiCAD, Python, VS Code
-  • Mobilité : basé à {ville}, disponible dans toute la Côte d'Ivoire
+  • Mobilité : basé à {ville}, disponible partout dans le pays
 
 Vous trouverez mon curriculum vitæ en pièce jointe. Je me tiens à votre
 disposition pour tout complément d'information et pour un entretien à votre

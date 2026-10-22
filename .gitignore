@@ -18,23 +18,27 @@ dist/
 *.spec
 
 # ---- Donnees locales (JAMAIS versionnees) ----
-app.db
+data/
 app.db-journal
 app.db-wal
 app.db-shm
 config.json
 envois.json
 *.backup.json
+*.legacy-save
 uploads/
 *.sqlite
 *.sqlite3
 
 # ---- Secrets / cles de chiffrement ----
-secret.key
-admin.key
+data/secret.key
+data/admin.key
+*.bak
 *.pem
 *.key
 !requirements.txt
+
+# ---- Docs : licences/versions ne doivent pas etre commitees si confidentielles ----
 
 # ---- WebView2 : profil, cookies, caches (13+ Mo) ----
 .webview/

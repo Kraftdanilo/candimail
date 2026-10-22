@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Candimail — HOBA Koutoua Daniel</title>
+<title>Candimail — Messagerie & suivi</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <style>
 :root {
@@ -270,6 +270,40 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
   .badge-cv{font-size:11px;padding:5px 10px}
 }
 
+/* ============ SPLASH DE DÉMARRAGE ============ */
+.splash{
+  position:fixed;inset:0;z-index:1000;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .5s ease,visibility .5s;
+}
+.splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.splash-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
+.splash-logo{
+  width:72px;height:72px;border-radius:18px;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:34px;
+  animation:splash-pop .6s cubic-bezier(.2,1.4,.4,1),splash-pulse 1.8s ease-in-out .6s infinite;
+  box-shadow:0 8px 30px rgba(30,90,168,.35);
+}
+@keyframes splash-pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes splash-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.splash-titre{font-size:22px;font-weight:800;letter-spacing:.04em}
+.splash-barre{
+  width:220px;height:6px;background:#E8DCC4;border-radius:3px;overflow:hidden;
+}
+.splash-prog{
+  height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:3px;transition:width .35s ease;
+}
+.splash-etat{font-size:12px;color:var(--muted);min-height:18px}
+
+/* ============ PAGES (vue multi-pages fluide) ============ */
+.page{display:none}
+.page.active{display:block;animation:page-in .28s ease both}
+@keyframes page-in{
+  from{opacity:0;transform:translateX(14px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
 /* ============ SIDEBAR + LAYOUT (modèle bureau) ============ */
 .layout{display:flex;min-height:100vh}
 .sidebar{
@@ -323,6 +357,13 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
 }
 .breadcrumb b{color:var(--text);font-weight:600}
 .breadcrumb .sep{opacity:.5}
+/* ===== PAGES (vues avec transition fluide) ===== */
+.page{display:none}
+.page.active{display:block;animation:pageIn .28s cubic-bezier(.2,.7,.3,1)}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .page.active{animation:none}
+}
 @media(max-width:900px){
   .sidebar{display:none}
   .breadcrumb{padding:14px 16px 0}
@@ -338,11 +379,39 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
   border-bottom:2px solid transparent; padding-bottom:1px; }
 .app-footer a:hover{ border-bottom-color:currentColor; }
 .app-footer .info{ opacity:.65; text-transform:none; letter-spacing:0; font-weight:600 }
+.app-footer .copyright{ flex:100%; opacity:.6; text-transform:none;
+  letter-spacing:0; font-weight:600; font-size:11px; }
 @media(max-width:900px){ .app-footer .sp{ display:none } }
 </style>
 <link rel="stylesheet" href="/static/brutalist.css">
+<link rel="stylesheet" href="/static/motion.css">
+<script>
+/* Garde-fou anti-splash figé, posé DÈS le <head> (avant tout le
+   reste du script). Si une erreur survient très tôt — donc avant
+   que le gestionnaire du splash ne soit enregistré — on retire le
+   splash quand même, sinon l'utilisateur reste bloqué devant une
+   fenêtre vide sans aucun moyen de réagir. */
+window.__candimailSauvetage = setTimeout(function () {
+  var s = document.getElementById('splash');
+  if (!s) return;                       // splash absent : rien a faire
+  var e = document.getElementById('splash-etat');
+  if (e) e.textContent = 'Chargement prolongé — ouverture…';
+  s.classList.add('hidden');
+  setTimeout(function () { s.remove(); }, 600);
+}, 12000);
+</script>
 </head>
 <body>
+
+<!-- ===== SPLASH DE DÉMARRAGE (préchargement) ===== -->
+<div class="splash" id="splash">
+  <div class="splash-inner">
+    <div class="splash-logo">📧</div>
+    <div class="splash-titre">Candimail</div>
+    <div class="splash-barre"><div class="splash-prog" id="splash-prog"></div></div>
+    <div class="splash-etat" id="splash-etat">Démarrage…</div>
+  </div>
+</div>
 
 <div class="layout">
 
@@ -351,28 +420,26 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
   <div class="logo"><span class="dot">📧</span> Candimail</div>
   <div class="recherche">
     <span>🔍</span>
-    <input type="search" id="search-side" placeholder="Rechercher…">
+    <input type="search" id="search-side" aria-label="Rechercher" placeholder="Rechercher…">
     <kbd>/</kbd>
   </div>
   <nav class="nav-group">
-    <div class="nav-label">Menu</div>
-    <a class="nav-item active" data-nav="dash"><span class="ico">🏠</span> Tableau de bord</a>
-    <a class="nav-item" href="/suivi"><span class="ico">📊</span> Analytique</a>
-    <a class="nav-item" data-nav="imap"><span class="ico">📨</span> Réponses IMAP</a>
+    <div class="nav-label">Messagerie</div>
+    <a class="nav-item active" data-nav="overview"><span class="ico">◈</span> Vue d'ensemble</a>
+    <a class="nav-item" data-nav="messages"><span class="ico">▤</span> Mes messages</a>
+    <a class="nav-item" data-nav="groupes"><span class="ico">◍</span> Mes groupes</a>
+    <a class="nav-item" data-nav="imap"><span class="ico">⌁</span> Réponses & filtres</a>
   </nav>
+
   <nav class="nav-group">
-    <div class="nav-label">Comptes</div>
-    <a class="nav-item" data-nav="comptes"><span class="ico">📧</span> Gmail <span class="badge-count" id="side-comptes" style="margin-left:auto">0</span></a>
-    <a class="nav-item" data-nav="filtres"><span class="ico">🗂️</span> Filtres</a>
+    <div class="nav-label">Envois</div>
+    <a class="nav-item" data-nav="dash"><span class="ico">▦</span> Cibles <span class="badge-count" id="side-entreprises">0</span></a>
+    <a class="nav-item" data-nav="envoi"><span class="ico">✉</span> Nouvel envoi</a>
+    <a class="nav-item" data-nav="suivi"><span class="ico">◔</span> Suivi des envois</a>
   </nav>
-  <nav class="nav-group">
-    <div class="nav-label">Autres</div>
-    <a class="nav-item" data-nav="params"><span class="ico">⚙️</span> Paramètres</a>
-    <a class="nav-item" data-nav="hist"><span class="ico">🕓</span> Historique</a>
-    <a class="nav-item" href="/cgu" target="_blank"><span class="ico">❓</span> Aide</a>
-  </nav>
-  <div class="spacer"></div>
-  <div class="bas-de-page">HOBA Koutoua Daniel<br> Soubré, Côte d'Ivoire</div>
+
+<div class="spacer"></div>
+  <div class="bas-de-page">Candimail — Démonstration</div>
 </aside>
 
 <!-- ===== COLONNE PRINCIPALE ===== -->
@@ -382,7 +449,7 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
   <div class="header-inner">
     <h1 id="page-titre">
       Tableau de bord
-      <small id="header-sub">Candimail · Candidatures Stage Génie Civil</small>
+      <small id="header-sub">Candimail · Messagerie & suivi Stage Génie Civil</small>
     </h1>
     <div class="badge-cv" id="cv-badge">📎 0 pièce(s)</div>
     <div class="badge-cv warn" id="pj-warn-badge" style="display:none"
@@ -390,6 +457,8 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     <div class="badge-cv" id="comptes-badge" title="Comptes Gmail actifs">📧 0</div>
     <div class="badge-cv" id="rate-badge" title="Rate limit horaire">⏱️ 0/30</div>
     <div class="top-actions">
+      <button class="btn small" id="btn-refresh-backend"
+              title="Recharger le back-end (en cas de ralentissement ou de bug)">🔄 Actualiser</button>
       <a class="btn small" href="/api/export-excel">⬇️ Excel</a>
       <a class="btn small" href="/api/export-csv">⬇️ CSV</a>
     </div>
@@ -407,34 +476,54 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     ⚠️ <strong>Aucune pièce jointe active</strong> — les emails partiront sans CV.
   </div>
 
-  <!-- COMPTES GMAIL -->
-  <section class="panel" id="sec-comptes">
-    <h2>📧 Comptes Gmail <span class="badge-count" id="comptes-count">0 actif(s)</span></h2>
-    <div id="comptes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-    <div class="config-row">
-      <input type="email" id="new-email" placeholder="battiment64@gmail.com"
-             style="flex:1;min-width:220px">
-      <input type="password" id="new-password"
-             placeholder="xxxx xxxx xxxx xxxx"
-             style="flex:1;min-width:260px">
-      <button class="btn primary small" id="btn-add-compte">+ Ajouter</button>
-      <button class="btn small" id="btn-help-password">❓ Où trouver mon mot de passe ?</button>
-    </div>
-  </section>
+  <!-- ============================================================
+       PAGE 1 : TABLEAU DE BORD (entreprises, stats, envoi de masse)
+       ============================================================ -->
+  <div class="page active" id="page-dash">
 
-  <!-- MES MESSAGES (TEMPLATES) -->
-  <section class="panel">
-    <h2>📝 Mes messages <span class="badge-count" id="tpl-count">0</span></h2>
-    <div id="tpl-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-    <div class="config-row">
-      <button class="btn primary small" id="btn-new-tpl">+ Nouveau message</button>
-      <span style="font-size:12px;color:var(--muted)">
-        Modèles réutilisables (candidature, parents, collègues…)
-      </span>
-    </div>
-  </section>
+  <div class="stats">
+    <div class="stat"><div class="n" id="stat-total">0</div><div class="l">Entreprises</div></div>
+    <div class="stat ok"><div class="n" id="stat-sent">0</div><div class="l">Envoyées</div></div>
+    <div class="stat warn"><div class="n" id="stat-pending">0</div><div class="l">En attente</div></div>
+    <div class="stat purple"><div class="n" id="stat-responded">0</div><div class="l">Réponses</div></div>
+  </div>
 
-  <!-- ENVOI PERSONNALISÉ -->
+  <!-- BULK -->
+  <div class="bulk-panel" id="bulk-panel">
+    <div class="info">
+      <strong id="bulk-title">🚀 Envoi en masse</strong>
+      <div id="bulk-desc" style="font-size:12px;color:var(--muted);margin-top:2px">
+        Envoie aux entreprises non contactées
+      </div>
+      <div class="progress"><div class="progress-bar" id="bulk-bar"></div></div>
+    </div>
+    <button class="btn primary" id="bulk-start">▶️ Tout envoyer</button>
+    <button class="btn danger" id="bulk-stop" style="display:none">⏹️ Arrêter</button>
+    <div class="sel-bar">
+      <span class="sel-count" id="sel-count">0 sélectionnée(s)</span>
+      <button class="btn small" id="sel-all">☑️ Tout cocher</button>
+      <button class="btn small" id="sel-none">☐ Tout décocher</button>
+      <button class="btn primary small" id="sel-send" disabled>📤 Envoyer la sélection</button>
+      <button class="btn danger small" id="sel-del" disabled>🗑️ Supprimer la sélection</button>
+    </div>
+  </div>
+
+  <!-- RECHERCHE -->
+  <div class="search-bar">
+    <input type="search" id="search" aria-label="Rechercher une entreprise" placeholder="Rechercher une entreprise...">
+    <div class="filters" id="filters"></div>
+    <button class="btn primary small" id="btn-add-company">➕ Entreprise</button>
+  </div>
+
+  <div id="list"></div>
+
+  </div><!-- /page-dash -->
+
+  <!-- ============================================================
+       PAGE 2 : ENVOI EXPRESS (email libre)
+       ============================================================ -->
+  <div class="page" id="page-envoi">
+
   <section class="panel">
     <h2>✉️ Envoi personnalisé <span class="badge-count">email libre</span></h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
@@ -480,72 +569,32 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
                     text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">
         Aperçu de la lettre
       </label>
-      <textarea id="custom-preview-body" readonly
+      <textarea id="custom-preview-body" aria-label="Apercu du corps du message" readonly
                 style="width:100%;min-height:280px;padding:12px;border:1px solid var(--border);
                        border-radius:6px;font-size:12px;font-family:ui-monospace,Consolas,monospace;
                        line-height:1.5;background:#FBF6EA;resize:vertical"></textarea>
     </div>
   </section>
 
-  <!-- MES GROUPES -->
-  <section class="panel">
-    <h2>👥 Mes groupes <span class="badge-count" id="groupes-count">0</span></h2>
-    <div id="groupes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-    <div class="config-row">
-      <button class="btn primary small" id="btn-new-groupe">+ Nouveau groupe</button>
-      <span style="font-size:12px;color:var(--muted)">
-        Pour envoyer le même message à plusieurs personnes (parents d'élèves, collègues…)
-      </span>
-    </div>
-  </section>
+  </div><!-- /page-envoi -->
 
-  <!-- INFORMATIONS CANDIDAT -->
-  <section class="panel">
-    <h2>👤 Informations candidat</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Nom complet
-        <input type="text" id="cfg-nom"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Téléphone
-        <input type="text" id="cfg-tel"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Email
-        <input type="email" id="cfg-email"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Ville
-        <input type="text" id="cfg-ville"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Diplôme
-        <input type="text" id="cfg-diplome"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
-                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
-        Spécialité
-        <input type="text" id="cfg-spec"
-               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
-      </label>
-    </div>
+  <!-- ============================================================
+       PAGE 3 : COMPTES GMAIL
+       ============================================================ -->
+  <div class="page" id="page-comptes">
+
+  <!-- COMPTES GMAIL -->
+  <section class="panel" id="sec-comptes">
+    <h2>📧 Comptes Gmail <span class="badge-count" id="comptes-count">0 actif(s)</span></h2>
+    <div id="comptes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
     <div class="config-row">
-      <label>
-        Template par défaut :
-        <select id="cfg-template"></select>
-      </label>
-      <button class="btn primary small" id="btn-save-config">💾 Enregistrer</button>
+      <input type="email" id="new-email" aria-label="Adresse Gmail" placeholder="vous@gmail.com"
+             style="flex:1;min-width:220px">
+      <input type="password" id="new-password" aria-label="Mot de passe d'application Gmail"
+             placeholder="xxxx xxxx xxxx xxxx"
+             style="flex:1;min-width:260px">
+      <button class="btn primary small" id="btn-add-compte">+ Ajouter</button>
+      <button class="btn small" id="btn-help-password">❓ Où trouver mon mot de passe ?</button>
     </div>
   </section>
 
@@ -561,6 +610,51 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
       <span style="font-size:12px;color:var(--muted)">CV, LM, diplôme…</span>
     </div>
   </section>
+
+  </div><!-- /page-comptes -->
+
+  <!-- ============================================================
+       PAGE 4 : MES MESSAGES (templates)
+       ============================================================ -->
+  <div class="page" id="page-messages">
+
+  <!-- MES MESSAGES (TEMPLATES) -->
+  <section class="panel">
+    <h2>📝 Mes messages <span class="badge-count" id="tpl-count">0</span></h2>
+    <div id="tpl-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+    <div class="config-row">
+      <button class="btn primary small" id="btn-new-tpl">+ Nouveau message</button>
+      <span style="font-size:12px;color:var(--muted)">
+        Modèles réutilisables (candidature, parents, collègues…)
+      </span>
+    </div>
+  </section>
+
+  </div><!-- /page-messages -->
+
+  <!-- ============================================================
+       PAGE 5 : GROUPES
+       ============================================================ -->
+  <div class="page" id="page-groupes">
+
+  <!-- MES GROUPES -->
+  <section class="panel">
+    <h2>👥 Mes groupes <span class="badge-count" id="groupes-count">0</span></h2>
+    <div id="groupes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+    <div class="config-row">
+      <button class="btn primary small" id="btn-new-groupe">+ Nouveau groupe</button>
+      <span style="font-size:12px;color:var(--muted)">
+        Pour envoyer le même message à plusieurs personnes (parents d'élèves, collègues…)
+      </span>
+    </div>
+  </section>
+
+  </div><!-- /page-groupes -->
+
+  <!-- ============================================================
+       PAGE 6 : RÉPONSES & FILTRES (IMAP)
+       ============================================================ -->
+  <div class="page" id="page-imap">
 
   <!-- IMAP -->
   <section class="panel" id="sec-imap">
@@ -650,17 +744,96 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     <div id="notifs-liste" style="font-size:13px;max-height:200px;overflow-y:auto"></div>
   </section>
 
-  <!-- HISTORIQUE LOCAL (navigateur) -->
-  <section class="panel" id="sec-hist">
-    <h2>🕓 Historique (cet appareil)</h2>
-    <p style="font-size:12px;color:var(--muted);margin:4px 0 10px">
-      Mémoire locale du navigateur : conserve les dernières actions
-      (envois, vérifications, filtres) même après fermeture. Stocké en
-      localStorage, jamais envoyé au serveur.
+  </div><!-- /page-imap -->
+
+  <!-- ============================================================
+       PAGE 7 : PROFIL & CV
+       ============================================================ -->
+  <div class="page" id="page-profil">
+
+  <!-- INFORMATIONS CANDIDAT -->
+  <section class="panel">
+    <h2>👤 Informations du profil</h2>
+    <p style="font-size:12px;color:var(--muted);margin:-4px 0 12px">
+      Ces informations sont insérées automatiquement dans chaque lettre envoyée
+      (nom, ville, pays, téléphone, diplôme).
     </p>
-    <div id="hist-liste" style="font-size:13px;max-height:200px;overflow-y:auto"></div>
-    <button class="btn small danger" id="btn-hist-vider" style="margin-top:8px">🗑️ Vider l'historique</button>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Nom complet
+        <input type="text" id="cfg-nom"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Téléphone
+        <input type="text" id="cfg-tel"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Email
+        <input type="email" id="cfg-email"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Ville
+        <input type="text" id="cfg-ville"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Pays
+        <input type="text" id="cfg-pays" list="cfg-pays-liste" placeholder="Côte d'Ivoire"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <datalist id="cfg-pays-liste">
+        <option value="Côte d'Ivoire"></option>
+        <option value="Sénégal"></option>
+        <option value="Burkina Faso"></option>
+        <option value="Mali"></option>
+        <option value="Bénin"></option>
+        <option value="Togo"></option>
+        <option value="Guinée"></option>
+        <option value="Cameroun"></option>
+        <option value="France"></option>
+      </datalist>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Diplôme
+        <input type="text" id="cfg-diplome"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;
+                    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+        Spécialité
+        <input type="text" id="cfg-spec"
+               style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </label>
+    </div>
+    <div class="config-row">
+      <label>
+        Template par défaut :
+        <select id="cfg-template"></select>
+      </label>
+      <button class="btn primary small" id="btn-save-config">💾 Enregistrer le profil</button>
+      <button class="btn small" id="btn-reinit-profil" title="Restaurer les valeurs d'origine">↩️ Valeurs d'origine</button>
+    </div>
+    <div class="signature-preview" id="cfg-apercu-wrap">
+      <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Signature générée</span>
+      <span id="cfg-apercu" style="font-size:13px;font-family:var(--mono,monospace)">—</span>
+      <span style="font-size:11px;color:var(--muted)">apparait en bas de chaque lettre</span>
+    </div>
   </section>
+
+  </div><!-- /page-profil -->
+
+  <!-- ============================================================
+       PAGE 8 : PARAMÈTRES & MAINTENANCE
+       ============================================================ -->
+  <div class="page" id="page-params">
 
   <!-- PARAMÈTRES -->
   <section class="panel" id="sec-params">
@@ -679,47 +852,111 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
         Max / heure :
         <input type="number" id="cfg-maxh" min="1" max="500" value="100">
       </label>
-      <button class="btn small danger" id="btn-reset-log">🗑️ Réinitialiser le log</button>
-      <button class="btn small" id="btn-import-json">⬆️ Importer JSON</button>
-      <input type="file" id="import-json-input" accept=".json" hidden>
     </div>
   </section>
 
-  <!-- STATS -->
-  <div class="stats">
-    <div class="stat"><div class="n" id="stat-total">0</div><div class="l">Entreprises</div></div>
-    <div class="stat ok"><div class="n" id="stat-sent">0</div><div class="l">Envoyées</div></div>
-    <div class="stat warn"><div class="n" id="stat-pending">0</div><div class="l">En attente</div></div>
-    <div class="stat purple"><div class="n" id="stat-responded">0</div><div class="l">Réponses</div></div>
-  </div>
-
-  <!-- BULK -->
-  <div class="bulk-panel" id="bulk-panel">
-    <div class="info">
-      <strong id="bulk-title">🚀 Envoi en masse</strong>
-      <div id="bulk-desc" style="font-size:12px;color:var(--muted);margin-top:2px">
-        Envoie aux entreprises non contactées
-      </div>
-      <div class="progress"><div class="progress-bar" id="bulk-bar"></div></div>
+  <!-- MAINTENANCE / SANTÉ -->
+  <!-- NOTICE D'UTILISATION -->
+  <section class="panel" id="sec-notice">
+    <h2>📖 Notice d'utilisation des outils</h2>
+    <p style="font-size:12px;color:var(--muted);margin:-4px 0 12px">
+      Guide rapide de chaque outil de l'application. <b>Important :</b> les données
+      préinstallées (profil, compte, entreprises) sont <b>fictives</b> et servent
+      uniquement de démonstration — remplacez-les par vos informations réelles avant
+      tout envoi.
+    </p>
+    <div style="display:grid;gap:10px;font-size:13px">
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">1. 👤 Profil — vos informations personnelles</summary>
+        <p style="margin-top:8px">Remplacez le profil de démonstration par vos vraies informations : nom,
+        téléphone, e-mail, ville, diplôme et spécialité. Ces champs alimentent les
+        messages ({nom}, {email}, {ville}…) et sont visibles par les destinataires.
+        <b>Sans un profil correct, vos candidatures ne peuvent pas aboutir.</b></p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">2. 📧 Comptes Gmail — l'expéditeur des messages</summary>
+        <p style="margin-top:8px">Ajoutez votre <b>vrai compte Gmail</b> (l'adresse d'envoi) et son mot de passe
+        d'application (16 caractères, généré sur
+        <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a>).
+        Le compte préinstallé « compte.demo@exemple.com » est <b>fictif et inactif</b> :
+        il sert uniquement d'exemple et ne peut rien envoyer. Activez-le seulement après
+        avoir mis votre vrai compte.</p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">3. 🏢 Tableau de bord — les entreprises cibles</summary>
+        <p style="margin-top:8px">Les entreprises préinstallées sont <b>toutes fictives</b> (marquées « [Démo] »).
+        Supprimez-les (case à cocher → Supprimer) puis ajoutez vos vraies cibles : nom,
+        e-mail de recrutement, catégorie et — très important — un <b>contexte personnalisé</b>
+        qui explique pourquoi vous contactez cette entreprise précisément.</p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">4. 📝 Mes messages — les modèles de lettres</summary>
+        <p style="margin-top:8px">Chaque modèle contient des variables {entreprise}, {contexte}, {nom}…
+        remplies automatiquement. Vous pouvez créer, modifier, dupliquer et supprimer vos
+        propres modèles. Choisissez le modèle par défaut dans les Paramètres d'envoi.</p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">5. 👥 Mes groupes — envois ciblés</summary>
+        <p style="margin-top:8px">Regroupez plusieurs entreprises (par secteur, par zone…) pour leur envoyer
+        le même modèle en un clic, avec le délai anti-spam appliqué entre chaque message.</p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">6. ✂️ Envoi express — un message à la fois</summary>
+        <p style="margin-top:8px">Pour un envoi unique et soigné : choisissez l'entreprise, le modèle, vérifiez
+        l'aperçu, joignez votre CV, puis envoyez. Idéal pour les candidatures importantes.</p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">7. ⚙️ Paramètres d'envoi — anti-spam</summary>
+        <p style="margin-top:8px">Délai entre messages (40 s par défaut, aléatoire 35–55 s conseillé),
+        maximum par heure (100), tentatives SMTP. Ces protections évitent que Gmail ne bloque
+        votre compte pour spam. <b>Ne les désactivez pas.</b></p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">8. 📨 Réponses & filtres — suivi automatique</summary>
+        <p style="margin-top:8px">L'app vérifie votre boîte via IMAP pour détecter les réponses, classe les
+        e-mails (étiquettes, archive, marque comme lu) selon des règles configurables, et
+        affiche les notifications quand une entreprise répond.</p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">9. 🕓 Historique — tout est annulable</summary>
+        <p style="margin-top:8px">Chaque action (suppression d'entreprise, modification de profil…) est
+        enregistrée et peut être annulée depuis la page Historique.</p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">10. 🛠️ Maintenance — sauvegarde et dépannage</summary>
+        <p style="margin-top:8px">« Actualiser le back-end » recharge les données sans perdre la session ;
+        « Sauvegarde JSON » exporte toutes vos données ; « Importer JSON » les restaure ;
+        « Réinitialiser le log » vide le journal des envois (définitif).</p>
+      </details>
+      <details style="border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <summary style="cursor:pointer;font-weight:700">⚠️ Rappels importants</summary>
+        <ul style="margin:8px 0 0 18px">
+          <li>Les données préinstallées sont fictives : <b>aucun vrai e-mail ne peut partir</b> tant que vous n'avez pas configuré votre vrai compte Gmail.</li>
+          <li>Utilisez toujours un mot de passe d'application Gmail (jamais votre mot de passe principal).</li>
+          <li>Respectez la loi et les règles anti-spam : n'envoyez qu'à des entreprises pour lesquelles vous avez une candidature légitime.</li>
+          <li>Vos données restent sur votre ordinateur (base locale chiffrée).</li>
+        </ul>
+      </details>
     </div>
-    <button class="btn primary" id="bulk-start">▶️ Tout envoyer</button>
-    <button class="btn danger" id="bulk-stop" style="display:none">⏹️ Arrêter</button>
-    <div class="sel-bar">
-      <span class="sel-count" id="sel-count">0 sélectionnée(s)</span>
-      <button class="btn small" id="sel-all">☑️ Tout cocher</button>
-      <button class="btn small" id="sel-none">☐ Tout décocher</button>
-      <button class="btn primary small" id="sel-send" disabled>📤 Envoyer la sélection</button>
+  </section>
+
+  <section class="panel" id="sec-maintenance">
+    <h2>🛠️ Maintenance & santé de l'application</h2>
+    <p style="font-size:12px;color:var(--muted);margin:-4px 0 12px">
+      Si l'application ralentit ou se comporte bizarrement, utilise ces outils :
+      ils rechargent le back-end sans redémarrer, et ne touchent jamais à un envoi en cours.
+    </p>
+    <div class="config-row">
+      <button class="btn primary small" id="btn-refresh-backend-2"
+              title="Recharger le back-end (en cas de ralentissement ou de bug)">🔄 Actualiser le back-end</button>
+      <button class="btn small danger" id="btn-reset-log">🗑️ Réinitialiser le log</button>
+      <button class="btn small" id="btn-import-json">⬆️ Importer JSON</button>
+      <input type="file" id="import-json-input" aria-label="Fichier JSON a importer" accept=".json" hidden>
+      <a class="btn small" href="/api/export-json">💾 Sauvegarde JSON</a>
     </div>
-  </div>
+  </section>
 
-  <!-- RECHERCHE -->
-  <div class="search-bar">
-    <input type="search" id="search" placeholder="Rechercher une entreprise...">
-    <div class="filters" id="filters"></div>
-    <button class="btn primary small" id="btn-add-company">➕ Entreprise</button>
-  </div>
-
-  <div id="list"></div>
+  </div><!-- /page-params -->
 
 </main>
 </div><!-- /content -->
@@ -727,13 +964,14 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
 
 <!-- ===== PIED DE PAGE ===== -->
 <footer class="app-footer">
-  <a href="/vitrine">Vitrine</a>
   <a href="/cv">Mon CV</a>
   <a href="/suivi">Suivi des envois</a>
   <span class="sp"></span>
   <a href="/cgu">CGU</a>
   <a href="/rgpd">RGPD</a>
-  <span class="info">Candimail v7 — usage local</span>
+  <span class="info">Candimail v7 — usage personnel</span>
+  <span class="sp"></span>
+  <span class="copyright">{{ COPYRIGHT }}</span>
 </footer>
 
 <!-- MODAL APERÇU -->
@@ -745,11 +983,11 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     </div>
     <div class="modal-body">
       <label>Destinataire</label>
-      <input type="text" id="modal-dest" readonly style="background:#EFE7D4">
+      <input type="text" id="modal-dest" aria-label="Destinataire" readonly style="background:#EFE7D4">
       <label>Objet</label>
-      <input type="text" id="modal-subject">
+      <input type="text" id="modal-subject" aria-label="Objet du message">
       <label>Corps du message</label>
-      <textarea id="modal-body"></textarea>
+      <textarea id="modal-body" aria-label="Corps du message"></textarea>
     </div>
     <div class="modal-foot">
       <span class="info" id="modal-info"></span>
@@ -777,7 +1015,7 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
         Étape 1 — Activer la validation en deux étapes
       </h4>
       <ol style="padding-left:20px;margin-bottom:16px">
-        <li>Va sur <a href="https://myaccount.google.com/security" target="_blank"
+        <li>Va sur <a href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer"
             style="color:var(--accent)">myaccount.google.com/security</a></li>
         <li>Clique sur <strong>Validation en deux étapes</strong></li>
         <li>Suis les instructions (SMS ou appli Authenticator)</li>
@@ -787,7 +1025,7 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
         Étape 2 — Générer un mot de passe d'application
       </h4>
       <ol style="padding-left:20px;margin-bottom:16px">
-        <li>Va sur <a href="https://myaccount.google.com/apppasswords" target="_blank"
+        <li>Va sur <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer"
             style="color:var(--accent)">myaccount.google.com/apppasswords</a></li>
         <li>Dans « Nom de l'application », tape <strong>Candimail</strong></li>
         <li>Clique sur <strong>Créer</strong></li>
@@ -810,7 +1048,7 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
       </div>
     </div>
     <div class="modal-foot">
-      <a class="btn primary" href="https://myaccount.google.com/apppasswords" target="_blank">
+      <a class="btn primary" href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer">
         🔗 Ouvrir Google
       </a>
       <button class="btn" id="help-close-btn">Fermer</button>
@@ -828,11 +1066,11 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     <div class="modal-body">
       <input type="hidden" id="grp-id">
       <label>Nom du groupe *</label>
-      <input type="text" id="grp-nom" placeholder="Ex : Parents 6ème A">
+      <input type="text" id="grp-nom" aria-label="Nom du groupe" placeholder="Ex : Parents 6ème A">
       <label>Description (optionnel)</label>
-      <input type="text" id="grp-desc" placeholder="Ex : Groupe WhatsApp parents">
+      <input type="text" id="grp-desc" aria-label="Description du groupe" placeholder="Ex : Groupe WhatsApp parents">
       <label>Emails des membres * (un par ligne ou séparés par virgule)</label>
-      <textarea id="grp-emails" rows="6"
+      <textarea id="grp-emails" aria-label="Adresses e-mail du groupe" rows="6"
                 placeholder="parent1@gmail.com&#10;parent2@gmail.com&#10;parent3@gmail.com"></textarea>
       <div id="grp-email-count" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
     </div>
@@ -854,17 +1092,17 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     <div class="modal-body">
       <input type="hidden" id="grp-send-id">
       <label>Template (optionnel)</label>
-      <select id="grp-send-template" style="width:100%;padding:10px 12px;
+      <select id="grp-send-template" aria-label="Template d'envoi" style="width:100%;padding:10px 12px;
               border:1px solid var(--border);border-radius:6px;
               font-size:13px;font-family:inherit;margin-bottom:12px">
         <option value="">— Message libre —</option>
       </select>
 
       <label>Objet *</label>
-      <input type="text" id="grp-send-subject" placeholder="Ex : Réunion parents jeudi 20h">
+      <input type="text" id="grp-send-subject" aria-label="Objet de l'envoi" placeholder="Ex : Réunion parents jeudi 20h">
 
       <label>Message *</label>
-      <textarea id="grp-send-body" rows="10"
+      <textarea id="grp-send-body" aria-label="Corps de l'envoi" rows="10"
                 placeholder="Bonjour à tous,&#10;&#10;Je vous informe que…"></textarea>
 
       <div style="margin-top:16px;padding:12px 14px;background:#FBF6EA;border-radius:8px;
@@ -914,11 +1152,11 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
         <div>
           <label>Nom *</label>
-          <input type="text" id="tpl-nom" placeholder="Ex : Candidature stage">
+          <input type="text" id="tpl-nom" aria-label="Nom du template" placeholder="Ex : Candidature stage">
         </div>
         <div>
           <label>Catégorie</label>
-          <select id="tpl-categorie" style="width:100%;padding:10px 12px;
+          <select id="tpl-categorie" aria-label="Categorie du template" style="width:100%;padding:10px 12px;
                   border:1px solid var(--border);border-radius:6px;
                   font-size:13px;font-family:inherit">
             <option value="candidature">💼 Candidature</option>
@@ -930,9 +1168,9 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
         </div>
       </div>
       <label>Objet *</label>
-      <input type="text" id="tpl-objet" placeholder="Ex : Demande de stage — {entreprise}">
+      <input type="text" id="tpl-objet" aria-label="Objet du template" placeholder="Ex : Demande de stage — {entreprise}">
       <label>Corps du message *</label>
-      <textarea id="tpl-corps" rows="14" style="min-height:280px"
+      <textarea id="tpl-corps" aria-label="Corps du template" rows="14" style="min-height:280px"
                 placeholder="Bonjour,&#10;&#10;{contexte}&#10;&#10;Cordialement,&#10;{nom}"></textarea>
 
       <div style="margin-top:12px;padding:12px 14px;background:#F2E7CE;border-radius:8px;
@@ -959,17 +1197,17 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
       <button class="modal-close" id="company-modal-close">✕</button>
     </div>    <div class="modal-body">
       <label>Nom de l'entreprise</label>
-      <input type="text" id="company-f-name" placeholder="Ex : COLAS Afrique">
+      <input type="text" id="company-f-name" aria-label="Nom de l'entreprise" placeholder="Ex : COLAS Afrique">
       <label>Email destinataire</label>
-      <input type="text" id="company-f-email" placeholder="recrutement@entreprise.com">
+      <input type="text" id="company-f-email" aria-label="Adresse e-mail de l'entreprise" placeholder="recrutement@entreprise.com">
       <label>Catégorie</label>
-      <select id="company-f-cat">
+      <select id="company-f-cat" aria-label="Categorie de l'entreprise">
         <option value="pme">PME</option>
         <option value="grands">Grands groupes</option>
         <option value="port">Port / Maritime</option>
       </select>
       <label>Contexte (inséré dans le message)</label>
-      <textarea id="company-f-context" rows="4"
+      <textarea id="company-f-context" aria-label="Contexte personnalise" rows="4"
                 placeholder="Pourquoi cette entreprise t'intéresse..."></textarea>
     </div>
     <div class="modal-foot">
@@ -988,17 +1226,17 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
     </div>
     <div class="modal-body">
       <label>Nom de la règle</label>
-      <input type="text" id="filter-f-name">
+      <input type="text" id="filter-f-name" aria-label="Nom du filtre">
       <label>Type de règle</label>
-      <select id="filter-f-type">
+      <select id="filter-f-type" aria-label="Type de filtre">
         <option value="sender">Adresse de l'expéditeur</option>
         <option value="subject">Objet du mail</option>
         <option value="domain">Domaine de l'expéditeur</option>
       </select>
       <label>Valeur (adresse, domaine ou mot-clé)</label>
-      <input type="text" id="filter-f-value">
+      <input type="text" id="filter-f-value" aria-label="Valeur du filtre">
       <label>Libellé Gmail à appliquer</label>
-      <input type="text" id="filter-f-label">
+      <input type="text" id="filter-f-label" aria-label="Libelle Gmail a appliquer">
     </div>
     <div class="modal-foot">
       <button class="btn" id="filter-cancel">Annuler</button>
@@ -1010,129 +1248,96 @@ main{max-width:1200px;margin:0 auto;padding:24px 32px}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ENTREPRISES */
+/* ENTREPRISES — Données de DÉMONSTRATION uniquement.
+   Aucune référence à une entreprise ou une adresse e-mail réelle.
+   Ces exemples servent de modèle : remplacez-les par vos propres cibles. */
 let COMPANIES = [
-  { cat:'grands', name:'SOGEA-SATOM (VINCI)', email:'sogea-satom.cote-ivoire@vinci-construction.com',
-    context:`Membre du groupe VINCI, SOGEA-SATOM est un acteur de référence des travaux publics en Côte d'Ivoire. C'est précisément cette expertise sur les grands projets d'infrastructure routière et d'ouvrages d'art qui motive ma candidature.` },
-  { cat:'grands', name:'PFO Africa', email:'recrutement@pfoafrica.com',
-    context:`Je suis avec un vif intérêt les activités de PFO Africa, notamment votre chantier de réhabilitation de l'axe San-Pédro – Soubré. Résidant à Soubré même, je vois quotidiennement l'avancement de vos travaux.` },
-  { cat:'grands', name:'PFO Construction', email:'recrutement@pfo-construction.com',
-    context:`Filiale du groupe PFO Africa, PFO Construction incarne l'excellence ivoirienne dans le secteur du bâtiment et des travaux publics.` },
-  { cat:'grands', name:'Bouygues Travaux Publics', email:'byes.ci@bouygues-es.com',
-    context:`Rejoindre Bouygues Travaux Publics représenterait pour moi une opportunité exceptionnelle de me former aux standards internationaux du génie civil.` },
-  { cat:'grands', name:'SICMA', email:'c2a@aviso.ci',
-    context:`Le Groupe SICMA est reconnu pour son engagement en faveur de la formation et de l'insertion professionnelle des jeunes ivoiriens.` },
-  { cat:'grands', name:'SETAO', email:'setao@setao.ci',
-    context:`Membre du groupe Bouygues, SETAO est l'un des acteurs historiques du BTP en Côte d'Ivoire.` },
-  { cat:'grands', name:'RAZEL', email:'recrutement.razel.ci@razel.fr',
-    context:`La réputation de RAZEL dans les travaux publics et le génie civil n'est plus à démontrer.` },
-  { cat:'grands', name:'COLAS Afrique', email:'colasci@colasafrique.com',
-    context:`Spécialiste mondial des routes, COLAS Afrique est une référence dans la construction et l'entretien d'infrastructures routières.` },
-  { cat:'grands', name:'H2C Africa', email:'recrutement@h2c-africa.com',
-    context:`Votre implantation à San-Pédro et votre dynamisme dans le secteur du BTP en Côte d'Ivoire retiennent toute mon attention.` },
-  { cat:'pme', name:'B-Constructions (B-Group)', email:'info@b-groupci.com',
-    context:`Depuis votre création en 2015, B-Constructions s'est imposée comme un acteur dynamique du bâtiment et des travaux publics.` },
-  { cat:'pme', name:'S.I.E TRAVAUX', email:'me_ngoran_ake@yahoo.fr',
-    context:`L'expertise de la S.I.E TRAVAUX dans l'adduction en eau potable et l'assainissement est un domaine technique qui m'intéresse particulièrement.` },
-  { cat:'pme', name:'Magnon Construction & TP', email:'recrutements@mctp.ci',
-    context:`Vous recherchez régulièrement des profils d'ingénieurs travaux et d'études. C'est précisément l'orientation que je souhaite donner à ma carrière.` },
-  { cat:'pme', name:'SOTIC', email:'info@sotici.com',
-    context:`SOTIC s'est construit une solide réputation dans le bâtiment et l'ingénierie en Côte d'Ivoire.` },
-  { cat:'pme', name:'SOGENAM-CI', email:'sogenam@sogenam.com',
-    context:`La double casquette de SOGENAM — génie civil et négoce de matériaux — offre une vision complète du secteur de la construction.` },
-  { cat:'pme', name:'CORIAS', email:'secretariatcorias@gmail.com',
-    context:`Vous proposez un stage de perfectionnement au sein de votre Direction Technique, avec des missions de suivi de chantiers, appels d'offres et contrôle qualité.` },
-  { cat:'pme', name:"MATRELEC Côte d'Ivoire", email:'secretariat@matrelec-ci.com',
-    context:`Votre offre de stage en Génie Civil à Marcory correspond parfaitement à mes compétences actuelles de licencié.` },
-  { cat:'pme', name:'BEESHOP GENIUS', email:'meyerlansky225@gmail.com',
-    context:`La dimension technico-commerciale du BTP est une facette du métier que je souhaite découvrir.` },
-  { cat:'pme', name:'OCEANE INTERNATIONAL', email:'oceaneinternational@gmail.com',
-    context:`Votre structure basée à Cocody recherche un stagiaire en Génie Civil Bâtiment.` },
-  { cat:'pme', name:'ITB Group', email:'itbgroupci@gmail.com',
-    context:`La double approche d'ITB Group — architecture et génie civil — rejoint ma propre ambition de carrière.` },
-  { cat:'pme', name:'EGTP SARL', email:'egtp.btp@gmail.com',
-    context:`Votre implantation dans la région des Montagnes (Man) témoigne d'une capacité à intervenir sur des terrains complexes.` },
-  { cat:'pme', name:'UNISERV BTP', email:'recrutement@uniservci.net',
-    context:`Votre couverture nationale et votre expérience depuis 2013 dans le bâtiment et le génie civil vous positionnent comme un partenaire de confiance.` },
-  { cat:'pme', name:'Porteo BTP', email:'recrutement@porteo-btp.com',
-    context:`Je suis attentif à vos projets d'asphaltage et de réhabilitation routière, notamment dans la région de Korhogo.` },
-  { cat:'pme', name:'ETRAKO-BTP', email:'etrakobtpsarl@gmail.com',
-    context:`ETRAKO-BTP fait partie des entreprises dynamiques qui contribuent au développement du Nord ivoirien.` },
-  { cat:'pme', name:"NEUCE Côte d'Ivoire", email:'cote.ivoire@neuce.com',
-    context:`NEUCE Côte d'Ivoire combine construction et travaux publics, avec une présence régionale notamment à Daloa.` },
-  { cat:'port', name:'Port Autonome de San-Pédro (PASP)', email:'pasp@pasp.ci',
-    context:`Le Port Autonome de San-Pédro, classé parmi les plus performants de la zone UEMOA, est un acteur stratégique du développement économique ivoirien.` },
-  { cat:'port', name:'PASP — Direction Stratégie', email:'pzahabi@pasp.ci',
-    context:`Je me permets de vous contacter directement, en votre qualité de responsable de la Direction Stratégie du PASP.` },
-  { cat:'port', name:'PASP — Partenariats Public-Privé', email:'kkoffi@pasp.ci',
-    context:`Les Partenariats Public-Privé sont au cœur du développement des infrastructures portuaires modernes.` },
-  { cat:'port', name:'IDM', email:'nziakissivictorine@yahoo.fr',
-    context:`Votre entreprise IDM intervient dans le BTP à San-Pédro, une ville en pleine expansion.` },
-  { cat:'port', name:'Groupe Cacao', email:'groupecacao@gmail.com',
-    context:`Vos activités à la croisée du BTP et de la gestion immobilière m'intéressent.` },
-  { cat:'port', name:'San Pedro Truck (Groupe CIERA)', email:'sanpedrotrucks007@gmail.com',
-    context:`La logistique et le transport sont le prolongement naturel du BTP.` },
-  { cat:'port', name:'LBTP San-Pédro', email:'lbtp@aviso.ci',
-    context:`Le Laboratoire du Bâtiment et des Travaux Publics est une référence dans le contrôle qualité des matériaux et des ouvrages.` },
-  { cat:'port', name:"Les Grands Moulins d'Abidjan", email:'recrutement@gma.ci',
-    context:`Les Grands Moulins d'Abidjan sont une entreprise industrielle majeure, et votre présence à San-Pédro m'intéresse.` },
+  { cat:'grands', name:'[Démo] Conglomérat BTP Alpha', email:'exemple.grands1@exemple.com',
+    context:`Exemple de contexte pour un grand groupe : décrivez ici ce qui vous attire dans cette entreprise (grands projets d'infrastructure, expertise internationale, etc.).` },
+  { cat:'grands', name:'[Démo] Infrastructures Beta SA', email:'exemple.grands2@exemple.com',
+    context:`Exemple de contexte : mentionnez un projet précis de l'entreprise et votre proximité géographique avec son chantier.` },
+  { cat:'grands', name:'[Démo] Groupe Gamma Travaux', email:'exemple.grands3@exemple.com',
+    context:`Exemple de contexte : soulignez la réputation du groupe en matière de formation des jeunes ingénieurs.` },
+  { cat:'grands', name:'[Démo] Routes & Ouvrages Delta', email:'exemple.grands4@exemple.com',
+    context:`Exemple de contexte : référencez le domaine d'activité (routes, ouvrages d'art) qui motive votre candidature.` },
+  { cat:'grands', name:'[Démo] Bàtiment Epsilon', email:'exemple.grands5@exemple.com',
+    context:`Exemple de contexte : exprimez votre intérêt pour les standards techniques du groupe.` },
+  { cat:'grands', name:'[Démo] Holding Zeta Construction', email:'exemple.grands6@exemple.com',
+    context:`Exemple de contexte : montrez que vous suivez l'actualité de l'entreprise.` },
+  { cat:'grands', name:'[Démo] Voiries et Assainissement Eta', email:'exemple.grands7@exemple.com',
+    context:`Exemple de contexte : citez le secteur précis (voiries, assainissement) qui vous intéresse.` },
+  { cat:'grands', name:'[Démo] Ingénierie Thêta', email:'exemple.grands8@exemple.com',
+    context:`Exemple de contexte : dynamisme de l'entreprise dans le BTP régional.` },
+  { cat:'pme', name:'[Démo] PME Construct 1', email:'exemple.pme1@exemple.com',
+    context:`Exemple de contexte pour une PME : création récente, projets locaux, polyvalence attendue d'un stagiaire.` },
+  { cat:'pme', name:'[Démo] PME Travaux 2', email:'exemple.pme2@exemple.com',
+    context:`Exemple de contexte : domaine technique qui vous intéresse (hydraulique, VRD, etc.).` },
+  { cat:'pme', name:'[Démo] PME Ingénierie 3', email:'exemple.pme3@exemple.com',
+    context:`Exemple de contexte : orientation de carrière que l'entreprise peut vous offrir.` },
+  { cat:'pme', name:'[Démo] PME Bàtiment 4', email:'exemple.pme4@exemple.com',
+    context:`Exemple de contexte : réputation de l'entreprise dans le bâtiment local.` },
+  { cat:'pme', name:'[Démo] PME Matériaux 5', email:'exemple.pme5@exemple.com',
+    context:`Exemple de contexte : double activité (génie civil + négoce) qui offre une vision complète du secteur.` },
+  { cat:'pme', name:'[Démo] PME Suivi Chantier 6', email:'exemple.pme6@exemple.com',
+    context:`Exemple de contexte : stage de perfectionnement en direction technique, suivi de chantiers, contrôle qualité.` },
+  { cat:'pme', name:'[Démo] PME Électrotech 7', email:'exemple.pme7@exemple.com',
+    context:`Exemple de contexte : offre de stage correspondant à votre niveau de formation.` },
+  { cat:'pme', name:'[Démo] PME Commerce 8', email:'exemple.pme8@exemple.com',
+    context:`Exemple de contexte : dimension technico-commerciale du BTP que vous souhaitez découvrir.` },
+  { cat:'pme', name:'[Démo] PME Internationale 9', email:'exemple.pme9@exemple.com',
+    context:`Exemple de contexte : structure de taille intermédiaire offrant une formation polyvalente.` },
+  { cat:'pme', name:'[Démo] PME Architecture 10', email:'exemple.pme10@exemple.com',
+    context:`Exemple de contexte : double approche architecture + génie civil.` },
+  { cat:'pme', name:'[Démo] PME Terrains 11', email:'exemple.pme11@exemple.com',
+    context:`Exemple de contexte : capacité à intervenir sur des terrains complexes.` },
+  { cat:'pme', name:'[Démo] PME Nationale 12', email:'exemple.pme12@exemple.com',
+    context:`Exemple de contexte : couverture nationale, expérience du secteur.` },
+  { cat:'pme', name:'[Démo] PME Routière 13', email:'exemple.pme13@exemple.com',
+    context:`Exemple de contexte : projets d'asphaltage et de réhabilitation routière.` },
+  { cat:'pme', name:'[Démo] PME Croissance 14', email:'exemple.pme14@exemple.com',
+    context:`Exemple de contexte : entreprise régionale en pleine croissance.` },
+  { cat:'pme', name:'[Démo] PME Multi-régions 15', email:'exemple.pme15@exemple.com',
+    context:`Exemple de contexte : construction + travaux publics, présence multi-régions.` },
+  { cat:'port', name:'[Démo] Port & Logistique 1', email:'exemple.port1@exemple.com',
+    context:`Exemple de contexte pour un acteur portuaire : importance stratégique du port dans l'économie régionale.` },
+  { cat:'port', name:'[Démo] Port — Direction Stratégie', email:'exemple.port2@exemple.com',
+    context:`Exemple de contexte : prise de contact directe avec un responsable.` },
+  { cat:'port', name:'[Démo] Port — Partenariats PPP', email:'exemple.port3@exemple.com',
+    context:`Exemple de contexte : intérêt pour les partenariats public-privé dans les infrastructures portuaires.` },
+  { cat:'port', name:'[Démo] Entreprise Portuaire 2', email:'exemple.port4@exemple.com',
+    context:`Exemple de contexte : entreprise locale d'une ville portuaire en expansion.` },
+  { cat:'port', name:'[Démo] Groupe Agro-Port 3', email:'exemple.port5@exemple.com',
+    context:`Exemple de contexte : activités à la croisée du BTP et de la gestion industrielle.` },
+  { cat:'port', name:'[Démo] Transport & Logistique 4', email:'exemple.port6@exemple.com',
+    context:`Exemple de contexte : logistique comme prolongement du BTP.` },
+  { cat:'port', name:'[Démo] Laboratoire BTP 5', email:'exemple.port7@exemple.com',
+    context:`Exemple de contexte : contrôle qualité des matériaux et des ouvrages.` },
+  { cat:'port', name:'[Démo] Industrie Port 6', email:'exemple.port8@exemple.com',
+    context:`Exemple de contexte : industrie majeure présente dans la zone portuaire.` },
 ];
 
-const CATEGORIES = {
-  grands:'🏢 Grands groupes', pme:'🏗️ PME dynamiques', port:'⚓ San-Pédro & Port',
-};
-
-/* ÉTAT */
-let serverLog = {};
-let TEMPLATES_DISPO = {};
-let piecesActives = 0;
-let rateLimit = { utilises: 0, max: 30, ok: true };
-let activeFilter = 'all';
-let searchQuery = '';
-let bulkPollTimer = null;
-let currentSendCompany = null;
-let templatesCache = [];
-let predefinis = {};
-let groupesCache = [];
-
-/* STATUS */
-async function refreshStatus() {
+/* Recharge le back-end (bouton « Actualiser ») — resynchronise toutes les données */
+async function refreshBackend(btn) {
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '…';
   try {
-    const r = await fetch('/api/status');
-    if (r.status === 401) { toast('❌ Session expirée', 'err'); return; }
+    const r = await fetch('/api/refresh-backend', { method: 'POST' });
     const data = await r.json();
-    serverLog = data.log || {};
-    piecesActives = data.pieces_count || 0;
-    rateLimit = data.rate_limit || rateLimit;
-
-    const cvBadge = document.getElementById('cv-badge');
-    if (piecesActives > 0) {
-      cvBadge.textContent = `📎 ${piecesActives} pièce(s)`;
-      cvBadge.className = 'badge-cv ok';
-    } else {
-      cvBadge.textContent = '📎 0 pièce';
-      cvBadge.className = 'badge-cv';
-    }
-
-    const cptBadge = document.getElementById('comptes-badge');
-    const nb = data.comptes_actifs || 0;
-    cptBadge.textContent = `📧 ${nb}`;
-    cptBadge.className = 'badge-cv ' + (nb > 0 ? 'ok' : 'warn');
-    const sideCpt = document.getElementById('side-comptes');
-    if (sideCpt) sideCpt.textContent = nb;
-
-    const rlBadge = document.getElementById('rate-badge');
-    rlBadge.textContent = `⏱️ ${rateLimit.utilises}/${rateLimit.max}`;
-    rlBadge.className = 'badge-cv ' + (rateLimit.ok ? 'ok' : 'warn');
-
-    const warn = document.getElementById('pj-warning');
-    if (warn) warn.style.display = piecesActives === 0 ? 'block' : 'none';
-    const pjWarn = document.getElementById('pj-warn-badge');
-    if (pjWarn) pjWarn.style.display = piecesActives === 0 ? '' : 'none';
-
-    updateStats();
-    render();
-  } catch (e) { console.error(e); }
+    if (!data.ok) throw new Error(data.error || 'Erreur');
+    toast(`🔄 Back-end rechargé (${data.heure})`, 'ok');
+    // Tout re-synchroniser avec le serveur fraîchement rechargé
+    await Promise.all([loadConfig(), loadTemplates(), loadPieces(),
+                       loadGroupes(), loadIMAPStatus()]);
+    await refreshStatus();
+    await syncCompanies();
+  } catch (e) {
+    console.error(e);
+    toast('❌ Impossible de recharger le back-end', 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
 }
 
 /* CONFIG */
@@ -1146,6 +1351,7 @@ async function loadConfig() {
     document.getElementById('cfg-tel').value      = cand.tel || '';
     document.getElementById('cfg-email').value    = cand.email || '';
     document.getElementById('cfg-ville').value    = cand.ville || '';
+    document.getElementById('cfg-pays').value    = cand.pays || '';
     document.getElementById('cfg-diplome').value  = cand.diplome || '';
     document.getElementById('cfg-spec').value     = cand.spec || '';
 
@@ -1156,15 +1362,31 @@ async function loadConfig() {
     document.getElementById('cfg-maxh').value = params.max_par_heure || 100;
 
     updateHeaderSub();
+    updateSignaturePreview();
     TEMPLATES_DISPO = cfg.templates_dispo || {};
     renderComptes(cfg.comptes || []);
   } catch (e) { console.error(e); }
 }
 
 function updateHeaderSub() {
-  const nom   = document.getElementById('cfg-nom').value || 'HOBA Koutoua Daniel';
-  const ville = document.getElementById('cfg-ville').value || 'Soubré';
-  document.getElementById('header-sub').textContent = `${nom} · ${ville}, Côte d'Ivoire`;
+  const nom   = document.getElementById('cfg-nom').value.trim()   || 'Candidat';
+  const ville = document.getElementById('cfg-ville').value.trim() || '—';
+  const pays  = document.getElementById('cfg-pays').value.trim();
+  document.getElementById('header-sub').textContent =
+    pays ? `${nom} · ${ville}, ${pays}` : `${nom} · ${ville}`;
+}
+
+/* Aperçu live de la signature : montre l'effet du profil sur les lettres. */
+function updateSignaturePreview() {
+  const el = document.getElementById('cfg-apercu');
+  if (!el) return;
+  const nom   = document.getElementById('cfg-nom').value.trim();
+  const tel   = document.getElementById('cfg-tel').value.trim();
+  const ville = document.getElementById('cfg-ville').value.trim();
+  const pays  = document.getElementById('cfg-pays').value.trim() || 'Côte d\'Ivoire';
+  if (!nom && !ville) { el.textContent = '—'; return; }
+  const lieu = [ville, pays].filter(Boolean).join(', ');
+  el.textContent = [nom, tel, lieu].filter(Boolean).join(' · ');
 }
 
 async function saveCandidatConfig() {
@@ -1174,6 +1396,7 @@ async function saveCandidatConfig() {
       tel:     document.getElementById('cfg-tel').value.trim(),
       email:   document.getElementById('cfg-email').value.trim(),
       ville:   document.getElementById('cfg-ville').value.trim(),
+      pays:    document.getElementById('cfg-pays').value.trim(),
       diplome: document.getElementById('cfg-diplome').value.trim(),
       spec:    document.getElementById('cfg-spec').value.trim(),
     },
@@ -1188,10 +1411,34 @@ async function saveCandidatConfig() {
     });
     const data = await r.json();
     if (data.ok) {
-      toast('Configuration enregistrée', 'ok');
+      toast('Profil enregistré — les lettres utiliseront ces informations', 'ok');
       updateHeaderSub();
+      updateSignaturePreview();
+      loadConfig();          // réaligne les champs sur la valeur réellement stockée
+    } else {
+      toast(data.error || 'Enregistrement impossible', 'err');
     }
   } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+/* Restaure les valeurs d'origine du profil (modifiable ensuite / annulable). */
+function reinitialiserProfil() {
+  const D = {
+    'cfg-nom':     'Candidat Démo',
+    'cfg-tel':     '+000 00 00 00 00',
+    'cfg-email':   'candidat.demo@exemple.com',
+    'cfg-ville':   'Ma Ville',
+    'cfg-pays':    'Côte d\'Ivoire',
+    'cfg-diplome': 'Votre diplôme (personnaliser)',
+    'cfg-spec':    'Votre spécialité',
+  };
+  Object.entries(D).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  updateHeaderSub();
+  updateSignaturePreview();
+  toast('Valeurs d\'origine restaurées — cliquez sur « Enregistrer le profil »', 'ok');
 }
 
 /* COMPTES */
@@ -1216,11 +1463,13 @@ function renderComptes(comptes) {
         </div>
         <div style="font-size:11px;color:var(--muted)">
           ${c.has_password
-            ? `🔑 <span class="compte-mdp" data-index="${c.index}" data-email="${escapeHtml(c.email)}"
+            ? (c.devoiler
+              ? `🔑 <span class="compte-mdp" data-index="${c.index}" data-email="${escapeHtml(c.email)}"
                    title="Cliquer pour afficher/masquer le mot de passe d'application (16 caractères)"
                    style="cursor:pointer;user-select:all;font-family:Consolas,monospace;
                           letter-spacing:1px;background:#F2E7CE;border:1px solid var(--border);
                           padding:1px 6px;border-radius:4px;">••••••••••••••••</span>`
+              : '🔒 mot de passe enregistré (masqué)')
             : '❌ mot de passe manquant'}
         </div>
       </div>
@@ -1231,7 +1480,7 @@ function renderComptes(comptes) {
         ${tplOptions}
       </select>
       <button class="btn small" data-action="test-compte" data-email="${escapeHtml(c.email)}">🧪 Tester</button>
-      <button class="btn small" data-action="reveal-compte" data-index="${c.index}">👁️ Voir</button>
+      ${c.devoiler ? `<button class="btn small" data-action="reveal-compte" data-index="${c.index}" title="Révélation autorisée pour ce compte">👁️ Voir</button>` : ''}
       <button class="btn small" data-action="toggle-compte" data-index="${c.index}">
         ${c.actif ? '⏸️' : '▶️'}
       </button>
@@ -1239,6 +1488,7 @@ function renderComptes(comptes) {
     </div>
   `).join('');
 
+  Motion.cascade(el, ':scope > div');   // apparition en cascade
   el.querySelectorAll('.compte-tpl').forEach(sel => {
     sel.addEventListener('change', async () => {
       const r = await fetch(`/api/comptes/${sel.dataset.index}/template`, {
@@ -1293,8 +1543,7 @@ function renderComptes(comptes) {
       }
       const old = s.textContent; s.textContent = '⏳';
       try {
-        const r = await fetch(`/api/comptes/${s.dataset.index}/reveal`, { method:'POST' });
-        const d = await r.json();
+        const d = await revelerMotDePasse(s.dataset.index);
         if (!d.ok) { s.textContent = old; toast('❌ ' + (d.error || 'Erreur'), 'err'); return; }
         s.dataset.mdp = d.password;
         s.textContent = d.password;
@@ -1308,13 +1557,43 @@ function renderComptes(comptes) {
   });
 }
 
+// ── Révélation d'un mot de passe d'application (double contrôle serveur) ──
+// Le serveur exige (1) un opt-in `devoiler` sur le compte et (2) un nonce
+// anti-CSRF lié à la session. Le nonce n'est jamais renvoyé ailleurs.
+let _nonceCache = null, _nonceExpiry = 0;
+async function getNonce() {
+  const now = Date.now();
+  if (_nonceCache && now < _nonceExpiry) return _nonceCache;
+  const r = await fetch('/api/comptes/nonce', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }
+  });
+  const d = await r.json();
+  if (!d.ok || !d.nonce) return null;
+  _nonceCache = d.nonce;
+  _nonceExpiry = now + 10 * 60 * 1000;   // marge sur les 15 min serveur
+  return _nonceCache;
+}
+
+async function revelerMotDePasse(index) {
+  const nonce = await getNonce();
+  if (!nonce) return { ok: false, error: 'Session expirée — recharge la page' };
+  const r = await fetch(`/api/comptes/${index}/reveal`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nonce })
+  });
+  if (!r.ok) { _nonceCache = null; }        // nonce consommé → on en-demandera un autre
+  const d = await r.json();
+  if (!d.ok) _nonceCache = null;
+  return d;
+}
+
 // ── Ouvre les identifiants dans un NOUVEL ONGLET (vérification visuelle) ──
 async function afficherIdentifiantsOnglet(btn) {
   const libelle = btn.textContent;
   btn.disabled = true; btn.textContent = '⏳ Chargement…';
   try {
-    const r = await fetch(`/api/comptes/${btn.dataset.index}/reveal`, { method:'POST' });
-    const d = await r.json();
+    const d = await revelerMotDePasse(btn.dataset.index);
     if (!d.ok) { toast('❌ ' + (d.error || 'Erreur'), 'err'); return; }
 
     const ok16 = d.longueur === 16;
@@ -1456,6 +1735,7 @@ function renderPieces(pieces) {
     </div>
   `).join('');
 
+  Motion.cascade(el, ':scope > div');   // apparition en cascade
   el.querySelectorAll('[data-action="toggle-piece"]').forEach(cb => {
     cb.addEventListener('change', async () => {
       await fetch(`/api/pieces/${cb.dataset.id}/toggle`, { method:'POST' });
@@ -1481,7 +1761,9 @@ async function uploadPieces(files) {
       const r = await fetch('/api/pieces', { method:'POST', body: form });
       const data = await r.json();
       if (data.ok) nb++;
-    } catch (e) {}
+    } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
   }
   await loadPieces(); await refreshStatus();
   if (nb > 0) toast(`${nb} fichier(s) ajouté(s)`, 'ok');
@@ -1534,6 +1816,7 @@ function renderTemplates() {
     </div>
   `).join('');
 
+  Motion.cascade(el, ':scope > div');   // apparition en cascade
   el.querySelectorAll('[data-action="edit-tpl"]').forEach(b => {
     b.addEventListener('click', () => openEditTpl(b.dataset.id));
   });
@@ -1566,6 +1849,8 @@ function populateTemplateSelects() {
   }
   html.push('<optgroup label="📚 Prédéfinis">');
   for (const [k, v] of Object.entries(predefinis)) {
+    // Les prédéfinis semés dans « Mes messages » ne doivent pas apparaître deux fois
+    if (templatesCache.some(t => t.id === `tpl_predef_${k}`)) continue;
     html.push(`<option value="${escapeHtml(k)}">${escapeHtml(v.nom)}</option>`);
   }
   html.push('</optgroup>');
@@ -1604,7 +1889,7 @@ function openEditTpl(id) {
 }
 
 function closeTplModal() {
-  document.getElementById('tpl-modal').classList.remove('visible');
+  Motion.fermerModale(document.getElementById('tpl-modal'));
 }
 
 async function saveTpl() {
@@ -1704,7 +1989,7 @@ function openEditGroupe(id) {
 }
 
 function closeGrpModal() {
-  document.getElementById('grp-modal').classList.remove('visible');
+  Motion.fermerModale(document.getElementById('grp-modal'));
 }
 
 function updateGrpEmailCount() {
@@ -1753,7 +2038,7 @@ function openSendGroupe(id) {
 }
 
 function closeGrpSendModal() {
-  document.getElementById('grp-send-modal').classList.remove('visible');
+  Motion.fermerModale(document.getElementById('grp-send-modal'));
 }
 
 function majGrpSendInfo(g) {
@@ -1839,7 +2124,7 @@ async function checkIMAP() {
     if (data.ok) {
       toast(`✅ ${data.reponses} rép · ${data.bounces} bounce`, 'ok');
       badge.textContent = `${data.reponses} rép · ${data.bounces} bnc`;
-      histAjouter({ type: 'IMAP', detail: `${data.reponses} rép · ${data.bounces} bounce` });
+      toast(`✅ ${data.reponses} réponse(s) · ${data.bounces} bounce(s)`, 'ok');
       await refreshStatus();
       await loadIMAPStatus();
     } else toast(data.error || 'Erreur', 'err');
@@ -1857,7 +2142,9 @@ async function loadIMAPStatus() {
       const mins = Math.floor((Date.now() - d) / 60000);
       badge.textContent = `Dernière : ${mins < 1 ? 'instant' : mins < 60 ? `${mins}min` : `${Math.floor(mins/60)}h`}`;
     } else badge.textContent = 'Jamais';
-  } catch (e) {}
+  } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
 }
 
 /* RÈGLES DE CLASSEMENT */
@@ -1872,12 +2159,16 @@ async function loadFiltres() {
     const r = await fetch('/api/filtres');
     const data = await r.json();
     if (data.ok) { filtresCache = data.filtres || []; renderFiltres(); }
-  } catch (e) {}
+  } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
   try {
     const r = await fetch('/api/filtres/suggestions');
     const d = await r.json();
     if (d.ok) { apprentissageCache = d.apprentissage || {}; renderApprentissage(); }
-  } catch (e) {}
+  } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
 }
 
 function renderFiltres() {
@@ -1947,12 +2238,12 @@ function openRegleModal(idx) {
   document.getElementById('filter-f-type').value = champ;
   document.getElementById('filter-f-value').value = f.items?.map(it => it.valeur).join(', ') || '';
   document.getElementById('filter-f-label').value = f.label || '';
-  document.getElementById('filter-modal').classList.add('open');
+  document.getElementById('filter-modal').classList.add('visible');
 }
 
 function closeRegleModal() {
   editRegleIdx = null;
-  document.getElementById('filter-modal').classList.remove('open');
+  document.getElementById('filter-modal').classList.remove('visible');
 }
 
 function editerRegle(idx) { openRegleModal(idx); }
@@ -2113,7 +2404,9 @@ async function chargerNotifs() {
         body: `${n.nombre} mail(s) classé(s) — ${n.label || n.regle}` });
     }
     if (d.non_vues > 0) await fetch('/api/notifications/vue', { method: 'POST' });
-  } catch (e) {}
+  } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
 }
 
 function activerNotifs() {
@@ -2122,45 +2415,6 @@ function activerNotifs() {
     toast(p === 'granted' ? '✅ Notifications activées'
                           : '❌ Notifications refusées', p === 'granted' ? 'ok' : 'err');
   });
-}
-
-/* HISTORIQUE NAVIGATEUR (localStorage) */
-const HIST_KEY = 'candimail_historique';
-const HIST_MAX = 200;
-
-function histLire() {
-  try { return JSON.parse(localStorage.getItem(HIST_KEY)) || []; }
-  catch (e) { return []; }
-}
-
-function histAjouter(entree) {
-  const h = histLire();
-  h.unshift({ ...entree, t: Date.now() });
-  localStorage.setItem(HIST_KEY, JSON.stringify(h.slice(0, HIST_MAX)));
-  renderHistorique();
-}
-
-function histVider() {
-  localStorage.removeItem(HIST_KEY);
-  renderHistorique();
-}
-
-function renderHistorique() {
-  const box = document.getElementById('hist-liste');
-  if (!box) return;
-  const h = histLire();
-  if (!h.length) {
-    box.innerHTML = '<span style="color:var(--muted)">Aucune action enregistrée sur cet appareil.</span>';
-    return;
-  }
-  box.innerHTML = h.map(e => {
-    const d = new Date(e.t);
-    const heure = d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
-    return `<div style="padding:4px 8px;border-bottom:1px solid #eee;font-size:12px">
-      <b>${escapeHtml(e.type || 'action')}</b> ${escapeHtml(e.detail || '')}
-      <span style="color:var(--muted);float:right">${heure}</span>
-    </div>`;
-  }).join('');
 }
 
 /* DÉLAI */
@@ -2231,7 +2485,7 @@ function openModal(company) {
 }
 
 function closeModal() {
-  document.getElementById('modal').classList.remove('visible');
+  Motion.fermerModale(document.getElementById('modal'));
   currentSendCompany = null;
   // Réinitialise le bouton d'envoi pour la prochaine ouverture
   const btn = document.getElementById('modal-send');
@@ -2369,6 +2623,8 @@ function updateSelectionUI() {
   if (countEl) countEl.textContent = `${n} sélectionnée(s)`;
   const sendBtn = document.getElementById('sel-send');
   if (sendBtn) sendBtn.disabled = n === 0;
+  const delBtn = document.getElementById('sel-del');
+  if (delBtn) delBtn.disabled = n === 0;
 }
 
 function toggleSelect(name, checked, cardEl) {
@@ -2395,6 +2651,97 @@ async function sendSelected() {
   render();
 }
 
+/* ---------------------------------------------------------
+   SUPPRESSION D'ENTREPRISES
+   Toute suppression est inscrite dans l'historique : le
+   toast propose un « Annuler » immédiat, et l'action reste
+   annulable depuis la fenêtre /historique.
+   --------------------------------------------------------- */
+async function supprimerEntreprise(name) {
+  const cible = COMPANIES.find(c => c.name === name);
+  const envoye = !!serverLog[name];
+  const info = [
+    `Entreprise : ${name}`,
+    cible?.email ? `Email : ${cible.email}` : null,
+    envoye ? '⚠️ Un e-mail a déjà été envoyé à cette entreprise' : null,
+  ].filter(Boolean).join('\n');
+  if (!confirm(`🗑️ SUPPRIMER\n\n${info}\n\nCette action est annulable depuis 🕓 Historique.\nConfirmer ?`)) return;
+
+  try {
+    const r = await fetch(`/api/companies/${encodeURIComponent(name)}`,
+                          { method:'DELETE' });
+    const d = await r.json();
+    if (!r.ok || !d.ok) { toast(d.error || 'Suppression impossible', 'err'); return; }
+    selectedCompanies.delete(name);
+    await syncCompanies();
+    toastUndo(`« ${name} » supprimée`, async () => {
+      const b = await fetch(`/api/companies/${encodeURIComponent(name)}`,
+                            { method:'PUT',
+                              headers:{'Content-Type':'application/json'},
+                              body: JSON.stringify(cible || { name, email:'' }) });
+      const bb = await b.json();
+      if (bb.ok) { await syncCompanies(); toast('Entreprise restaurée', 'ok'); }
+      else toast('Restauration impossible — utilisez 🕓 Historique', 'err');
+    });
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+async function supprimerSelection() {
+  const noms = [...selectedCompanies];
+  if (!noms.length) { toast('Aucune entreprise sélectionnée', 'warn'); return; }
+  const preview = noms.slice(0, 10).map(n => `  • ${n}`).join('\n');
+  const suite = noms.length > 10 ? `\n  … et ${noms.length - 10} autre(s)` : '';
+  if (!confirm(
+    `🗑️ SUPPRIMER ${noms.length} ENTREPRISE(S)\n\n${preview}${suite}\n\n` +
+    `Cette action est annulable depuis 🕓 Historique.\nConfirmer ?`)) return;
+
+  try {
+    const r = await fetch('/api/companies', {
+      method:'DELETE',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ names: noms })
+    });
+    const d = await r.json();
+    if (!r.ok || !d.ok) { toast(d.error || 'Suppression impossible', 'err'); return; }
+    selectedCompanies.clear();
+    await syncCompanies();
+    toastUndo(`${d.supprimees} entreprise(s) supprimée(s)`, null,
+              'Ouvrez 🕓 Historique pour tout rétablir');
+  } catch (e) { toast('Erreur réseau', 'err'); }
+}
+
+/* Toast avec action cliquable (défaut 6 s au lieu de 3,5 s). */
+function toastUndo(msg, action, hint) {
+  const t = document.getElementById('toast');
+  t.textContent = '';
+  t.className = 'toast show ok';
+  t.appendChild(document.createTextNode(msg + ' '));
+  if (action) {
+    const b = document.createElement('button');
+    b.className = 'toast-action';
+    b.textContent = '↩︎ Annuler';
+    b.addEventListener('click', async () => {
+      clearTimeout(t._timer);
+      t.classList.add('hiding');
+      setTimeout(() => t.classList.remove('show', 'hiding'), 260);
+      await action();
+    });
+    t.appendChild(b);
+  }
+  if (hint) {
+    const h = document.createElement('span');
+    h.className = 'toast-hint';
+    h.textContent = hint;
+    t.appendChild(h);
+  }
+  Motion.rebondir(t);
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.classList.add('hiding');
+    setTimeout(() => t.classList.remove('show', 'hiding'), 260);
+  }, action ? 6000 : 4000);
+}
+
 async function startBulk(target) {
   if (!rateLimit.ok) { toast('Rate limit atteint', 'err'); return; }
   const nbComptes = parseInt(document.getElementById('comptes-badge').textContent.replace(/\D/g, '')) || 0;
@@ -2417,7 +2764,7 @@ async function startBulk(target) {
     const data = await r.json();
     if (!data.ok) { toast(data.error, 'err'); return; }
     setBulkUIRunning(true); startBulkPolling();
-    histAjouter({ type: 'envoi', detail: `Envoi en masse lancé (${pending.length} emails)` });
+    toast(`📤 Envoi de masse lancé (${pending.length} e-mails)`, 'ok');
   } catch (e) { toast('Erreur réseau', 'err'); }
 }
 
@@ -2448,7 +2795,9 @@ function startBulkPolling() {
         await refreshStatus();
         toast(`Terminé : ${s.envoyes} ✅ / ${s.erreurs} ❌`, s.erreurs ? 'warn' : 'ok');
       }
-    } catch (e) {}
+    } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
   }, 2000);
 }
 
@@ -2521,7 +2870,8 @@ function renderCard(c) {
 
   return `
     <div class="card ${cardCls}" data-name="${escapeHtml(c.name)}">
-      <div class="card-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="card-head" role="button" tabindex="0" aria-expanded="false"
+           onclick="this.parentElement.classList.toggle('open');this.setAttribute('aria-expanded',this.parentElement.classList.contains('open'))">
         <input type="checkbox" class="sel-ck" data-action="toggle-select"
                data-name="${escapeHtml(c.name)}" title="Cocher pour envoi ciblé"
                ${selectedCompanies.has(c.name) ? 'checked' : ''}>
@@ -2579,17 +2929,7 @@ function bindEvents() {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
       const name = btn.dataset.name;
-      if (!confirm(`Supprimer "${name}" de la liste ?`)) return;
-      try {
-        const r = await fetch(`/api/companies/${encodeURIComponent(name)}`,
-                              { method:'DELETE' });
-        const d = await r.json();
-        if (d.ok) {
-          selectedCompanies.delete(name);
-          toast('Entreprise supprimée', 'ok');
-          await syncCompanies();
-        } else toast(d.error || 'Erreur', 'err');
-      } catch (err) { toast('Erreur réseau', 'err'); }
+      supprimerEntreprise(name);
     });
   });
   document.querySelectorAll('[data-action="toggle-select"]').forEach(cb => {
@@ -2634,7 +2974,7 @@ function openCompanyModal(c) {
 }
 
 function closeCompanyModal() {
-  document.getElementById('company-modal').classList.remove('visible');
+  Motion.fermerModale(document.getElementById('company-modal'));
 }
 
 async function saveCompany() {
@@ -2679,8 +3019,8 @@ async function syncCompanies() {
       COMPANIES = d.companies;
     }
   } catch (e) { console.error('syncCompanies', e); }
-  render();
-  updateStats();
+  try { render(); updateStats(); }
+  catch (e) { console.error('syncCompanies render:', e); }
 }
 
 function escapeHtml(s) {
@@ -2747,26 +3087,247 @@ function bindSearch() {
   });
 }
 
+/* ============================================================
+   MICRO-INTERACTIONS — module d'animation (motion.css)
+   ============================================================ */
+const Motion = {
+  /** Respecte la préférence système « motions réduites ». */
+  get reduit() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  },
+
+  /** Active l'état de chargement sur un bouton (spinner inline). */
+  loading(btn, actif = true) {
+    if (!btn) return;
+    btn.classList.toggle('is-loading', actif);
+    btn.disabled = actif;
+  },
+
+  /** Ferme une modale avec une animation de sortie (~110 ms). */
+  fermerModale(el) {
+    if (!el) return;
+    if (Motion.reduit) { el.classList.remove('visible'); return; }
+    el.classList.add('closing');
+    setTimeout(() => {
+      el.classList.remove('closing', 'visible');
+    }, 120);
+  },
+
+  /** Fait vibrer un élément (erreur / action refusée). */
+  secouer(el) {
+    if (!el || Motion.reduit) return;
+    el.animate(
+      [{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' },
+       { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' },
+       { transform: 'translateX(0)' }],
+      { duration: 280, easing: 'ease-in-out' }
+    );
+  },
+
+  /** Petit rebond de confirmation sur un élément. */
+  rebondir(el) {
+    if (!el || Motion.reduit) return;
+    el.animate(
+      [{ transform: 'scale(1)' }, { transform: 'scale(1.06)' },
+       { transform: 'scale(1)' }],
+      { duration: 220, easing: 'cubic-bezier(.34,1.56,.64,1)' }
+    );
+  },
+
+  /** Applique une cascade d'apparition aux enfants d'un conteneur. */
+  cascade(parent, selecteur = ':scope > *', pas = 35) {
+    if (!parent || Motion.reduit) return;
+    [...parent.querySelectorAll(selecteur)].forEach((el, i) => {
+      el.style.animation = 'none';
+      void el.offsetWidth;                       // force le reflow
+      el.style.animation = `riseIn 260ms cubic-bezier(.22,1,.36,1) ${i * pas}ms both`;
+    });
+  },
+
+  /** Empêche le double-clic sur une action asynchrone. */
+  async once(btn, fn) {
+    if (!btn || btn.disabled) return;
+    Motion.loading(btn, true);
+    try {
+      await fn();
+    } finally {
+      Motion.loading(btn, false);
+    }
+  },
+};
+
+/* Fermeture au clavier (Escape) sur toutes les modales */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const ouverte = document.querySelector('.modal-overlay.visible');
+    if (ouverte) Motion.fermerModale(ouverte);
+  }
+});
+
+/* Carte entreprise : le .card-head est un bouton (deplie/replie).
+   Il etait declenche au clic uniquement -> inatteignable au clavier.
+   Delegation : les cartes sont recreees a chaque rendu, on attache
+   donc l'ecouteur une seule fois sur le document. */
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+  const tete = e.target.closest?.('.card-head[role="button"]');
+  // On n'agit que si le .card-head lui-meme est focus (il porte le
+  // tabindex) : pas si un enfant (case a cocher) a le focus.
+  if (!tete || e.target !== tete) return;
+  e.preventDefault();          // Espace ne doit pas faire scroller
+  const carte = tete.parentElement;
+  carte.classList.toggle('open');
+  tete.setAttribute('aria-expanded', carte.classList.contains('open'));
+});
+
 function toast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
+  // Retour haptique visuel : secousse sur erreur, rebond sur succès
+  if (type === 'err') Motion.secouer(t);
+  else if (type === 'ok') Motion.rebondir(t);
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+  t._timer = setTimeout(() => {
+    t.classList.add('hiding');
+    setTimeout(() => t.classList.remove('show', 'hiding'), 260);
+  }, 3500);
+}
+
+/* ---------------------------------------------------------------
+   SPLASH — animation de démarrage + préchargement des paramètres
+   ---------------------------------------------------------------
+   Deux problemes corriges ici :
+
+   1. L'animation etait un clignotement. Les 6 appels de préchargement
+      répondent en ~25 ms sur localhost : la barre sautait de 10 % à
+      100 % en quelques images et le splash disparaissait en 375 ms,
+      donc rien n'était visible. On impose maintenant une durée
+      MINIMALE d'affichage, et la barre se REMPLIT en douceur
+      (requestAnimationFrame + easeOutCubic) au lieu de sauter.
+
+   2. Le splash pouvait rester bloqué POUR TOUJOURS. La fermeture
+      n'était atteignable que si les 6 awaited aboutissaient, et
+      bindSearch/renderFilters/bindDelaiUI n'étaient pas protégés.
+      Un seul throw => splash figé, fenêtre inutilisable, sans issue.
+      On corrige par : try/finally, chien de garde (watchdog),
+      progression monotone, et dismissal sur erreur globale.
+   --------------------------------------------------------------- */
+const SPLASH_MIN_MS = 900;    // durée minimale d'affichage
+const SPLASH_MAX_MS = 8000;   // chien de garde : au-delà, on force
+
+let splashT0 = performance.now();
+let splashPct = 0;
+let splashFerme = false;
+let splashWatchdog = null;
+
+/** Avance la barre. La progression est monotone et bornée [0,100]. */
+function splashAvancer(pct, etat) {
+  const cible = Math.max(0, Math.min(100, Number(pct) || 0));
+  // Monotone : une étape plus lente ne fait jamais reculer la barre.
+  if (cible > splashPct) splashPct = cible;
+  const p = document.getElementById('splash-prog');
+  const e = document.getElementById('splash-etat');
+  if (p) p.style.width = splashPct + '%';
+  if (e && etat) e.textContent = etat;
+}
+
+/** Remplit la barre jusqu'à 100 % en douceur sur `duree` ms. */
+function splashRemplir(duree) {
+  const p = document.getElementById('splash-prog');
+  if (!p) return Promise.resolve();
+  if (duree <= 0 || Motion.reduit) { p.style.width = '100%'; return Promise.resolve(); }
+  return new Promise(resolve => {
+    const depart = performance.now();
+    const largeur = p.parentElement ? p.parentElement.clientWidth : 220;
+    const actuel = Math.min(100, (parseFloat(getComputedStyle(p).width) /
+                                  (largeur || 220)) * 100);
+    (function tick(now) {
+      const t = Math.min(1, (now - depart) / duree);
+      const ease = 1 - Math.pow(1 - t, 3);      // easeOutCubic
+      p.style.width = (actuel + (100 - actuel) * ease) + '%';
+      if (t < 1) requestAnimationFrame(tick); else resolve();
+    })(performance.now());
+  });
+}
+
+/** Ferme le splash. Idempotent : appelable depuis l'init ET le watchdog. */
+async function splashFermer(message) {
+  if (splashFerme) return;
+  splashFerme = true;
+  if (splashWatchdog) { clearTimeout(splashWatchdog); splashWatchdog = null; }
+  // Le minuteur de secours du <head> n'a plus lieu d'être : on
+  // l'annule pour qu'il ne réapparaisse pas après la fermeture.
+  if (window.__candimailSauvetage) {
+    clearTimeout(window.__candimailSauvetage);
+    window.__candimailSauvetage = null;
+  }
+  splashAvancer(100, message || 'Prêt !');
+  // On respecte la durée minimale AVANT de masquer, sinon le
+  // splash disparaîtrait dès la fin réelle du chargement (~25 ms).
+  const restant = Math.max(0, SPLASH_MIN_MS - (performance.now() - splashT0));
+  await splashRemplir(Math.max(restant, Motion.reduit ? 0 : 220));
+  const s = document.getElementById('splash');
+  if (!s) return;
+  s.classList.add('hidden');
+  setTimeout(() => s.remove(), 600);
+}
+
+/** Filet de sécurité : si l'init se bloque, on libère quand même. */
+function splashWatchdogArmer() {
+  splashWatchdog = setTimeout(() => {
+    if (!splashFerme) splashFermer('Chargement prolongé — ouverture…');
+  }, SPLASH_MAX_MS);
+}
+
+/**
+ * Exécute une étape de préchargement.
+ * Un échec isolé N'INTERROMPT PAS les étapes suivantes : on journalise
+ * et on continue, exactement comme le faisait le code d'origine
+ * (try/catch par étape). Le splash est fermé quoi qu'il arrive.
+ */
+async function splashEtape(pct, etat, fn) {
+  splashAvancer(pct, etat);
+  try {
+    await fn();
+  } catch (e) {
+    console.error(`[candimail] ${etat}`, e);
+  }
 }
 
 /* INIT */
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadConfig();
-  await loadTemplates();
-  await loadPieces();
-  await loadGroupes();
-  await loadIMAPStatus();
-  await syncCompanies();
+  splashWatchdogArmer();
+  try {
+    await splashEtape(10, 'Chargement du profil…', loadConfig);
+    await splashEtape(30, 'Chargement des messages…', loadTemplates);
+    await splashEtape(48, 'Chargement des pièces jointes…', loadPieces);
+    await splashEtape(62, 'Chargement des groupes…', loadGroupes);
+    await splashEtape(76, 'Vérification IMAP…', loadIMAPStatus);
+    await splashEtape(90, 'Chargement des entreprises…', syncCompanies);
+    // Ces 3 liaisons ne sont pas critiques : si l'une échoue,
+    // l'utilisateur doit quand même obtenir l'application.
+    for (const [nom, fn] of [
+      ['bindSearch', bindSearch],
+      ['renderFilters', renderFilters],
+      ['bindDelaiUI', bindDelaiUI],
+    ]) {
+      try { fn(); }
+      catch (e) { console.error(`[candimail] ${nom}()`, e); }
+    }
+  } catch (e) {
+    console.error('[candimail] init incomplet :', e);
+  } finally {
+    await splashFermer();
+  }
 
-  bindSearch();
-  renderFilters();
-  bindDelaiUI();
+  // Back-end : bouton d'actualisation (ralentissement / bug)
+  const btnRB = document.getElementById('btn-refresh-backend');
+  if (btnRB) btnRB.addEventListener('click', () => refreshBackend(btnRB));
+  // 2e bouton identique dans le panneau Paramètres (id suffixé -2 :
+  // deux éléments ne peuvent pas partager le même id).
+  const btnRB2 = document.getElementById('btn-refresh-backend-2');
+  if (btnRB2) btnRB2.addEventListener('click', () => refreshBackend(btnRB2));
 
   // Entreprises : ajout / édition / suppression
   document.getElementById('btn-add-company').addEventListener('click', () => openCompanyModal(null));
@@ -2792,10 +3353,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('sel-all').addEventListener('click', selectAllFiltered);
   document.getElementById('sel-none').addEventListener('click', clearSelection);
   document.getElementById('sel-send').addEventListener('click', sendSelected);
+document.getElementById('sel-del').addEventListener('click', supprimerSelection);
   updateSelectionUI();
 
   // Config
   document.getElementById('btn-save-config').addEventListener('click', saveCandidatConfig);
+document.getElementById('btn-reinit-profil').addEventListener('click', reinitialiserProfil);
+
+/* Aperçu + en-tête réactifs pendant la saisie du profil */
+['cfg-nom', 'cfg-tel', 'cfg-ville', 'cfg-pays'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => {
+    updateHeaderSub();
+    updateSignaturePreview();
+  });
+});
   document.getElementById('cfg-template').addEventListener('change', saveCandidatConfig);
 
   // Comptes
@@ -2804,13 +3376,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('help-modal').classList.add('visible');
   });
   document.getElementById('help-close').addEventListener('click', () => {
-    document.getElementById('help-modal').classList.remove('visible');
+    Motion.fermerModale(document.getElementById('help-modal'));
   });
   document.getElementById('help-close-btn').addEventListener('click', () => {
-    document.getElementById('help-modal').classList.remove('visible');
+    Motion.fermerModale(document.getElementById('help-modal'));
   });
   document.getElementById('help-modal').addEventListener('click', e => {
-    if (e.target.id === 'help-modal') document.getElementById('help-modal').classList.remove('visible');
+    if (e.target.id === 'help-modal') Motion.fermerModale(document.getElementById('help-modal'));
   });
   document.getElementById('new-password').addEventListener('keydown', e => {
     if (e.key === 'Enter') addCompte();
@@ -2867,28 +3439,72 @@ document.addEventListener('DOMContentLoaded', async () => {
   // IMAP
   document.getElementById('btn-imap-check').addEventListener('click', checkIMAP);
 
-  // Navigation sidebar : active + scroll + fil d'Ariane
-  const NAV_TITRES = { dash: 'Tableau de bord', imap: 'Détection des réponses',
-                       comptes: 'Comptes Gmail', filtres: 'Filtres Gmail',
-                       params: "Paramètres d'envoi", hist: 'Historique' };
+  // Navigation par PAGES (routing #hash, transition fluide)
+  const PAGES = {
+    overview: { id: 'page-dash', titre: "Vue d'ensemble" },
+    dash:     { id: 'page-dash',     titre: 'Cibles' },
+    envoi: { id: 'page-envoi', titre: 'Nouvel envoi' },
+    suivi: { id: 'page-suivi', titre: 'Suivi des envois' },
+    imap: { id: 'page-imap', titre: 'Réponses & filtres' },
+    comptes: { id: 'page-comptes', titre: 'Gmail & CV' },
+    messages: { id: 'page-messages', titre: 'Mes messages' },
+    groupes: { id: 'page-groupes', titre: 'Mes groupes' },
+    profil: { id: 'page-profil', titre: 'Profil' },
+    params: { id: 'page-params', titre: 'Paramètres & maintenance' },
+    historique: { id: 'page-historique', titre: 'Historique' },
+  },
+    envoi:    { id: 'page-envoi',    titre: 'Envoi express' },
+    imap:     { id: 'page-imap',     titre: 'Réponses & filtres' },
+    comptes:  { id: 'page-comptes',  titre: 'Comptes Gmail & CV' },
+    messages: { id: 'page-messages', titre: 'Mes messages' },
+    groupes:  { id: 'page-groupes',  titre: 'Mes groupes' },
+    profil:   { id: 'page-profil',   titre: 'Profil' },
+    params:   { id: 'page-params',   titre: "Paramètres & maintenance" },
+  };
+  function montrerPage(nav, sansHash) {
+    const page = PAGES[nav] || PAGES.dash;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const el = document.getElementById(page.id);
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.sidebar .nav-item[data-nav]')
+      .forEach(x => x.classList.toggle('active', x.dataset.nav === nav));
+    document.getElementById('bc-page').textContent = page.titre;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (!sansHash) history.replaceState(null, '', '#' + nav);
+    try { sessionStorage.setItem('candimail.page', nav); } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
+  }
+  window.montrerPage = montrerPage;
+  window.PAGES_CANDIMAIL = PAGES;
   document.querySelectorAll('.sidebar .nav-item[data-nav]').forEach(a => {
-    a.addEventListener('click', () => {
-      document.querySelectorAll('.sidebar .nav-item').forEach(x => x.classList.remove('active'));
-      a.classList.add('active');
-      const nav = a.dataset.nav;
-      document.getElementById('bc-page').textContent = NAV_TITRES[nav] || 'Tableau de bord';
-      const cible = { dash: null, imap: 'sec-imap', comptes: 'sec-comptes',
-                      filtres: 'sec-filtres', params: 'sec-params', hist: 'sec-hist' }[nav];
-      if (cible) {
-        const el = document.getElementById(cible);
-        el && el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    a.addEventListener('click', () => montrerPage(a.dataset.nav));
   });
+  // Raccourcis clavier Alt+1..8
+  const ORDRE_NAV = Object.keys(PAGES);
+  document.addEventListener('keydown', e => {
+    if (e.altKey && e.key >= '1' && e.key <= '8') {
+      e.preventDefault();
+      montrerPage(ORDRE_NAV[parseInt(e.key, 10) - 1]);
+    }
+  });
+  // Restaure la page au chargement + bouton retour navigateur
+  window.addEventListener('hashchange', () => {
+    montrerPage((location.hash || '#dash').slice(1), true);
+  });
+  const pageInit = (location.hash || '').slice(1)
+    || (() => { try { return sessionStorage.getItem('candimail.page'); } catch (e) { return null; } })()
+    || 'dash';
+  montrerPage(PAGES[pageInit] ? pageInit : 'dash', true);
 
   // Recherche sidebar synchronisée + raccourci clavier « / »
   const sMain = document.getElementById('search'), sSide = document.getElementById('search-side');
-  sSide.addEventListener('input', () => { sMain.value = sSide.value; sMain.dispatchEvent(new Event('input')); });
+  sSide.addEventListener('input', () => {
+    // La liste est sur le tableau de bord : on y bascule automatiquement
+    if ((sSide.value || '').trim()) montrerPage('dash');
+    sMain.value = sSide.value; sMain.dispatchEvent(new Event('input'));
+  });
+  sMain.addEventListener('input', () => { if ((sMain.value||'').trim()) montrerPage('dash'); sSide.value = sMain.value; });
   document.addEventListener('keydown', e => {
     if (e.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
       e.preventDefault(); sSide.focus();
@@ -2897,6 +3513,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Règles de classement
   document.getElementById('btn-flt-add').addEventListener('click', addFiltre);
+  // Modal de règle (ajout / édition) : les 3 boutons n'étaient câblés
+  // à rien, le modal ne pouvait donc jamais être validé ni fermé.
+  document.getElementById('filter-save').addEventListener('click', soumettreRegle);
+  document.getElementById('filter-cancel').addEventListener('click', closeRegleModal);
+  document.getElementById('filter-modal-close').addEventListener('click', closeRegleModal);
+  document.getElementById('filter-modal').addEventListener('click', (ev) => {
+    if (ev.target === ev.currentTarget) closeRegleModal();
+  });
   document.getElementById('btn-flt-appliquer').addEventListener('click', appliquerFiltres);
   document.getElementById('btn-flt-libelles').addEventListener('click', creerLibelles);
   document.getElementById('btn-app-corriger').addEventListener('click', apprendre);
@@ -2904,11 +3528,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadFiltres();
   await chargerNotifs();
   setInterval(chargerNotifs, 60000);   // poll toutes les minutes
-
-  // Historique local
-  document.getElementById('btn-hist-vider').addEventListener('click', histVider);
-  renderHistorique();
-  histAjouter({ type: 'session', detail: 'Ouverture de Candimail' });
 
   // Import/reset
   document.getElementById('btn-reset-log').addEventListener('click', resetLog);
@@ -2934,7 +3553,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       closeModal();
-      document.getElementById('help-modal').classList.remove('visible');
+      Motion.fermerModale(document.getElementById('help-modal'));
       closeGrpModal();
       closeGrpSendModal();
       closeTplModal();
@@ -2951,7 +3570,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateBulkUI(s);
       startBulkPolling();
     }
-  } catch (e) {}
+  } catch (e) {
+        console.error('[candimail] erreur silencieuse:', e);
+      }
 });
 </script>
 </body>

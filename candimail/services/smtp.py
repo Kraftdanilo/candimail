@@ -12,7 +12,7 @@ from email.utils import formatdate, make_msgid
 from candimail.core import crypto
 from candimail.core.noyau import (charger_config, _config_globale, parse_emails,
                                   compte_suivant, get_pieces_actives,
-                                  current_uid, _pieces)
+                                  current_uid, _pieces, _MESSAGES_PUBLICS)
 
 
 # ============================================================
@@ -24,7 +24,6 @@ def _envoyer_un_email(dest, subject, body, compte, pieces,
     """Envoie un email unitaire. bcc_mode=True : tous en Cci (invisible)."""
     gmail_user = compte["email"]
     gmail_pass = crypto.dechiffrer(compte["password"])
-    dernier_msg = ""
 
     for tentative in range(1, max_retries + 1):
         try:
@@ -69,13 +68,16 @@ def _envoyer_un_email(dest, subject, body, compte, pieces,
         except smtplib.SMTPRecipientsRefused:
             return False, "Destinataire refusé"
         except (smtplib.SMTPServerDisconnected, socket.timeout, TimeoutError):
-            dernier_msg = "Réseau"
             if tentative < max_retries:
                 time.sleep(2 ** tentative)
                 continue
             return False, f"Réseau instable après {max_retries} essais"
         except Exception as e:
-            return False, f"{type(e).__name__} — {str(e)[:120]}"
+            # Anti-fuite : `e` peut contenir l'hôte, le port, le code
+            # d'authentification ou le chemin d'un fichier. Le détail est
+            # journalisé côté serveur, pas renvoyé au front.
+            print(f"[SMTP] {gmail_user} {dest}: {type(e).__name__}: {e}")
+            return False, _MESSAGES_PUBLICS["smtp"]
     return False, f"Échec après {max_retries} tentatives"
 
 def envoyer_email(dest, subject, body, max_retries=None, compte=None,

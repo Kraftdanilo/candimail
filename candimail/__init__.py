@@ -1,9 +1,9 @@
 """
 Candimail — automatisation Gmail pour candidatures (package).
 
-Point d'entree : `candimail.web.app` (fabrique Flask) ou
-`desktop.py` (fenetre pywebview).
+Point d'entree : `candimail.web.api` (fabrique FastAPI) ou
+`candimail.py` (fenetre pywebview).
 """
 
-__version__ = "7.1.0"
+__version__ = "8.0.0"
 

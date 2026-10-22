@@ -4,14 +4,135 @@ Noyau applicatif — verrous, état partagé et logique de gestion :
 config par utilisateur, journal d'envois, quotas/délais, comptes Gmail,
 templates, pièces jointes, validation d'emails.
 """
-import json, random, re, threading, time
+import json, os, random, re, threading, time
 from datetime import datetime
 from pathlib import Path
 
-from flask import session
-
 from candimail.core import db
 from candimail.core.config import UPLOADS_DIR, DEFAULT_CONFIG, TEMPLATES
+
+
+# ---- Session applicative (remplace flask.session pour l'app desktop) ----
+# Mono-utilisateur : un uid par défaut (0). Les routes FastAPI peuvent
+# surcharger via le header X-UID ou un cookie de session.
+_SESSION_LOCAL = threading.local()
+
+
+def session_get(key, default=None):
+    return getattr(_SESSION_LOCAL, key, default)
+
+
+def session_set(key, value):
+    setattr(_SESSION_LOCAL, key, value)
+
+
+def current_uid():
+    """UID de l'utilisateur courant (0 par défaut, hors contexte Flask)."""
+    try:
+        return int(session_get("uid", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+# ============================================================
+# ANTI-FUITE D'INFORMATIONS SENSIBLES
+# ============================================================
+# Règle : le front ne reçoit JAMAIS le détail technique d'une exception
+# (traceback, message SMTP/IMAP brut, chemins de fichiers, noms de classes).
+# Le détail complet part dans le fichier de log serveur uniquement.
+#   log.error("...: %s", exc_info=True)  →  .webview/candimail.log
+_MESSAGES_PUBLICS = {
+    "smtp":  "Échec de l'envoi — vérifie le compte Gmail et la connexion",
+    "imap":  "Échec de la connexion à la boîte Gmail",
+    "fichier": "Erreur lors de l'accès au fichier",
+    "db":    "Erreur interne de base de données",
+    "crypto": "Erreur interne de chiffrement",
+    "generique": "Erreur interne — consulte le journal (.webview/candimail.log)",
+}
+
+
+def log_erreur(where, exc, contexte=""):
+    """Journalise le détail technique côté serveur (jamais renvoyé au front)."""
+    import logging
+    try:
+        logging.getLogger("candimail").error(
+            "[%s] %s\n%s", where, contexte, "".join(
+                __import__("traceback").format_exception(type(exc), exc, exc.__traceback__)),
+            exc_info=True,
+        )
+    except Exception:
+        pass
+
+
+def erreur_publique(exc=None, type_erreur="generique", where="", contexte="", code=500):
+    """Retourne (message_public, code_http) SANS divulguer la cause technique.
+
+    - journalise l'exception réelle côté serveur
+    - renvoie un message générique comprehensible par l'utilisateur
+    """
+    if exc is not None:
+        log_erreur(where or type_erreur, exc, contexte)
+    return _MESSAGES_PUBLICS.get(type_erreur, _MESSAGES_PUBLICS["generique"]), code
+
+
+# ---- Nonce anti-CSRF (opérations sensibles : révélation de secret) ----
+_NONCE_TTL = 900          # 15 min
+_NONCE = {}               # {nonce: date_creation}
+
+
+def creer_nonce():
+    """Émet un nonce à usage unique, valable _NONCE_TTL secondes.
+
+    Le nonce est lié à la session applicative : un site tiers (CSRF) ne peut pas
+    lire la réponse ni construire un jeton valide.
+    """
+    import hmac
+    n = os.urandom(16).hex()
+    _purge_nonces()
+    _NONCE[n] = time.time()
+    try:
+        signer = hmac.new(app_secret_bytes(), n.encode(), "sha256").hexdigest()
+    except Exception:
+        signer = n
+    try:
+        session_set("_nonce_signe", signer)
+    except RuntimeError:
+        pass
+    return n
+
+
+_APP_SECRET = b"candimail-nonce"
+
+
+def app_secret_bytes():
+    return _APP_SECRET
+
+
+def _purge_nonces():
+    lim = time.time() - _NONCE_TTL
+    for k in [k for k, v in _NONCE.items() if v < lim]:
+        _NONCE.pop(k, None)
+
+
+def _nonce_valide(nonce):
+    """Vérifie qu'un nonce a été émis récemment ET qu'il correspond à la session."""
+    import hmac
+    if not nonce:
+        return False
+    _purge_nonces()
+    if nonce not in _NONCE:
+        return False
+    attendu = _NONCE.pop(nonce, None)      # usage unique
+    if attendu is None or (time.time() - attendu) > _NONCE_TTL:
+        return False
+    try:
+        signe = session_get("_nonce_signe")
+        if not signe:
+            return False
+        attendu_sig = hmac.new(app_secret_bytes(), nonce.encode(), "sha256").hexdigest()
+        return hmac.compare_digest(signe, attendu_sig)
+    except RuntimeError:
+        return False
 
 
 # ============================================================
@@ -41,8 +162,8 @@ _auth_attempts   = {}          # {ip: [timestamps]} — anti-bruteforce/spam
 def current_uid():
     """UID de l'utilisateur connecté (0 si hors contexte = global/legacy)."""
     try:
-        return int(session.get("uid", 0) or 0)
-    except RuntimeError:
+        return int(session_get("uid", 0) or 0)
+    except (TypeError, ValueError):
         return 0
 
 
@@ -96,6 +217,17 @@ def sauver_config(cfg, uid=None):
     else:
         db.config_set(cfg, uid)
 
+
+def invalider_cache_config():
+    """Force la relecture de la config globale au prochain accès.
+
+    À appeler après une écriture directe via `db.config_set` (scripts,
+    migrations) pour éviter de servir une copie périmée — donc potentiellement
+    une version antérieure d'un indicateur de sécurité.
+    """
+    with _config_lock:
+        _config_cache[0] = None
+
 # ============================================================
 # LOG
 # ============================================================
@@ -112,7 +244,30 @@ def sauver_log(log, uid=None):
         try:
             db.log_set(log, uid)
         except Exception as e:
-            print(f"[LOG] {e}")
+            log_erreur("sauver_log", e, f"uid={uid}")
+
+
+def modifier_log(fonction, uid=None):
+    """Applique `fonction(log)` et sauvegarde le résultat, de façon ATOMIQUE.
+
+    Résout le « lost update » : `charger_log()` puis `sauver_log()` sont
+    deux verrous distincts — entre les deux, un autre thread peut écrire et
+    être écrasé. Ici le cycle lire → modifier → écrire est entièrement
+    couvert par `_log_lock`.
+
+        modifier_log(lambda l: l.update({"ACME": {...}}))
+    """
+    if uid is None:
+        uid = current_uid()
+    with _log_lock:
+        log = db.log_get(uid)
+        resultat = fonction(log)
+        try:
+            db.log_set(log, uid)
+        except Exception as e:
+            log_erreur("modifier_log", e, f"uid={uid}")
+            raise
+    return log, resultat
 
 # ============================================================
 # DÉLAI
@@ -152,10 +307,25 @@ def compte_suivant():
     comptes = get_comptes_actifs()
     if not comptes:
         return None
+    # Si un compte est sélectionné manuellement, on l'utilise en priorité
+    selected = get_selected_compte_index()
+    if selected is not None and 0 <= selected < len(comptes):
+        return comptes[selected]
     with _send_lock:
         idx = _compte_index[0] % len(comptes)
         _compte_index[0] = (_compte_index[0] + 1) % len(comptes)
         return comptes[idx]
+
+
+def get_selected_compte_index():
+    cfg = _config_globale()
+    return cfg.get("selected_compte_index")
+
+
+def set_selected_compte_index(idx):
+    cfg = _config_globale()
+    cfg["selected_compte_index"] = idx
+    sauver_config(cfg, 0)
 
 # ============================================================
 # TEMPLATES
@@ -164,7 +334,7 @@ def _get_template(template_id, uid=None):
     """Cherche dans les templates perso d'abord, puis dans les prédéfinis."""
     cfg = charger_config(uid)
     for t in cfg.get("templates_perso", []):
-        if t["id"] == template_id:
+        if t.get("id") == template_id:
             return t
     if template_id in TEMPLATES:
         return TEMPLATES[template_id]
@@ -173,12 +343,13 @@ def _get_template(template_id, uid=None):
 def build_letter(template_id, company_name, context, uid=None):
     cfg = charger_config(uid)
     cand = cfg["candidat"]
-    tpl = _get_template(template_id)
+    tpl = _get_template(template_id, uid)
     try:
         return tpl["corps"].format(
             contexte=context, entreprise=company_name,
             nom=cand["nom"], tel=cand["tel"], email=cand["email"],
-            ville=cand["ville"], diplome=cand["diplome"], spec=cand["spec"],
+            ville=cand["ville"], pays=cand["pays"],
+            diplome=cand["diplome"], spec=cand["spec"],
         )
     except KeyError as e:
         return f"[Erreur template : variable {e} inconnue]\n\n" + tpl["corps"]
@@ -238,7 +409,14 @@ _RX_EMAIL = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$")
 
 
 def _email_valide(email):
-    """Validation stricte : refuse '', espaces, '@exemple.fr', 'a@.fr'..."""
+    """Validation stricte : refuse '', espaces, '@exemple.fr', 'a@.fr'...
+
+    Robuste : toute valeur non-chaîne (None, int, dict…) retourne False
+    au lieu de lever une exception (les entrées viennent du JSON front).
+    """
+    if not isinstance(email, str):
+        return False
+    email = email.strip()
     if not email or len(email) > 254 or " " in email:
         return False
     if email.startswith((".", "@", "-")) or ".." in email:

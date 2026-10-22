@@ -1,1 +1,1 @@
-"""Couche web Flask : fabrique d'app + blueprints."""
+"""Couche web FastAPI : fabrique d'app (candimail.web.api)."""

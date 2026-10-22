@@ -9,9 +9,9 @@ Chiffrement des secrets + mot de passe d'accès à l'interface.
 """
 import base64, hashlib, hmac, os
 
-from candimail.core.config import BASE_DIR
+from candimail.core.config import BASE_DIR, DATA_DIR
 
-SECRET_KEY_FILE = BASE_DIR / "secret.key"
+SECRET_KEY_FILE = DATA_DIR / "secret.key"
 MARK            = "enc$"
 
 
@@ -33,6 +33,11 @@ def _charger_ou_creer_cle():
         pass
     return key
 
+
+# NB — doublon apparent : `chiffrer`, `dechiffrer` et `est_chiffre` sont
+# définies DEUX fois dans ce fichier. Ce n'est pas une erreur : la seconde
+# définition est le repli sans `cryptography` (plus bas), atteinte uniquement
+# si `ImportError`. Un seul jeu n'est actif à l'exécution.
 
 try:
     from cryptography.fernet import Fernet, InvalidToken
